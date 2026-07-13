@@ -1,0 +1,20 @@
+# Klar
+
+Privacy-first, offline-only iOS app for tracking personal substance use, with the goal of reduction.
+
+## Structure
+
+- `Klar/` — Xcode project (SwiftUI app; thin shell: views, persistence, app lifecycle)
+- `Packages/KlarCore/` — local Swift package with the domain logic (pure Swift, no SwiftData/UIKit imports), independently testable via `swift test`
+- `docs/` — concept notes and pitch materials
+
+## Requirements
+
+- Xcode 26.6+
+- iOS 26.5+
+
+## Running tests
+
+```
+swift test --package-path Packages/KlarCore
+```

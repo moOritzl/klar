@@ -1,0 +1,26 @@
+# Xcode
+DerivedData/
+*.xcuserstate
+*.xcuserdatad/
+*.xcscmblueprint
+*.xccheckout
+*.moved-aside
+*.hmap
+*.ipa
+*.dSYM
+*.dSYM.zip
+timeline.xctimeline
+playground.xcworkspace/
+
+# Xcode user-specific state (never share between machines)
+xcuserdata/
+
+# Swift Package Manager
+.build/
+.swiftpm/
+
+# macOS
+.DS_Store
+
+# JetBrains IDEs (not used for this Xcode/Swift project)
+.idea/
