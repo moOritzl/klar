@@ -6,12 +6,36 @@
 //
 
 import SwiftUI
+import SwiftData
 
 @main
 struct KlarApp: App {
+    @State private var lockManager = AppLockManager()
+    @Environment(\.scenePhase) private var scenePhase
+    private let container: ModelContainer
+
+    init() {
+        let container = ModelContainerFactory.makeContainer()
+        self.container = container
+        try? ContextTagSeeder.seedIfNeeded(context: ModelContext(container))
+    }
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            DebugRootView()
+                .modelContainer(container)
+                .overlay {
+                    if lockManager.requiresUnlock {
+                        AppLockOverlayView(lockManager: lockManager)
+                    } else if scenePhase != .active {
+                        SnapshotShieldView()
+                    }
+                }
+        }
+        .onChange(of: scenePhase) { _, newPhase in
+            if newPhase == .background {
+                lockManager.lock()
+            }
         }
     }
 }

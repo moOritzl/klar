@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		B21503C072FD90588DBB78B3 /* KlarCore in Frameworks */ = {isa = PBXBuildFile; productRef = 1E3D38F9B05F7E2D106C9FD2 /* KlarCore */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		3923392230054E0D00A5DC89 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -52,6 +56,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B21503C072FD90588DBB78B3 /* KlarCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -112,6 +117,7 @@
 			);
 			name = Klar;
 			packageProductDependencies = (
+				1E3D38F9B05F7E2D106C9FD2 /* KlarCore */,
 			);
 			productName = Klar;
 			productReference = 3923391430054E0C00A5DC89 /* Klar.app */;
@@ -187,14 +193,17 @@
 				};
 			};
 			buildConfigurationList = 3923390F30054E0C00A5DC89 /* Build configuration list for PBXProject "Klar" */;
-			developmentRegion = en;
+			developmentRegion = de;
 			hasScannedForEncodings = 0;
 			knownRegions = (
-				en,
+				de,
 				Base,
 			);
 			mainGroup = 3923390B30054E0C00A5DC89;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				F411788C181EB3DFECB98148 /* XCLocalSwiftPackageReference "../Packages/KlarCore" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 3923391530054E0C00A5DC89 /* Products */;
 			projectDirPath = "";
@@ -578,6 +587,20 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		F411788C181EB3DFECB98148 /* XCLocalSwiftPackageReference "../Packages/KlarCore" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../Packages/KlarCore;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		1E3D38F9B05F7E2D106C9FD2 /* KlarCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = KlarCore;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 3923390C30054E0C00A5DC89 /* Project object */;
 }

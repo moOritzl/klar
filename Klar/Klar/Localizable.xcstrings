@@ -1,0 +1,39 @@
+{
+  "sourceLanguage" : "de",
+  "strings" : {
+    "Entsperre Klar, um fortzufahren" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entsperre Klar, um fortzufahren"
+          }
+        }
+      }
+    },
+    "Entsperren" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entsperren"
+          }
+        }
+      }
+    },
+    "Import ist nur in eine leere Datenbank möglich." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Import ist nur in eine leere Datenbank möglich."
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

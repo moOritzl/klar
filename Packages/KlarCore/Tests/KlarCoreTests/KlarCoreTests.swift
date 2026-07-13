@@ -1,6 +1,8 @@
-import Testing
+import XCTest
 @testable import KlarCore
 
-@Test func packageBuilds() {
-    #expect(1 + 1 == 2)
+final class KlarCoreTests: XCTestCase {
+    func testPackageBuilds() {
+        XCTAssertEqual(1 + 1, 2)
+    }
 }
