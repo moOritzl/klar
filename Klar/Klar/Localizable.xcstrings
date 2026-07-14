@@ -1,6 +1,307 @@
 {
   "sourceLanguage" : "de",
   "strings" : {
+    "" : {
+
+    },
+    "—" : {
+
+    },
+    "„%@“" : {
+
+    },
+    "„%@“ archivieren?" : {
+
+    },
+    "„%@“ entfernen" : {
+
+    },
+    "„Wenn %@, dann %@.“" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "„Wenn %1$@, dann %2$@.“"
+          }
+        }
+      }
+    },
+    "„Wenn %@, dann %@“" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "„Wenn %1$@, dann %2$@“"
+          }
+        }
+      }
+    },
+    "%@" : {
+
+    },
+    "%@ %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ %2$@"
+          }
+        }
+      }
+    },
+    "%@ archivieren" : {
+
+    },
+    "%lld" : {
+
+    },
+    "%lld · " : {
+
+    },
+    "%lld %%" : {
+
+    },
+    "%lld %% deiner %@-Einträge tragen den Tag „%@“. Plan dafür bauen?" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld %% deiner %2$@-Einträge tragen den Tag „%3$@“. Plan dafür bauen?"
+          }
+        }
+      }
+    },
+    "%lld %% deiner Einträge tragen den Tag „%@“. Möchtest du dafür einen Plan?" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld %% deiner Einträge tragen den Tag „%2$@“. Möchtest du dafür einen Plan?"
+          }
+        }
+      }
+    },
+    "%lld Einträge" : {
+
+    },
+    "%lld von %lld diesen Monat" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld von %2$lld diesen Monat"
+          }
+        }
+      }
+    },
+    "€" : {
+
+    },
+    "1 Eintrag" : {
+
+    },
+    "2–3 persönliche Alternativen. Im Craving ist keine Zeit, sie zu suchen — darum jetzt, in Ruhe." : {
+
+    },
+    "Abbrechen" : {
+
+    },
+    "Abstinenz — Einträge werden weiterhin ohne Wertung erfasst." : {
+
+    },
+    "Abstinenz — jeder Eintrag wird trotzdem ohne Wertung erfasst." : {
+
+    },
+    "Alle Daten löschen" : {
+
+    },
+    "Alles bleibt auf deinem Gerät." : {
+
+    },
+    "Alphabetisch, ohne Wertung. Mehrfachauswahl. Jederzeit änderbar — die Auswahl ist kein Bekenntnis." : {
+
+    },
+    "Als CSV exportieren" : {
+
+    },
+    "Als JSON exportieren" : {
+
+    },
+    "Alternative hinzufügen" : {
+
+    },
+    "Archivieren" : {
+
+    },
+    "Atemübung starten" : {
+
+    },
+    "Auf diesem Gerät ist weder Face ID noch ein Gerätecode eingerichtet. Ohne einen davon kann Klar nicht sperren." : {
+
+    },
+    "Auto-Sperre" : {
+
+    },
+    "Benachrichtigungen" : {
+
+    },
+    "Beratung" : {
+
+    },
+    "Beratungsstellen in deiner Stadt — offiziell gepflegt, laufend aktuell." : {
+
+    },
+    "Bestehende Einträge bleiben erhalten. Die Substanz verschwindet nur aus der Auswahl." : {
+
+    },
+    "Bist du sicher? Das kann nicht rückgängig gemacht werden." : {
+
+    },
+    "Bundesweit · anonym" : {
+
+    },
+    "Craving-SOS" : {
+
+    },
+    "Craving-SOS. Ein Tap — die App führt dich." : {
+
+    },
+    "CSV teilen" : {
+
+    },
+    "DANN" : {
+
+    },
+    "Dann … (Handlung — Vorlage, frei editierbar)" : {
+
+    },
+    "Das hat nicht geklappt" : {
+
+    },
+    "Daten" : {
+
+    },
+    "Daten exportieren / löschen" : {
+
+    },
+    "Dein „Warum“" : {
+
+    },
+    "Dein Archiv — nur deine eigene Ausgangslage." : {
+
+    },
+    "Dein Plan" : {
+
+    },
+    "Dein Plan für „%@“" : {
+
+    },
+    "Dein Plan für nächste Woche — du entscheidest." : {
+
+    },
+    "Dein Wochenrückblick ist da." : {
+
+    },
+    "Deine Daten" : {
+
+    },
+    "Demodaten einspielen" : {
+
+    },
+    "Der Eintrag wird endgültig entfernt." : {
+
+    },
+    "Der Export enthält deine Einträge, Ziele, Pläne und Notizen. Er enthält keine Gerätedaten — Face-ID-Einstellung und Vertrauensperson bleiben auf diesem Gerät." : {
+
+    },
+    "Der Weg zu Menschen ist immer einen Tap entfernt." : {
+
+    },
+    "Die Kostenbasis ist deine eigene Schätzung — sie speist die „Geld gespart“-Rechnung." : {
+
+    },
+    "Diese Woche" : {
+
+    },
+    "Dieses Gefühl geht vorbei. Du hast einen Plan." : {
+
+    },
+    "Dosis (optional)" : {
+
+    },
+    "Eigene hinzufügen" : {
+
+    },
+    "Eigene Substanz" : {
+
+    },
+    "Ein guter Plan braucht Kenntnis der eigenen Muster. Deshalb kommt er nicht am Tag 1 — sondern wenn deine Einträge etwas zeigen." : {
+
+    },
+    "Ein Plan entsteht aus deinen Mustern — nicht am Tag 1." : {
+
+    },
+    "Ein ruhiger Tag." : {
+
+    },
+    "Ein Tap — die App führt dich." : {
+
+    },
+    "Eine eintragsfreie Woche. Rein deskriptiv — kein Lob, keine Wertung." : {
+
+    },
+    "Eine Frage nach vorn." : {
+
+    },
+    "Einheit" : {
+
+    },
+    "Einstellungen" : {
+
+    },
+    "Eintrag" : {
+
+    },
+    "Eintrag %lld von max. %lld diesen Monat." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Eintrag %1$lld von max. %2$lld diesen Monat."
+          }
+        }
+      }
+    },
+    "Eintrag bearbeiten" : {
+
+    },
+    "Eintrag erfassen" : {
+
+    },
+    "Eintrag löschen" : {
+
+    },
+    "Eintrag löschen?" : {
+
+    },
+    "Eintrag nachtragen" : {
+
+    },
+    "Einträge" : {
+
+    },
+    "Einträge, Ziele, Pläne und Notizen werden entfernt. Das lässt sich nicht rückgängig machen." : {
+
+    },
+    "Eintragsfrei" : {
+
+    },
+    "Endgültig löschen" : {
+
+    },
+    "Endgültig. Kein Papierkorb, keine Kopie auf einem Server." : {
+
+    },
     "Entsperre Klar, um fortzufahren" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -23,6 +324,84 @@
         }
       }
     },
+    "Erfasst" : {
+
+    },
+    "Erhoben im Onboarding, genutzt im Craving-SOS." : {
+
+    },
+    "Erhöhen" : {
+
+    },
+    "Erneut versuchen" : {
+
+    },
+    "Ersatzhandlungen" : {
+
+    },
+    "Erscheint im Craving-SOS — in dem Moment, in dem du es am wenigsten formulieren kannst." : {
+
+    },
+    "Erste-Hilfe-Schritte" : {
+
+    },
+    "Erstmal nur beobachten — kein Limit, kein Druck." : {
+
+    },
+    "Export" : {
+
+    },
+    "Face ID einrichten" : {
+
+    },
+    "Face ID nicht verfügbar" : {
+
+    },
+    "Face ID Sperre" : {
+
+    },
+    "Fertig" : {
+
+    },
+    "Fertig — App öffnen" : {
+
+    },
+    "Gefahren" : {
+
+    },
+    "Gefahrenvermeidung mit Quellen. Keine Dosisempfehlungen, keine Wirkoptimierung." : {
+
+    },
+    "Generische Texte — nie Substanznamen" : {
+
+    },
+    "Genutzt im Craving-SOS" : {
+
+    },
+    "Gespeichert." : {
+
+    },
+    "Handlung beschreiben …" : {
+
+    },
+    "Hat dein Plan geholfen?" : {
+
+    },
+    "Heute" : {
+
+    },
+    "Heute erfasst" : {
+
+    },
+    "Hilfe" : {
+
+    },
+    "Hinzufügen" : {
+
+    },
+    "Import" : {
+
+    },
     "Import ist nur in eine leere Datenbank möglich." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -33,6 +412,416 @@
           }
         }
       }
+    },
+    "Ja, hat geholfen" : {
+
+    },
+    "Jeder Monat beginnt bei null. Kein Rückblick auf den letzten, kein Vorwurf." : {
+
+    },
+    "JSON importieren" : {
+
+    },
+    "JSON teilen" : {
+
+    },
+    "Kein Account. Keine Registrierung. Kein Server. Nichts, was kompromittiert werden könnte. Deine Ehrlichkeit gehört nur dir." : {
+
+    },
+    "Kein Limit gesetzt." : {
+
+    },
+    "Kein Vergleich, keine Norm. Nur, was dein Plan diese Woche getan hat." : {
+
+    },
+    "Kein Ziel am Tag 1 nötig. „Nur beobachten“ ist Stufe 1 — anfangen darfst du trotzdem." : {
+
+    },
+    "KLAR" : {
+
+    },
+    "Klar – Debug" : {
+
+    },
+    "Kontext (optional)" : {
+
+    },
+    "Kontextverteilung" : {
+
+    },
+    "Kontingent" : {
+
+    },
+    "Kontingent: %lld." : {
+
+    },
+    "Kosten je %@" : {
+
+    },
+    "Kurz nachdenken" : {
+
+    },
+    "Lange gedrückt halten, um Klar zu öffnen" : {
+
+    },
+    "Limit / Monat" : {
+
+    },
+    "Limit anpassen, Zieltyp wechseln" : {
+
+    },
+    "Local-first. Kein Account, kein Server, nichts zu kompromittieren." : {
+
+    },
+    "Löschen" : {
+
+    },
+    "Max. 3 aktive Pläne — Fokus statt Liste." : {
+
+    },
+    "Max. 3 aktive Pläne — Fokus statt Liste. Pausiere einen bestehenden Plan, um Platz zu schaffen." : {
+
+    },
+    "Mit Face ID entsperren" : {
+
+    },
+    "Mit Face ID sichern" : {
+
+    },
+    "Möchtest du deinen Plan dazu ansehen? — Freiwillig, nicht jetzt nötig." : {
+
+    },
+    "Nachschlagewerk, kein Startpunkt" : {
+
+    },
+    "Nächster Monat" : {
+
+    },
+    "Name" : {
+
+    },
+    "Nein" : {
+
+    },
+    "Neue Alternative" : {
+
+    },
+    "Neuer Monat" : {
+
+    },
+    "Neuer Plan" : {
+
+    },
+    "Noch %lld von %lld diesen Monat" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Noch %1$lld von %2$lld diesen Monat"
+          }
+        }
+      }
+    },
+    "Noch kein „Warum“ hinterlegt. Du kannst es in den Einstellungen ergänzen — es steht dann genau hier." : {
+
+    },
+    "Noch kein aktiver Plan. Die Bilanz erscheint, sobald einer läuft." : {
+
+    },
+    "Noch kein Plan — das ist in Ordnung." : {
+
+    },
+    "Noch kein Plan." : {
+
+    },
+    "Noch keine abgeschlossene Woche. Der erste Rückblick kommt, sobald eine Woche mit Einträgen vorbei ist." : {
+
+    },
+    "Noch keine Ersatzhandlungen hinterlegt. Du kannst sie unter Pläne → Ersatzhandlungen ergänzen." : {
+
+    },
+    "Noch keine Kontext-Tags erfasst. Sie sind optional — und der Rohstoff für deine Pläne." : {
+
+    },
+    "Noch keine Substanz ausgewählt. Du kannst sie in den Einstellungen ergänzen." : {
+
+    },
+    "Noch keine Substanzen. Sobald du etwas erfasst, entstehen hier Muster." : {
+
+    },
+    "Notfall" : {
+
+    },
+    "Notfallsymptome" : {
+
+    },
+    "Notruf 112 anrufen" : {
+
+    },
+    "Notruf hilft, ohne die Polizei zu rufen. Sag ehrlich, was konsumiert wurde — das entscheidet über die richtige Behandlung." : {
+
+    },
+    "Ø Abstand" : {
+
+    },
+    "Ø Dosis" : {
+
+    },
+    "Ø Dosis %@" : {
+
+    },
+    "Ø Dosis über Zeit" : {
+
+    },
+    "OK" : {
+
+    },
+    "Panik-Geste" : {
+
+    },
+    "Pausiert" : {
+
+    },
+    "Plan anpassen" : {
+
+    },
+    "Plan bearbeiten" : {
+
+    },
+    "Plan festlegen" : {
+
+    },
+    "Plan für „%@“ bauen" : {
+
+    },
+    "Plan pausieren" : {
+
+    },
+    "Plan trotzdem selbst anlegen" : {
+
+    },
+    "Plan-Bilanz der Woche" : {
+
+    },
+    "Pläne" : {
+
+    },
+    "Privatsphäre & Sicherheit" : {
+
+    },
+    "Quelle: %@" : {
+
+    },
+    "Quote" : {
+
+    },
+    "Quote für aktuellen Monat anzeigen" : {
+
+    },
+    "Risiko-Infos" : {
+
+    },
+    "Rückblick abschließen" : {
+
+    },
+    "Schließen" : {
+
+    },
+    "Schon 3 aktive Pläne" : {
+
+    },
+    "Sichern" : {
+
+    },
+    "Situation beschreiben …" : {
+
+    },
+    "Später" : {
+
+    },
+    "Später einrichten" : {
+
+    },
+    "Statistik" : {
+
+    },
+    "Statistik-Zusammenfassung anzeigen" : {
+
+    },
+    "Stattdessen" : {
+
+    },
+    "Status" : {
+
+    },
+    "Steht so in deinem Verlauf. Ehrliche Daten sind wertvoller als eingehaltene Zahlen." : {
+
+    },
+    "Stimmung (optional)" : {
+
+    },
+    "Substanz hinzufügen" : {
+
+    },
+    "Substanzen & Kosten" : {
+
+    },
+    "Substanzen verwalten" : {
+
+    },
+    "Suchtberatung · Hotlines · anonym" : {
+
+    },
+    "Suchthilfeverzeichnis der DHS" : {
+
+    },
+    "Tage" : {
+
+    },
+    "Telefonnummer" : {
+
+    },
+    "Tippen genügt. Details kannst du später ergänzen." : {
+
+    },
+    "Überspringbar" : {
+
+    },
+    "Unbekannte Schemaversion: %lld" : {
+
+    },
+    "URGE-SURFING" : {
+
+    },
+    "Verlauf" : {
+
+    },
+    "Verringern" : {
+
+    },
+    "Verstanden" : {
+
+    },
+    "Vertrauensperson" : {
+
+    },
+    "Vier Sekunden ein, vier halten, vier aus, vier halten." : {
+
+    },
+    "Vor Ort" : {
+
+    },
+    "VORBEI" : {
+
+    },
+    "Vorgenommen am" : {
+
+    },
+    "Vorgenommen am %@" : {
+
+    },
+    "Vorheriger Monat" : {
+
+    },
+    "Vorschlag aus deinen Einträgen" : {
+
+    },
+    "Warnzeichen · Erste Hilfe · 112" : {
+
+    },
+    "Warnzeichen erkennen" : {
+
+    },
+    "Was änderst du am Plan?" : {
+
+    },
+    "Was hätte geholfen?" : {
+
+    },
+    "Was hilft dir im Moment?" : {
+
+    },
+    "Was ist dein Ziel?" : {
+
+    },
+    "Was möchtest du erfassen?" : {
+
+    },
+    "Was war der Auslöser?" : {
+
+    },
+    "Was war los?" : {
+
+    },
+    "Was war." : {
+
+    },
+    "Weiter" : {
+
+    },
+    "Weitere hinzufügen" : {
+
+    },
+    "WENN" : {
+
+    },
+    "Wenn … (Situation aus deinen Tags)" : {
+
+    },
+    "Wenn %@, dann %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Wenn %1$@, dann %2$@"
+          }
+        }
+      }
+    },
+    "Wird nur auf diesem Gerät gespeichert und nicht exportiert. Im Craving-SOS genügt ein Tap." : {
+
+    },
+    "Wirklich alle Daten löschen?" : {
+
+    },
+    "Woche" : {
+
+    },
+    "z. B. Ich will die Wochenenden wieder klar erleben." : {
+
+    },
+    "z. B. Jonas anrufen" : {
+
+    },
+    "Zeitpunkt" : {
+
+    },
+    "Ziel" : {
+
+    },
+    "Ziel & Plan." : {
+
+    },
+    "Ziel pausieren" : {
+
+    },
+    "Ziele" : {
+
+    },
+    "Zieltyp wechseln oder fortsetzen." : {
+
+    },
+    "Zu vermeidende Kombinationen" : {
+
+    },
+    "Zu wenig Einträge für einen Verlauf. Ab zwei Wochen mit Einträgen zeigt sich hier eine Linie." : {
+
+    },
+    "Zurück" : {
+
+    },
+    "Zwei Finger, doppelt tippen — zeigt einen Taschenrechner. Zum Zurückkehren die Anzeige lange gedrückt halten." : {
+
     }
   },
   "version" : "1.0"
