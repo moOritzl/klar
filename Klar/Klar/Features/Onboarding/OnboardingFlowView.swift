@@ -57,10 +57,12 @@ final class OnboardingDraft {
     var substitutionActions: [String] = []
 
     /// Selected substances in the order they'll be created, alphabetically like the picker.
+    ///
+    /// `selectedTemplates` already contains custom substances (`addCustom` inserts into both
+    /// collections so the A2 checkbox shows them as checked) — `customSubstanceNames` must not
+    /// be merged in again here, or custom substances get created twice.
     var chosenSubstances: [SubstanceTemplate] {
-        let customs = customSubstanceNames.map { SubstanceTemplate(name: $0, unit: .piece) }
-        return (Array(selectedTemplates) + customs)
-            .sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+        selectedTemplates.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
     }
 
     func goalType(for substance: SubstanceTemplate) -> GoalType {
