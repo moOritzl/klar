@@ -101,6 +101,16 @@ final class ScreenshotTests: XCTestCase {
         app.buttons["help.sos"].tap()
         XCTAssertTrue(app.staticTexts["Dieses Gefühl geht vorbei. Du hast einen Plan."].waitForExistence(timeout: 5))
         capture(app, "H2-Craving-SOS")
+
+        // H2b · Atemübung (part of the SOS flow, no drafted screen of its own)
+        app.buttons["Atemübung starten"].tap()
+        XCTAssertTrue(
+            app.staticTexts["Vier Sekunden ein, vier halten, vier aus, vier halten."]
+                .waitForExistence(timeout: 5)
+        )
+        capture(app, "H2b-Atemuebung")
+        app.buttons["Schließen"].firstMatch.tap()
+
         app.buttons["Schließen"].firstMatch.tap()
 
         // H3 · Notfall

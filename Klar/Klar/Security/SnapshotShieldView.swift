@@ -4,7 +4,7 @@ import SwiftUI
 struct SnapshotShieldView: View {
     var body: some View {
         ZStack {
-            Klar.bgInverseDeep.ignoresSafeArea()
+            Klar.bgSubtle.ignoresSafeArea()
             KlarWordmark()
         }
     }
@@ -18,7 +18,7 @@ struct KlarWordmark: View {
         Text("KLAR")
             .font(Klar.TypeScale.display(size))
             .tracking(size * 0.4)
-            .foregroundStyle(.white)
+            .foregroundStyle(Klar.text)
             // `tracking` adds trailing space after the final letter; nudge back to re-center.
             .padding(.leading, size * 0.4)
     }

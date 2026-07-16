@@ -8,7 +8,7 @@ struct AppLockOverlayView: View {
 
     var body: some View {
         ZStack {
-            Klar.bgInverseDeep.ignoresSafeArea()
+            Klar.bgSubtle.ignoresSafeArea()
 
             KlarWordmark()
 
@@ -19,17 +19,17 @@ struct AppLockOverlayView: View {
                 } label: {
                     Image(systemName: "faceid")
                         .font(.system(size: 26, weight: .light))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(Klar.textSecondary)
                         .frame(width: 56, height: 56)
                         .overlay {
-                            Circle().strokeBorder(Color.white.opacity(0.35), lineWidth: 2)
+                            Circle().strokeBorder(Klar.borderStrong, lineWidth: 2)
                         }
                 }
                 .accessibilityLabel("Mit Face ID entsperren")
 
                 Text(didFail ? "Erneut versuchen" : "Mit Face ID entsperren")
                     .font(Klar.TypeScale.bodySmall)
-                    .foregroundStyle(Klar.textOnInverseSecondary)
+                    .foregroundStyle(Klar.textTertiary)
             }
             .padding(.bottom, 70)
         }

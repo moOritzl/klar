@@ -33,14 +33,14 @@ struct CravingSOSView: View {
 
     var body: some View {
         ZStack {
-            Klar.bgInverseDeep.ignoresSafeArea()
+            Klar.bgSubtle.ignoresSafeArea()
 
             VStack(alignment: .leading, spacing: 0) {
                 header
 
                 Text("Dieses Gefühl geht vorbei. Du hast einen Plan.")
                     .font(Klar.TypeScale.bodySmall)
-                    .foregroundStyle(Klar.textOnInverseSecondary)
+                    .foregroundStyle(Klar.textSecondary)
                     .frame(maxWidth: .infinity)
                     .multilineTextAlignment(.center)
                     .padding(.bottom, 8)
@@ -49,28 +49,31 @@ struct CravingSOSView: View {
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 18)
 
-                KlarSectionLabel(text: "Dein „Warum“", color: Klar.textOnInverseSecondary)
+                KlarSectionLabel(text: "Dein „Warum“")
                     .padding(.bottom, 8)
 
                 whyCard
                     .padding(.bottom, 16)
 
-                KlarSectionLabel(text: "Stattdessen", color: Klar.textOnInverseSecondary)
+                KlarSectionLabel(text: "Stattdessen")
                     .padding(.bottom, 8)
 
                 if actions.isEmpty {
                     Text("Noch keine Ersatzhandlungen hinterlegt. Du kannst sie unter Pläne → Ersatzhandlungen ergänzen.")
                         .font(Klar.TypeScale.bodySmall)
-                        .foregroundStyle(Klar.textOnInverseSecondary)
+                        .foregroundStyle(Klar.textTertiary)
                 } else {
                     KlarFlowLayout(spacing: 8) {
                         ForEach(actions) { action in
                             Text(action.text)
                                 .font(Klar.TypeScale.caption)
-                                .foregroundStyle(.white)
+                                .foregroundStyle(Klar.text)
                                 .padding(.horizontal, 14)
                                 .padding(.vertical, 8)
-                                .background(Color.white.opacity(0.1), in: Capsule())
+                                .background(Klar.surface, in: Capsule())
+                                .overlay {
+                                    Capsule().strokeBorder(Klar.border, lineWidth: 1)
+                                }
                         }
                     }
                 }
@@ -84,7 +87,6 @@ struct CravingSOSView: View {
             .padding(.top, 12)
             .padding(.bottom, 30)
         }
-        .preferredColorScheme(.dark)
         .fullScreenCover(isPresented: $isBreathing) {
             BreathingExerciseView()
         }
@@ -113,9 +115,9 @@ struct CravingSOSView: View {
             } label: {
                 Image(systemName: "xmark")
                     .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(Klar.textOnInverseSecondary)
+                    .foregroundStyle(Klar.textSecondary)
                     .frame(width: 32, height: 32)
-                    .background(Color.white.opacity(0.1), in: Circle())
+                    .background(Klar.surfaceTint, in: Circle())
             }
             .accessibilityLabel("Schließen")
         }
@@ -126,9 +128,9 @@ struct CravingSOSView: View {
         VStack(spacing: 18) {
             ZStack {
                 Circle()
-                    .fill(Klar.accent.opacity(0.08))
+                    .fill(Klar.accentTint)
                 Circle()
-                    .strokeBorder(Klar.accent.opacity(0.35), lineWidth: 2)
+                    .strokeBorder(Klar.accent.opacity(0.4), lineWidth: 2)
                 Circle()
                     .trim(from: 0, to: progress)
                     .stroke(Klar.accent, style: StrokeStyle(lineWidth: 3, lineCap: .round))
@@ -137,13 +139,13 @@ struct CravingSOSView: View {
                 VStack(spacing: 6) {
                     Text(timeText)
                         .font(.system(size: 46, weight: .bold))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(Klar.text)
                         .monospacedDigit()
                         .contentTransition(.numericText())
                     Text(remaining > 0 ? "URGE-SURFING" : "VORBEI")
                         .font(Klar.TypeScale.caption)
                         .tracking(0.6)
-                        .foregroundStyle(Klar.textOnInverseSecondary)
+                        .foregroundStyle(Klar.accentStrong)
                 }
             }
             .frame(width: 180, height: 180)
@@ -153,12 +155,12 @@ struct CravingSOSView: View {
             } label: {
                 Text("Atemübung starten")
                     .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Klar.text)
                     .padding(.horizontal, 22)
                     .padding(.vertical, 11)
-                    .background(Color.white.opacity(0.12), in: Capsule())
+                    .background(Klar.surface, in: Capsule())
                     .overlay {
-                        Capsule().strokeBorder(Color.white.opacity(0.2), lineWidth: 1)
+                        Capsule().strokeBorder(Klar.border, lineWidth: 1)
                     }
             }
             .buttonStyle(.plain)
@@ -171,20 +173,20 @@ struct CravingSOSView: View {
                 Text("„\(whyNote.text)“")
                     .font(Klar.TypeScale.bodySmall)
                     .italic()
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Klar.text)
             } else {
                 Text("Noch kein „Warum“ hinterlegt. Du kannst es in den Einstellungen ergänzen — es steht dann genau hier.")
                     .font(Klar.TypeScale.bodySmall)
-                    .foregroundStyle(Klar.textOnInverseSecondary)
+                    .foregroundStyle(Klar.textTertiary)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(14)
-        .background(Color.white.opacity(0.06))
+        .background(Klar.surface)
         .clipShape(RoundedRectangle(cornerRadius: Klar.Radius.md, style: .continuous))
         .overlay {
             RoundedRectangle(cornerRadius: Klar.Radius.md, style: .continuous)
-                .strokeBorder(Color.white.opacity(0.12), lineWidth: 1)
+                .strokeBorder(Klar.border, lineWidth: 1)
         }
     }
 
@@ -269,7 +271,7 @@ struct BreathingExerciseView: View {
 
     var body: some View {
         ZStack {
-            Klar.bgInverseDeep.ignoresSafeArea()
+            Klar.bgSubtle.ignoresSafeArea()
 
             VStack {
                 HStack {
@@ -279,9 +281,9 @@ struct BreathingExerciseView: View {
                     } label: {
                         Image(systemName: "xmark")
                             .font(.system(size: 14, weight: .semibold))
-                            .foregroundStyle(Klar.textOnInverseSecondary)
+                            .foregroundStyle(Klar.textSecondary)
                             .frame(width: 32, height: 32)
-                            .background(Color.white.opacity(0.1), in: Circle())
+                            .background(Klar.surfaceTint, in: Circle())
                     }
                     .accessibilityLabel("Schließen")
                 }
@@ -291,7 +293,7 @@ struct BreathingExerciseView: View {
 
                 ZStack {
                     Circle()
-                        .fill(Klar.accent.opacity(0.12))
+                        .fill(Klar.accentTint)
                         .frame(width: 240, height: 240)
                         .scaleEffect(scale)
 
@@ -302,7 +304,7 @@ struct BreathingExerciseView: View {
 
                     Text(phase.label)
                         .font(.system(size: 22, weight: .semibold))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(Klar.text)
                         .contentTransition(.opacity)
                 }
 
@@ -310,11 +312,10 @@ struct BreathingExerciseView: View {
 
                 Text("Vier Sekunden ein, vier halten, vier aus, vier halten.")
                     .font(Klar.TypeScale.bodySmall)
-                    .foregroundStyle(Klar.textOnInverseSecondary)
+                    .foregroundStyle(Klar.textTertiary)
                     .padding(.bottom, 40)
             }
         }
-        .preferredColorScheme(.dark)
         .task {
             await runCycle()
         }

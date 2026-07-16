@@ -100,13 +100,13 @@ struct PrivacyStepView: View {
 
     var body: some View {
         ZStack {
-            Klar.bgInverseDeep.ignoresSafeArea()
+            Klar.bgSubtle.ignoresSafeArea()
 
             VStack(alignment: .leading, spacing: 0) {
                 Text("KLAR")
                     .font(Klar.TypeScale.display(15))
                     .tracking(15 * 0.42)
-                    .foregroundStyle(Klar.textOnInverseSecondary)
+                    .foregroundStyle(Klar.textTertiary)
                     .frame(maxWidth: .infinity)
 
                 Spacer()
@@ -115,40 +115,40 @@ struct PrivacyStepView: View {
                     .font(.system(size: 28))
                     .foregroundStyle(Klar.accent)
                     .frame(width: 64, height: 64)
-                    .background(Klar.accent.opacity(0.16), in: Circle())
+                    .background(Klar.accentTint, in: Circle())
                     .padding(.bottom, 28)
 
                 Text("Alles bleibt auf deinem Gerät.")
                     .font(Klar.TypeScale.display(30))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(Klar.text)
                     .padding(.bottom, 14)
 
                 Text("Kein Account. Keine Registrierung. Kein Server. Nichts, was kompromittiert werden könnte. Deine Ehrlichkeit gehört nur dir.")
                     .font(Klar.TypeScale.body)
-                    .foregroundStyle(Klar.textOnInverseSecondary)
+                    .foregroundStyle(Klar.textSecondary)
                     .padding(.bottom, 24)
 
                 if canUseBiometrics {
                     HStack(spacing: 12) {
                         Image(systemName: "faceid")
                             .font(.system(size: 18))
-                            .foregroundStyle(.white)
+                            .foregroundStyle(Klar.textSecondary)
                         Text("Mit Face ID sichern")
                             .font(Klar.TypeScale.bodySmall)
-                            .foregroundStyle(.white)
+                            .foregroundStyle(Klar.text)
                         Spacer()
                         if draft.enableAppLock {
                             Image(systemName: "checkmark")
                                 .font(.system(size: 14, weight: .semibold))
-                                .foregroundStyle(Klar.accent)
+                                .foregroundStyle(Klar.accentStrong)
                         }
                     }
                     .padding(16)
-                    .background(Color.white.opacity(0.06))
+                    .background(Klar.surface)
                     .clipShape(RoundedRectangle(cornerRadius: Klar.Radius.lg, style: .continuous))
                     .overlay {
                         RoundedRectangle(cornerRadius: Klar.Radius.lg, style: .continuous)
-                            .strokeBorder(Color.white.opacity(0.12), lineWidth: 1)
+                            .strokeBorder(Klar.border, lineWidth: 1)
                     }
                 }
 
@@ -169,7 +169,7 @@ struct PrivacyStepView: View {
 
                     Button("Später einrichten") { onContinue() }
                         .font(.system(size: 15, weight: .semibold))
-                        .foregroundStyle(Klar.textOnInverseSecondary)
+                        .foregroundStyle(Klar.textSecondary)
                         .frame(maxWidth: .infinity)
                         .padding(.bottom, 16)
                 } else {
@@ -178,7 +178,7 @@ struct PrivacyStepView: View {
                         .padding(.bottom, 16)
                 }
 
-                KlarStepDots(count: 4, current: 0, onInverse: true)
+                KlarStepDots(count: 4, current: 0)
                     .frame(maxWidth: .infinity)
             }
             .padding(.horizontal, 26)
