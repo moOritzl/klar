@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Merged with the generated Info.plist (GENERATE_INFOPLIST_FILE = YES).
+	     Only keys that have no INFOPLIST_KEY_* build setting live here. -->
+	<key>UILaunchScreen</key>
+	<dict>
+		<!-- bgSubtle (#F7FAFA): the launch frame matches the first real frame,
+		     so there is no white flash before the app's own background. -->
+		<key>UIColorName</key>
+		<string>LaunchBackground</string>
+	</dict>
+</dict>
+</plist>
