@@ -14,7 +14,6 @@ struct DataManagementView: View {
 
     @State private var exportDocument: ExportDocument?
     @State private var isExportingJSON = false
-    @State private var isExportingCSV = false
     @State private var isConfirmingWipe = false
     @State private var errorMessage: String?
 
@@ -30,18 +29,9 @@ struct DataManagementView: View {
 
                         SettingsGroup {
                             SettingsNavigationRow(
-                                icon: "doc.text",
-                                title: "Als JSON exportieren",
-                                subtitle: "Vollständig — lässt sich wieder importieren"
+                                icon: "square.and.arrow.up",
+                                title: "Daten exportieren"
                             ) { exportJSON() }
-
-                            SettingsDivider()
-
-                            SettingsNavigationRow(
-                                icon: "tablecells",
-                                title: "Als CSV exportieren",
-                                subtitle: "Nur Einträge, für Tabellenprogramme"
-                            ) { exportCSV() }
                         }
                         .padding(.bottom, 20)
 
@@ -100,12 +90,6 @@ struct DataManagementView: View {
             contentType: .json,
             defaultFilename: "klar-export-\(filenameStamp)"
         ) { handle($0) }
-        .fileExporter(
-            isPresented: $isExportingCSV,
-            document: exportDocument,
-            contentType: .commaSeparatedText,
-            defaultFilename: "klar-eintraege-\(filenameStamp)"
-        ) { handle($0) }
         .confirmationDialog(
             "Wirklich alle Daten löschen?",
             isPresented: $isConfirmingWipe,
@@ -145,16 +129,6 @@ struct DataManagementView: View {
         }
     }
 
-    private func exportCSV() {
-        do {
-            let data = try ExportImportService.exportCSV(context: modelContext)
-            exportDocument = ExportDocument(data: data)
-            isExportingCSV = true
-        } catch {
-            errorMessage = error.localizedDescription
-        }
-    }
-
     private func handle(_ result: Result<URL, Error>) {
         exportDocument = nil
         if case .failure(let error) = result {
@@ -182,7 +156,7 @@ struct DataManagementView: View {
 
 /// Bridges raw `Data` into `fileExporter`.
 struct ExportDocument: FileDocument {
-    static var readableContentTypes: [UTType] { [.json, .commaSeparatedText] }
+    static var readableContentTypes: [UTType] { [.json] }
 
     let data: Data
 

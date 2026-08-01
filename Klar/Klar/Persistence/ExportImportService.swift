@@ -8,24 +8,6 @@ enum ExportImportService {
         return try KlarExportCoding.makeEncoder().encode(export)
     }
 
-    static func exportCSV(context: ModelContext) throws -> Data {
-        let entries = try context.fetch(FetchDescriptor<Entry>())
-        var csv = "\u{FEFF}"
-        csv += "ID;Substanz;Zeitstempel;Zeitzone;Menge;Einheit;Kontext;Stimmung;Notiz\n"
-        let formatter = ISO8601DateFormatter()
-        for entry in entries.sorted(by: { $0.timestamp < $1.timestamp }) {
-            let substanceName = entry.substance?.name ?? ""
-            let timestamp = formatter.string(from: entry.timestamp)
-            let amount = entry.amount.map { "\($0)" } ?? ""
-            let unit = entry.unitOverride ?? entry.substance?.unit.rawValue ?? ""
-            let contextTagNames = (entry.contextTags ?? []).map(\.name).joined(separator: ",")
-            let mood = entry.mood.map { "\($0)" } ?? ""
-            let note = (entry.note ?? "").replacingOccurrences(of: ";", with: ",")
-            csv += "\(entry.id);\(substanceName);\(timestamp);\(entry.timezoneID);\(amount);\(unit);\(contextTagNames);\(mood);\(note)\n"
-        }
-        return csv.data(using: .utf8) ?? Data()
-    }
-
     /// Decodes and validates without touching the store. Split out from the import so a corrupt
     /// or wrong-version file can be rejected *before* anything is deleted.
     static func decode(_ data: Data) throws -> KlarExport {
