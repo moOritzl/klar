@@ -26,14 +26,28 @@ enum ExportImportService {
         return csv.data(using: .utf8) ?? Data()
     }
 
-    static func importJSON(_ data: Data, context: ModelContext) throws {
-        guard try isStoreEmpty(context: context) else {
-            throw ExportImportError.storeNotEmpty
-        }
+    /// Decodes and validates without touching the store. Split out from the import so a corrupt
+    /// or wrong-version file can be rejected *before* anything is deleted.
+    static func decode(_ data: Data) throws -> KlarExport {
         let export = try KlarExportCoding.makeDecoder().decode(KlarExport.self, from: data)
         guard export.schemaVersion == KlarExport.currentSchemaVersion else {
             throw ExportImportError.unknownSchemaVersion(export.schemaVersion)
         }
+        return export
+    }
+
+    static func importJSON(_ data: Data, context: ModelContext) throws {
+        guard try isStoreEmpty(context: context) else {
+            throw ExportImportError.storeNotEmpty
+        }
+        try restore(decode(data), context: context)
+    }
+
+    /// What the import screen calls. Decode first, wipe second, restore third — in that order
+    /// a rejected file costs the user nothing.
+    static func replaceAll(with data: Data, context: ModelContext) throws {
+        let export = try decode(data)
+        try wipeAll(context: context)
         try restore(export, context: context)
     }
 
@@ -73,7 +87,7 @@ enum ExportImportService {
         )
     }
 
-    private static func restore(_ export: KlarExport, context: ModelContext) throws {
+    static func restore(_ export: KlarExport, context: ModelContext) throws {
         var substanceByID: [UUID: Substance] = [:]
         for dto in export.substances {
             let substance = Substance(id: dto.id, name: dto.name, unit: dto.unit, colorIndex: dto.colorIndex, costPerUnit: dto.costPerUnit, sortOrder: dto.sortOrder, isArchived: dto.isArchived)
