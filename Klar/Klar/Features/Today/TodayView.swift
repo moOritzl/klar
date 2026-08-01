@@ -112,7 +112,7 @@ struct TodayView: View {
                     }
                 }
                 .padding(.horizontal, 16)
-                .padding(.top, 8)
+                .padding(.top, Klar.Space.x4)
                 .padding(.bottom, 100) // clear the FAB
             }
             .scrollIndicators(.hidden)
@@ -138,9 +138,9 @@ struct TodayView: View {
     // MARK: - Pieces
 
     private var header: some View {
-        HStack {
+        HStack(alignment: .firstTextBaseline) {
             Text("Heute")
-                .font(Klar.TypeScale.title)
+                .font(Klar.TypeScale.display(30))
                 .foregroundStyle(Klar.text)
             Spacer()
             Text(KlarDate.shortWeekdayDate(today))

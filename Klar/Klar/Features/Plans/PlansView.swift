@@ -25,35 +25,23 @@ struct PlansView: View {
 
     var body: some View {
         NavigationStack {
-            ZStack {
-                Klar.bgSubtle.ignoresSafeArea()
-
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 0) {
-                        Text("Pläne")
-                            .font(Klar.TypeScale.title)
-                            .foregroundStyle(Klar.text)
-                            .padding(.bottom, 4)
-
-                        Text(subtitle)
-                            .font(Klar.TypeScale.bodySmall)
-                            .foregroundStyle(Klar.textTertiary)
-                            .padding(.bottom, 16)
-
-                        if activePlans.isEmpty {
-                            emptyState
-                        } else {
-                            filledState
-                        }
-
-                        navigationRows
-                            .padding(.top, 24)
-                    }
-                    .padding(.horizontal, 16)
-                    .padding(.top, 8)
-                    .padding(.bottom, 24)
+            KlarScreen {
+                KlarScreenBanner(title: "Pläne") {
+                    Text(subtitle)
+                        .font(Klar.TypeScale.bodySmall)
+                        .foregroundStyle(Klar.textTertiary)
                 }
-                .scrollIndicators(.hidden)
+            } content: {
+                VStack(alignment: .leading, spacing: 0) {
+                    if activePlans.isEmpty {
+                        emptyState
+                    } else {
+                        filledState
+                    }
+
+                    navigationRows
+                        .padding(.top, 24)
+                }
             }
             .sheet(item: $editorSeed) { seed in
                 PlanEditorView(
