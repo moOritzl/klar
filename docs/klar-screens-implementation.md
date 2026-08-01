@@ -17,7 +17,7 @@ has been driven end-to-end in the simulator (`KlarUITests/ScreenshotTests`).
 | Settings (device) | [AppSettings.swift](../Klar/Klar/App/AppSettings.swift) | UserDefaults. Deliberately **not** SwiftData — device prefs must not land in the data export. |
 | Data access | [KlarStore.swift](../Klar/Klar/App/KlarStore.swift) | The single write path, and the bridge to `KlarCore`'s pure calculators. |
 | Dates | [KlarDate.swift](../Klar/Klar/App/KlarDate.swift) | **05:00 logical-day boundary.** An entry at 02:30 belongs to the night before. Every "today"/"this month" question goes through here. |
-| Shell | [RootView.swift](../Klar/Klar/App/RootView.swift) | Gate order: panic façade → app lock → onboarding → tabs. |
+| Shell | [RootView.swift](../Klar/Klar/App/RootView.swift) | Gate order: app lock → onboarding → tabs. |
 
 **Fonts.** The design's `--font-display` (PT Serif) and `--font-ui` (SF Pro) map to
 `Font.system(design: .serif)` and `Font.system(...)`. No font files are bundled — on iOS both
@@ -122,7 +122,7 @@ behaviourally inert (Konzept § 2.1).
 ### I · Einstellungen — [SettingsView.swift](../Klar/Klar/Features/Settings/SettingsView.swift)
 
 ✅ Reached from the gear on Heute, never a tab. Face ID lock (refuses to switch on when the device
-can't honour it), panic gesture, auto-lock delay, substances & costs, "Warum", Vertrauensperson,
+can't honour it), auto-lock delay, substances & costs, "Warum", Vertrauensperson,
 notifications, export/delete.
 
 ### J · System-Screens
@@ -130,7 +130,6 @@ notifications, export/delete.
 | Screen | State | Wiring |
 |---|---|---|
 | **J1** Sperrbildschirm | ✅ | [AppLockOverlayView](../Klar/Klar/Security/AppLockOverlayView.swift). `SnapshotShieldView` covers the app-switcher snapshot — the real content is gone *before* iOS screenshots the window. |
-| **J2** Panik-Ansicht | ✅ | [PanicView](../Klar/Klar/Security/PanicView.swift) — a **working** calculator, not a picture of one; it has to survive being handed to someone. |
 
 ---
 
@@ -138,14 +137,7 @@ notifications, export/delete.
 
 These are the real gaps. Everything else above is wired.
 
-### 3.1 The panic gesture's exit is undiscoverable by design — tell the user once
-
-Two-finger double-tap enters the façade. **Exit is a 1.5 s long-press on the number display.** A
-bystander will never find it; the user has to be told exactly once. The Settings row says so, and
-that is currently the *only* place it is said. If onboarding never mentions it, a user who triggers
-the gesture by accident will think the app is broken.
-
-### 3.2 H4 · Beratung — the local directory is deliberately not shipped
+### 3.1 H4 · Beratung — the local directory is deliberately not shipped
 
 The draft shows city-level entries with distances ("Suchtberatung Mitte · 2,1 km"). **I did not
 invent them.** Fabricating a counseling contact in this app could send someone to a number that
@@ -157,41 +149,41 @@ To ship the drafted city UI you need a **vetted, maintained data source** — DH
 agreement — plus a plan for keeping it current. The `CounselingOffer` model and the badge system
 (Anonym / Kostenlos / 24/7) already support it. `AppSettings.counselingCity` exists and is unused.
 
-### 3.3 H5 · Risiko-Infos — content needs expert review
+### 3.2 H5 · Risiko-Infos — content needs expert review
 
 The 7 entries are written to the constitution's rules (harm avoidance only; no dosage, no "how-to")
 and attributed to BZgA / drugcom / mindzone / Saferparty. **They have not been reviewed by a
 clinician or lawyer.** For a 17+ German-market app making public-health claims, they should be,
 before submission.
 
-### 3.4 Notifications are minimal
+### 3.3 Notifications are minimal
 
 Only a weekly-review reminder (Monday 10:00) is scheduled. Copy is **generic by contract** — no
 notification text may ever name a substance, a dose, or an entry
 ([NotificationScheduler](../Klar/Klar/Features/Settings/NotificationScheduler.swift)). Not built: a
 plan-check-in nudge, quota-reset notice. Both are currently surfaced in-app on launch instead.
 
-### 3.5 Import has a service but no UI
+### 3.4 Import has a service but no UI
 
 `ExportImportService.importJSON` exists and is tested (round-trips), but nothing calls it. It refuses
 a non-empty store, so it's a restore-onto-fresh-install path. Add a "Daten importieren" row to
 [DataManagementView](../Klar/Klar/Features/Settings/DataManagementView.swift) when you want it.
 
-### 3.6 Not built, because the draft doesn't draw them
+### 3.5 Not built, because the draft doesn't draw them
 
 From the concept (§ 4, Modul D): **eintragsfreie Serien, Meilensteine, Geld-gespart-Schätzung.** The
 cost basis is captured (Substanzen & Kosten) and `Substance.costPerUnit` is populated, but nothing
 consumes it. The draft's closing panel argues *against* a stats surface ("Zahlen ohne Handlungsfrage
 sind Selbstzweck"), so this is a product decision, not an oversight.
 
-### 3.7 App Group is not provisioned
+### 3.6 App Group is not provisioned
 
 [AppGroupContainer](../Klar/Klar/Persistence/AppGroupContainer.swift) prefers
 `group.de.lenhard.klar` and silently falls back to Application Support. Fine today; **required** the
 moment you add a widget or App Intent that must read the same store. Needs a paid Apple Developer
 account.
 
-### 3.8 Strings are inline German
+### 3.7 Strings are inline German
 
 There is no localization catalog work — `Localizable.xcstrings` is essentially untouched (and had an
 uncommitted modification before this change). German-only is the stated MVP scope; if EN is ever in

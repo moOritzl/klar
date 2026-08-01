@@ -49,15 +49,6 @@ struct SettingsView: View {
 
                             SettingsDivider()
 
-                            SettingsToggleRow(
-                                icon: "eye.slash",
-                                title: "Panik-Geste",
-                                subtitle: "Zwei Finger, doppelt tippen — zeigt einen Taschenrechner. Zum Zurückkehren die Anzeige lange gedrückt halten.",
-                                isOn: $settings.isPanicGestureEnabled
-                            )
-
-                            SettingsDivider()
-
                             SettingsPickerRow(
                                 icon: "timer",
                                 title: "Auto-Sperre",
