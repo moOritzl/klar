@@ -52,7 +52,23 @@ struct SettingsView: View {
                             SettingsPickerRow(
                                 icon: "timer",
                                 title: "Auto-Sperre",
+                                options: AutoLockDelay.allCases,
+                                label: \.label,
                                 selection: $settings.autoLockDelay
+                            )
+                        }
+                        .padding(.bottom, 16)
+
+                        KlarSectionLabel(text: "Darstellung")
+                            .padding(.bottom, 8)
+
+                        SettingsGroup {
+                            SettingsPickerRow(
+                                icon: "circle.lefthalf.filled",
+                                title: "Erscheinungsbild",
+                                options: AppAppearance.allCases,
+                                label: \.label,
+                                selection: $settings.appearance
                             )
                         }
                         .padding(.bottom, 16)
@@ -235,10 +251,12 @@ struct SettingsToggleRow: View {
     }
 }
 
-struct SettingsPickerRow: View {
+struct SettingsPickerRow<Value: Hashable & Identifiable>: View {
     let icon: String
     let title: LocalizedStringKey
-    @Binding var selection: AutoLockDelay
+    let options: [Value]
+    let label: (Value) -> String
+    @Binding var selection: Value
 
     var body: some View {
         HStack(spacing: 12) {
@@ -251,8 +269,8 @@ struct SettingsPickerRow: View {
                 .foregroundStyle(Klar.text)
             Spacer()
             Picker(title, selection: $selection) {
-                ForEach(AutoLockDelay.allCases) { delay in
-                    Text(delay.label).tag(delay)
+                ForEach(options) { option in
+                    Text(label(option)).tag(option)
                 }
             }
             .labelsHidden()

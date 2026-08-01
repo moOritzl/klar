@@ -100,7 +100,19 @@
     "1 Eintrag" : {
 
     },
+    "2–3 persönliche Alternativen. Im Craving ist keine Zeit, sie zu suchen." : {
+
+    },
     "Abbrechen" : {
+
+    },
+    "Abstinenz. Einträge werden weiterhin ohne Wertung erfasst." : {
+
+    },
+    "Abstinenz. Jeder Eintrag wird trotzdem ohne Wertung erfasst." : {
+
+    },
+    "Alle Daten ersetzen?" : {
 
     },
     "Alle Daten löschen" : {
@@ -109,7 +121,16 @@
     "Alles bleibt auf deinem Gerät." : {
 
     },
+    "Alphabetisch, ohne Wertung. Mehrfachauswahl. Jederzeit änderbar." : {
+
+    },
+    "Als JSON exportieren" : {
+
+    },
     "Alternative hinzufügen" : {
+
+    },
+    "App öffnen" : {
 
     },
     "Archivieren" : {
@@ -130,6 +151,9 @@
     "Beratung" : {
 
     },
+    "Beratungsstellen in deiner Stadt. Offiziell gepflegt, laufend aktuell." : {
+
+    },
     "Bestehende Einträge bleiben erhalten. Die Substanz verschwindet nur aus der Auswahl." : {
 
     },
@@ -142,7 +166,16 @@
     "Craving-SOS" : {
 
     },
+    "Craving-SOS. Ein Tap. Die App führt dich." : {
+
+    },
     "DANN" : {
+
+    },
+    "Dann … (Handlung: Vorlage, frei editierbar)" : {
+
+    },
+    "Darstellung" : {
 
     },
     "Das hat nicht geklappt" : {
@@ -151,13 +184,25 @@
     "Daten" : {
 
     },
+    "Daten exportieren" : {
+
+    },
+    "Daten importieren" : {
+
+    },
     "Dein „Warum“" : {
+
+    },
+    "Dein Archiv." : {
 
     },
     "Dein Plan" : {
 
     },
     "Dein Plan für „%@“" : {
+
+    },
+    "Dein Plan für nächste Woche." : {
 
     },
     "Dein Wochenrückblick ist da." : {
@@ -172,7 +217,13 @@
     "Der Eintrag wird endgültig entfernt." : {
 
     },
+    "Der Export enthält deine Einträge, Ziele, Pläne und Notizen. Er enthält keine Gerätedaten: Face-ID-Einstellung und Vertrauensperson bleiben auf diesem Gerät." : {
+
+    },
     "Der Weg zu Menschen ist immer einen Tap entfernt." : {
+
+    },
+    "Die Kostenbasis ist deine eigene Schätzung. Sie speist die „Geld gespart“-Rechnung." : {
 
     },
     "Diese Woche" : {
@@ -193,7 +244,19 @@
     "Eigene Substanz" : {
 
     },
+    "Ein guter Plan braucht Kenntnis der eigenen Muster. Er entsteht, wenn deine Einträge etwas zeigen." : {
+
+    },
+    "Ein Plan entsteht aus deinen Mustern." : {
+
+    },
     "Ein ruhiger Tag." : {
+
+    },
+    "Ein Tap. Die App führt dich." : {
+
+    },
+    "Eine eintragsfreie Woche." : {
 
     },
     "Eine Frage nach vorn." : {
@@ -234,6 +297,9 @@
 
     },
     "Einträge" : {
+
+    },
+    "Einträge, Ziele, Pläne und Notizen auf diesem Gerät werden durch die Datei ersetzt." : {
 
     },
     "Einträge, Ziele, Pläne und Notizen werden entfernt. Das lässt sich nicht rückgängig machen." : {
@@ -285,7 +351,19 @@
     "Ersatzhandlungen" : {
 
     },
+    "Erscheint im Craving-SOS." : {
+
+    },
+    "Erscheinungsbild" : {
+
+    },
+    "Ersetzen" : {
+
+    },
     "Erste-Hilfe-Schritte" : {
+
+    },
+    "Erstmal nur beobachten. Kein Limit." : {
 
     },
     "Export" : {
@@ -307,6 +385,9 @@
 
     },
     "Gefahrenvermeidung mit Quellen. Keine Dosisempfehlungen, keine Wirkoptimierung." : {
+
+    },
+    "Generische Texte, nie Substanznamen" : {
 
     },
     "Genutzt im Craving-SOS" : {
@@ -365,6 +446,9 @@
     "Kein Vergleich, keine Norm. Nur, was dein Plan diese Woche getan hat." : {
 
     },
+    "Kein Ziel am Tag 1 nötig. „Nur beobachten“ ist Stufe 1." : {
+
+    },
     "KLAR" : {
 
     },
@@ -396,6 +480,12 @@
 
     },
     "Löschen" : {
+
+    },
+    "Max. 3 aktive Pläne." : {
+
+    },
+    "Max. 3 aktive Pläne. Pausiere einen bestehenden Plan, um Platz zu schaffen." : {
 
     },
     "Mit Face ID entsperren" : {
@@ -435,6 +525,9 @@
         }
       }
     },
+    "Noch kein „Warum“ hinterlegt. Du kannst es in den Einstellungen ergänzen. Es steht dann genau hier." : {
+
+    },
     "Noch kein aktiver Plan. Die Bilanz erscheint, sobald einer läuft." : {
 
     },
@@ -447,6 +540,12 @@
     "Noch keine Ersatzhandlungen hinterlegt. Du kannst sie unter Pläne → Ersatzhandlungen ergänzen." : {
 
     },
+    "Noch keine Kontext-Tags erfasst. Sie sind optional und der Rohstoff für deine Pläne." : {
+
+    },
+    "Noch keine Substanz ausgewählt." : {
+
+    },
     "Noch keine Substanzen. Sobald du etwas erfasst, entstehen hier Muster." : {
 
     },
@@ -457,6 +556,9 @@
 
     },
     "Notruf 112 anrufen" : {
+
+    },
+    "Notruf hilft, ohne die Polizei zu rufen. Sag ehrlich, was konsumiert wurde. Das entscheidet über die richtige Behandlung." : {
 
     },
     "Ø Abstand" : {
@@ -559,6 +661,9 @@
 
     },
     "Substanzen & Kosten" : {
+
+    },
+    "Substanzen auswählen" : {
 
     },
     "Substanzen verwalten" : {
@@ -680,6 +785,9 @@
 
     },
     "Woche" : {
+
+    },
+    "Wochenrückblicke" : {
 
     },
     "z. B. Ich will die Wochenenden wieder klar erleben." : {

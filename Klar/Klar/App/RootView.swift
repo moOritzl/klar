@@ -37,7 +37,7 @@ struct RootView: View {
                 SnapshotShieldView()
             }
         }
-        .preferredColorScheme(.light) // The design ships light only.
+        .background(WindowAppearance(style: settings.appearance.uiStyle))
         .tint(Klar.accent)
         .onChange(of: scenePhase) { _, newPhase in
             guard settings.isAppLockEnabled else { return }

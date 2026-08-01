@@ -51,8 +51,12 @@ enum Klar {
     static let bg = adaptive(light: 0xFFFFFF, dark: 0x0E1719)
     static let bgSubtle = adaptive(light: 0xF7FAFA, dark: 0x15272B)
     static let bgSunken = adaptive(light: 0xF4F6F6, dark: 0x0E1719)
-    static let bgInverse = adaptive(light: 0x0E3B43, dark: 0x0A2429)
-    static let bgInverseDeep = adaptive(light: 0x15272B, dark: 0x081A1E)
+    /// The inverse surfaces are the app's emphasis block: in light they are the darkest thing on
+    /// a near-white page. Mirroring that literally in dark mode (a near-black card on a dark page)
+    /// measured 1.15:1 and read as the *quietest* element, inverting the role. So in dark they
+    /// step up out of the page instead of down into it, keeping "most emphatic" intact.
+    static let bgInverse = adaptive(light: 0x0E3B43, dark: 0x2C7A82)
+    static let bgInverseDeep = adaptive(light: 0x15272B, dark: 0x24686F)
 
     static let surface = adaptive(light: 0xFFFFFF, dark: 0x1B3238)
     static let surfaceTint = adaptive(light: 0xEEF6F5, dark: 0x17444C)
