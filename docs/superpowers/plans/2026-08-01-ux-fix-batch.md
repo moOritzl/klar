@@ -17,7 +17,7 @@
 Run unit tests with:
 
 ```bash
-xcodebuild test -project Klar/Klar.xcodeproj -scheme Klar -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -only-testing:KlarTests 2>&1 | tail -20
+xcodebuild test -project Klar/Klar.xcodeproj -scheme Klar -destination 'platform=iOS Simulator,id=D9360641-F9CD-4536-870B-3D66A89F6FEE' -only-testing:KlarTests 2>&1 | tail -20
 ```
 
 Expected on a green run: `** TEST SUCCEEDED **`. Baseline before this plan starts: 12 tests, 0 failures.
@@ -25,7 +25,7 @@ Expected on a green run: `** TEST SUCCEEDED **`. Baseline before this plan start
 Build only (faster, for view-only changes):
 
 ```bash
-xcodebuild build -project Klar/Klar.xcodeproj -scheme Klar -destination 'platform=iOS Simulator,name=iPhone 17 Pro' 2>&1 | tail -5
+xcodebuild build -project Klar/Klar.xcodeproj -scheme Klar -destination 'platform=iOS Simulator,id=D9360641-F9CD-4536-870B-3D66A89F6FEE' 2>&1 | tail -5
 ```
 
 Expected: `** BUILD SUCCEEDED **`.
@@ -35,6 +35,14 @@ every command is written to be run **from the repo root**. Do not `cd` into `Kla
 `-project` flag is there precisely so you do not have to.
 
 Branch: `feat/ux-fix-batch`. Every task commits there.
+
+**Pin the simulator by UDID, never by name.** This machine has two devices called
+`iPhone 17 Pro`, and only `D9360641-F9CD-4536-870B-3D66A89F6FEE` is a valid destination for the
+Klar scheme. Passing `name=iPhone 17 Pro` resolves ambiguously and fails at launch with
+`FBSOpenApplicationServiceErrorDomain ... "Application failed preflight checks" (Busy)`, which
+looks like a test failure but is not one. Every command below is already pinned; keep it that way.
+If you do see that error, it is the simulator, not the code — shut the device down and retry
+rather than changing anything.
 
 **Verification you cannot automate.** Face ID enrollment (Simulator → Features → Face ID →
 Enrolled) and the export/import round trip through the Files app need a human at the keyboard.
@@ -126,7 +134,7 @@ Expected: `2`
 - [ ] **Step 4: Verify it reaches the built Info.plist**
 
 ```bash
-xcodebuild build -project Klar/Klar.xcodeproj -scheme Klar -destination 'platform=iOS Simulator,name=iPhone 17 Pro' 2>&1 | tail -3
+xcodebuild build -project Klar/Klar.xcodeproj -scheme Klar -destination 'platform=iOS Simulator,id=D9360641-F9CD-4536-870B-3D66A89F6FEE' 2>&1 | tail -3
 plutil -extract NSFaceIDUsageDescription raw \
   ~/Library/Developer/Xcode/DerivedData/Klar-*/Build/Products/Debug-iphonesimulator/Klar.app/Info.plist
 ```
@@ -230,7 +238,7 @@ final class AppLockManagerTests: XCTestCase {
 - [ ] **Step 2: Run the tests to verify they fail**
 
 ```bash
-xcodebuild test -project Klar/Klar.xcodeproj -scheme Klar -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -only-testing:KlarTests/AppLockManagerTests 2>&1 | tail -20
+xcodebuild test -project Klar/Klar.xcodeproj -scheme Klar -destination 'platform=iOS Simulator,id=D9360641-F9CD-4536-870B-3D66A89F6FEE' -only-testing:KlarTests/AppLockManagerTests 2>&1 | tail -20
 ```
 
 Expected: compilation failure — `AppLockManager` has no such initializer, no `didFail`, and
@@ -361,7 +369,7 @@ final class AppLockManager {
 - [ ] **Step 4: Run the tests to verify they pass**
 
 ```bash
-xcodebuild test -project Klar/Klar.xcodeproj -scheme Klar -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -only-testing:KlarTests/AppLockManagerTests 2>&1 | tail -20
+xcodebuild test -project Klar/Klar.xcodeproj -scheme Klar -destination 'platform=iOS Simulator,id=D9360641-F9CD-4536-870B-3D66A89F6FEE' -only-testing:KlarTests/AppLockManagerTests 2>&1 | tail -20
 ```
 
 Expected: `Executed 6 tests, with 0 failures`, `** TEST SUCCEEDED **`
@@ -444,7 +452,7 @@ struct AppLockOverlayView: View {
 - [ ] **Step 2: Build**
 
 ```bash
-xcodebuild build -project Klar/Klar.xcodeproj -scheme Klar -destination 'platform=iOS Simulator,name=iPhone 17 Pro' 2>&1 | tail -5
+xcodebuild build -project Klar/Klar.xcodeproj -scheme Klar -destination 'platform=iOS Simulator,id=D9360641-F9CD-4536-870B-3D66A89F6FEE' 2>&1 | tail -5
 ```
 
 Expected: `** BUILD SUCCEEDED **`
@@ -572,7 +580,7 @@ unrelated prose and stays.)
 - [ ] **Step 8: Build and test**
 
 ```bash
-xcodebuild test -project Klar/Klar.xcodeproj -scheme Klar -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -only-testing:KlarTests 2>&1 | tail -10
+xcodebuild test -project Klar/Klar.xcodeproj -scheme Klar -destination 'platform=iOS Simulator,id=D9360641-F9CD-4536-870B-3D66A89F6FEE' -only-testing:KlarTests 2>&1 | tail -10
 ```
 
 Expected: `** TEST SUCCEEDED **`, 18 tests.
@@ -651,7 +659,7 @@ ExportImportTests: XCTestCase { … }`:
 - [ ] **Step 2: Run the tests to verify they fail**
 
 ```bash
-xcodebuild test -project Klar/Klar.xcodeproj -scheme Klar -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -only-testing:KlarTests/ExportImportTests 2>&1 | tail -20
+xcodebuild test -project Klar/Klar.xcodeproj -scheme Klar -destination 'platform=iOS Simulator,id=D9360641-F9CD-4536-870B-3D66A89F6FEE' -only-testing:KlarTests/ExportImportTests 2>&1 | tail -20
 ```
 
 Expected: compilation failure — `decode` and `replaceAll` do not exist.
@@ -693,7 +701,7 @@ reach it.
 - [ ] **Step 4: Run the tests to verify they pass**
 
 ```bash
-xcodebuild test -project Klar/Klar.xcodeproj -scheme Klar -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -only-testing:KlarTests/ExportImportTests 2>&1 | tail -20
+xcodebuild test -project Klar/Klar.xcodeproj -scheme Klar -destination 'platform=iOS Simulator,id=D9360641-F9CD-4536-870B-3D66A89F6FEE' -only-testing:KlarTests/ExportImportTests 2>&1 | tail -20
 ```
 
 Expected: `Executed 6 tests, with 0 failures`
@@ -773,7 +781,7 @@ EOF
 - [ ] **Step 4: Build**
 
 ```bash
-xcodebuild build -project Klar/Klar.xcodeproj -scheme Klar -destination 'platform=iOS Simulator,name=iPhone 17 Pro' 2>&1 | tail -5
+xcodebuild build -project Klar/Klar.xcodeproj -scheme Klar -destination 'platform=iOS Simulator,id=D9360641-F9CD-4536-870B-3D66A89F6FEE' 2>&1 | tail -5
 ```
 
 Expected: `** BUILD SUCCEEDED **`
@@ -902,7 +910,7 @@ EOF
 - [ ] **Step 5: Build and verify the round trip by hand**
 
 ```bash
-xcodebuild build -project Klar/Klar.xcodeproj -scheme Klar -destination 'platform=iOS Simulator,name=iPhone 17 Pro' 2>&1 | tail -5
+xcodebuild build -project Klar/Klar.xcodeproj -scheme Klar -destination 'platform=iOS Simulator,id=D9360641-F9CD-4536-870B-3D66A89F6FEE' 2>&1 | tail -5
 ```
 
 In the simulator: create two entries → Einstellungen → Daten → exportieren (save to Files) →
@@ -1009,7 +1017,7 @@ extension KlarScreenBanner where Detail == EmptyView {
 - [ ] **Step 2: Build**
 
 ```bash
-xcodebuild build -project Klar/Klar.xcodeproj -scheme Klar -destination 'platform=iOS Simulator,name=iPhone 17 Pro' 2>&1 | tail -5
+xcodebuild build -project Klar/Klar.xcodeproj -scheme Klar -destination 'platform=iOS Simulator,id=D9360641-F9CD-4536-870B-3D66A89F6FEE' 2>&1 | tail -5
 ```
 
 Expected: `** BUILD SUCCEEDED **`
@@ -1104,7 +1112,7 @@ Update the doc comment above `struct HelpView` — "SOS at the very top" is no l
 - [ ] **Step 2: Screenshot the result**
 
 ```bash
-xcodebuild build -project Klar/Klar.xcodeproj -scheme Klar -destination 'platform=iOS Simulator,name=iPhone 17 Pro' 2>&1 | tail -3
+xcodebuild build -project Klar/Klar.xcodeproj -scheme Klar -destination 'platform=iOS Simulator,id=D9360641-F9CD-4536-870B-3D66A89F6FEE' 2>&1 | tail -3
 ```
 
 Launch the app in the simulator, go to the Hilfe tab, take a screenshot. Expected: the "Hilfe"
@@ -1114,7 +1122,7 @@ and the "Risiko-Infos" row ending just above the tab bar. No scroll bounce.
 - [ ] **Step 3: Run the UI test that touches this screen**
 
 ```bash
-xcodebuild test -project Klar/Klar.xcodeproj -scheme Klar -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -only-testing:KlarUITests/KlarUITests 2>&1 | tail -15
+xcodebuild test -project Klar/Klar.xcodeproj -scheme Klar -destination 'platform=iOS Simulator,id=D9360641-F9CD-4536-870B-3D66A89F6FEE' -only-testing:KlarUITests/KlarUITests 2>&1 | tail -15
 ```
 
 Expected: `** TEST SUCCEEDED **`. The `help.sos` identifier is unchanged, so this should pass
@@ -1284,7 +1292,7 @@ and `statTile` go.
 - [ ] **Step 4: Build and screenshot both states**
 
 ```bash
-xcodebuild build -project Klar/Klar.xcodeproj -scheme Klar -destination 'platform=iOS Simulator,name=iPhone 17 Pro' 2>&1 | tail -3
+xcodebuild build -project Klar/Klar.xcodeproj -scheme Klar -destination 'platform=iOS Simulator,id=D9360641-F9CD-4536-870B-3D66A89F6FEE' 2>&1 | tail -3
 ```
 
 Screenshot the Verlauf tab. Expected: "Verlauf" plus the two number tiles at the top, calendar
@@ -1370,7 +1378,7 @@ stays exactly as it is.
 - [ ] **Step 3: Build and screenshot**
 
 ```bash
-xcodebuild build -project Klar/Klar.xcodeproj -scheme Klar -destination 'platform=iOS Simulator,name=iPhone 17 Pro' 2>&1 | tail -3
+xcodebuild build -project Klar/Klar.xcodeproj -scheme Klar -destination 'platform=iOS Simulator,id=D9360641-F9CD-4536-870B-3D66A89F6FEE' 2>&1 | tail -3
 ```
 
 Screenshot the Pläne tab with zero plans and with one plan. Expected in both: title, subtitle and
@@ -1380,7 +1388,7 @@ rows sitting low. Confirm the Ziel card appears exactly once.
 - [ ] **Step 4: Run the screenshot UI test**
 
 ```bash
-xcodebuild test -project Klar/Klar.xcodeproj -scheme Klar -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -only-testing:KlarUITests/ScreenshotTests 2>&1 | tail -15
+xcodebuild test -project Klar/Klar.xcodeproj -scheme Klar -destination 'platform=iOS Simulator,id=D9360641-F9CD-4536-870B-3D66A89F6FEE' -only-testing:KlarUITests/ScreenshotTests 2>&1 | tail -15
 ```
 
 Expected: `** TEST SUCCEEDED **`. `plans.goalsLink` is unchanged, but the row may now need a
@@ -1473,7 +1481,7 @@ final class CalendarMonthNavigationTests: XCTestCase {
 - [ ] **Step 2: Run it to verify it fails**
 
 ```bash
-xcodebuild test -project Klar/Klar.xcodeproj -scheme Klar -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -only-testing:KlarTests/CalendarMonthNavigationTests 2>&1 | tail -15
+xcodebuild test -project Klar/Klar.xcodeproj -scheme Klar -destination 'platform=iOS Simulator,id=D9360641-F9CD-4536-870B-3D66A89F6FEE' -only-testing:KlarTests/CalendarMonthNavigationTests 2>&1 | tail -15
 ```
 
 Expected: compilation failure — `CalendarMonthNavigation` does not exist.
@@ -1502,7 +1510,7 @@ enum CalendarMonthNavigation {
 - [ ] **Step 4: Run the test to verify it passes**
 
 ```bash
-xcodebuild test -project Klar/Klar.xcodeproj -scheme Klar -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -only-testing:KlarTests/CalendarMonthNavigationTests 2>&1 | tail -15
+xcodebuild test -project Klar/Klar.xcodeproj -scheme Klar -destination 'platform=iOS Simulator,id=D9360641-F9CD-4536-870B-3D66A89F6FEE' -only-testing:KlarTests/CalendarMonthNavigationTests 2>&1 | tail -15
 ```
 
 Expected: `Executed 3 tests, with 0 failures`
@@ -1547,7 +1555,7 @@ so it cannot fight the tab bar's own edge gestures:
 - [ ] **Step 6: Verify by hand**
 
 ```bash
-xcodebuild build -project Klar/Klar.xcodeproj -scheme Klar -destination 'platform=iOS Simulator,name=iPhone 17 Pro' 2>&1 | tail -3
+xcodebuild build -project Klar/Klar.xcodeproj -scheme Klar -destination 'platform=iOS Simulator,id=D9360641-F9CD-4536-870B-3D66A89F6FEE' 2>&1 | tail -3
 ```
 
 In the simulator, on Verlauf → Kalender:
@@ -1693,7 +1701,7 @@ EOF
 - [ ] **Step 4: Build and screenshot both states**
 
 ```bash
-xcodebuild build -project Klar/Klar.xcodeproj -scheme Klar -destination 'platform=iOS Simulator,name=iPhone 17 Pro' 2>&1 | tail -3
+xcodebuild build -project Klar/Klar.xcodeproj -scheme Klar -destination 'platform=iOS Simulator,id=D9360641-F9CD-4536-870B-3D66A89F6FEE' 2>&1 | tail -3
 ```
 
 Screenshot the "+" sheet with no substances (expected: a short sheet, roughly a third of the
@@ -1757,7 +1765,7 @@ EOF
 - [ ] **Step 3: Build and commit**
 
 ```bash
-xcodebuild build -project Klar/Klar.xcodeproj -scheme Klar -destination 'platform=iOS Simulator,name=iPhone 17 Pro' 2>&1 | tail -3
+xcodebuild build -project Klar/Klar.xcodeproj -scheme Klar -destination 'platform=iOS Simulator,id=D9360641-F9CD-4536-870B-3D66A89F6FEE' 2>&1 | tail -3
 git add -A
 git commit -m "Drop the new-month absolution line
 
@@ -1881,7 +1889,7 @@ information — only reassurance.
 - [ ] **Step 7: Build and commit**
 
 ```bash
-xcodebuild build -project Klar/Klar.xcodeproj -scheme Klar -destination 'platform=iOS Simulator,name=iPhone 17 Pro' 2>&1 | tail -3
+xcodebuild build -project Klar/Klar.xcodeproj -scheme Klar -destination 'platform=iOS Simulator,id=D9360641-F9CD-4536-870B-3D66A89F6FEE' 2>&1 | tail -3
 git add -A
 git commit -m "Cut the reassurance clauses from the UI copy
 
@@ -1962,7 +1970,7 @@ stored value to migrate.
 - [ ] **Step 3: Build and commit**
 
 ```bash
-xcodebuild build -project Klar/Klar.xcodeproj -scheme Klar -destination 'platform=iOS Simulator,name=iPhone 17 Pro' 2>&1 | tail -3
+xcodebuild build -project Klar/Klar.xcodeproj -scheme Klar -destination 'platform=iOS Simulator,id=D9360641-F9CD-4536-870B-3D66A89F6FEE' 2>&1 | tail -3
 git add -A
 git commit -m "Add an appearance preference defaulting to System"
 ```
@@ -2070,7 +2078,7 @@ private struct KlarShadowModifier: ViewModifier {
 - [ ] **Step 4: Build and commit**
 
 ```bash
-xcodebuild build -project Klar/Klar.xcodeproj -scheme Klar -destination 'platform=iOS Simulator,name=iPhone 17 Pro' 2>&1 | tail -3
+xcodebuild build -project Klar/Klar.xcodeproj -scheme Klar -destination 'platform=iOS Simulator,id=D9360641-F9CD-4536-870B-3D66A89F6FEE' 2>&1 | tail -3
 git add -A
 git commit -m "Make the design tokens adaptive
 
@@ -2277,7 +2285,7 @@ the first real frame and there is no flash.
 - [ ] **Step 4: Screenshot every main screen in both schemes**
 
 ```bash
-xcodebuild build -project Klar/Klar.xcodeproj -scheme Klar -destination 'platform=iOS Simulator,name=iPhone 17 Pro' 2>&1 | tail -3
+xcodebuild build -project Klar/Klar.xcodeproj -scheme Klar -destination 'platform=iOS Simulator,id=D9360641-F9CD-4536-870B-3D66A89F6FEE' 2>&1 | tail -3
 xcrun simctl ui booted appearance dark
 ```
 
@@ -2298,7 +2306,7 @@ and "Dunkel" the other way round.
 - [ ] **Step 5: Full test run**
 
 ```bash
-xcodebuild test -project Klar/Klar.xcodeproj -scheme Klar -destination 'platform=iOS Simulator,name=iPhone 17 Pro' 2>&1 | tail -20
+xcodebuild test -project Klar/Klar.xcodeproj -scheme Klar -destination 'platform=iOS Simulator,id=D9360641-F9CD-4536-870B-3D66A89F6FEE' 2>&1 | tail -20
 ```
 
 Expected: `** TEST SUCCEEDED **` for KlarTests and KlarUITests.
@@ -2323,7 +2331,7 @@ before the first real frame."
 
 ## Done criteria
 
-- [ ] `xcodebuild test -project Klar/Klar.xcodeproj -scheme Klar -destination 'platform=iOS Simulator,name=iPhone 17 Pro'` reports `** TEST SUCCEEDED **`
+- [ ] `xcodebuild test -project Klar/Klar.xcodeproj -scheme Klar -destination 'platform=iOS Simulator,id=D9360641-F9CD-4536-870B-3D66A89F6FEE'` reports `** TEST SUCCEEDED **`
 - [ ] Face ID prompts on a fresh launch and on every return from the background, including from an already-locked screen
 - [ ] `grep -rn "Panic\|isPanicGestureEnabled" --include="*.swift" Klar` is empty
 - [ ] Export produces JSON only; that JSON imports back into a populated app; a corrupt file leaves the data intact

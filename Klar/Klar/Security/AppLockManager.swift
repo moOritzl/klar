@@ -86,7 +86,7 @@ final class AppLockManager {
         }
     }
 
-    static func systemAuthenticate() async -> AuthenticationOutcome {
+    private static func systemAuthenticate() async -> AuthenticationOutcome {
         let context = LAContext()
         var error: NSError?
         guard context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &error) else {
