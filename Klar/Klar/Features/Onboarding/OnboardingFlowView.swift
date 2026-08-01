@@ -43,7 +43,7 @@ struct OnboardingFlowView: View {
 
 // MARK: - Draft
 
-/// Everything the flow gathers, held in memory until "Fertig — App öffnen".
+/// Everything the flow gathers, held in memory until "App öffnen".
 @Observable
 final class OnboardingDraft {
     var enableAppLock = false
@@ -406,7 +406,7 @@ struct SubstitutionStepView: View {
             title: "Was hilft dir im Moment?",
             subtitle: "2–3 persönliche Alternativen. Im Craving ist keine Zeit, sie zu suchen.",
             step: 3,
-            primaryTitle: "Fertig — App öffnen",
+            primaryTitle: "App öffnen",
             onPrimary: onFinish
         ) {
             VStack(spacing: 10) {
