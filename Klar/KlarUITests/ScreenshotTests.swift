@@ -47,7 +47,7 @@ final class ScreenshotTests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Was hilft dir im Moment?"].waitForExistence(timeout: 5))
         app.buttons["Eine Runde rausgehen"].tap()
         capture(app, "A4-Ersatzhandlungen")
-        app.buttons["Fertig — App öffnen"].tap()
+        app.buttons["App öffnen"].tap()
 
         // B2 · Heute (leerer Tag)
         XCTAssertTrue(app.staticTexts["Heute"].waitForExistence(timeout: 5))
