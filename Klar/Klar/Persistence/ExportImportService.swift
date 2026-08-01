@@ -46,6 +46,12 @@ enum ExportImportService {
         try context.save()
     }
 
+    /// Writes a decoded export into a store. Callers are responsible for the store being empty
+    /// first — `importJSON` checks, `replaceAll` wipes.
+    static func restore(_ export: KlarExport, context: ModelContext) throws {
+        try insert(export, into: context)
+    }
+
     // MARK: - Private
 
     private static func isStoreEmpty(context: ModelContext) throws -> Bool {
@@ -69,7 +75,7 @@ enum ExportImportService {
         )
     }
 
-    static func restore(_ export: KlarExport, context: ModelContext) throws {
+    private static func insert(_ export: KlarExport, into context: ModelContext) throws {
         var substanceByID: [UUID: Substance] = [:]
         for dto in export.substances {
             let substance = Substance(id: dto.id, name: dto.name, unit: dto.unit, colorIndex: dto.colorIndex, costPerUnit: dto.costPerUnit, sortOrder: dto.sortOrder, isArchived: dto.isArchived)
