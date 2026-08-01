@@ -3,66 +3,55 @@ import SwiftData
 
 /// H1 · Tab „Hilfe".
 ///
-/// Must be operable one-handed in a bad moment: SOS at the very top, reference material at the
-/// very bottom. A permanently visible tab normalizes asking for help — it's a basic function of
-/// the app, not an emergency exit.
+/// Must be operable one-handed in a bad moment, which is why the whole block sits in the lower
+/// half of the screen: SOS first, reference material last. A permanently visible tab normalizes
+/// asking for help — it's a basic function of the app, not an emergency exit.
 struct HelpView: View {
     @State private var isSOSPresented = false
 
     var body: some View {
         NavigationStack {
-            ZStack {
-                Klar.bgSubtle.ignoresSafeArea()
+            KlarScreen {
+                KlarScreenBanner(title: "Hilfe")
+            } content: {
+                VStack(alignment: .leading, spacing: 0) {
+                    sosButton
+                        .padding(.bottom, 16)
 
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 0) {
-                        Text("Hilfe")
-                            .font(Klar.TypeScale.title)
-                            .foregroundStyle(Klar.text)
-                            .padding(.bottom, 14)
-
-                        sosButton
-                            .padding(.bottom, 16)
-
-                        VStack(spacing: 10) {
-                            NavigationLink {
-                                EmergencyView()
-                            } label: {
-                                emergencyRow
-                            }
-                            .buttonStyle(.plain)
-                            .accessibilityIdentifier("help.emergency")
-
-                            NavigationLink {
-                                CounselingView()
-                            } label: {
-                                helpRow(
-                                    icon: "person.2",
-                                    title: "Beratung",
-                                    subtitle: "Suchtberatung · Hotlines · anonym"
-                                )
-                            }
-                            .buttonStyle(.plain)
-                            .accessibilityIdentifier("help.counseling")
-
-                            NavigationLink {
-                                RiskInfoListView()
-                            } label: {
-                                helpRow(
-                                    icon: "book",
-                                    title: "Risiko-Infos",
-                                    subtitle: "Nachschlagewerk, kein Startpunkt"
-                                )
-                            }
-                            .buttonStyle(.plain)
-                            .accessibilityIdentifier("help.riskInfo")
+                    VStack(spacing: 10) {
+                        NavigationLink {
+                            EmergencyView()
+                        } label: {
+                            emergencyRow
                         }
+                        .buttonStyle(.plain)
+                        .accessibilityIdentifier("help.emergency")
+
+                        NavigationLink {
+                            CounselingView()
+                        } label: {
+                            helpRow(
+                                icon: "person.2",
+                                title: "Beratung",
+                                subtitle: "Suchtberatung · Hotlines · anonym"
+                            )
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityIdentifier("help.counseling")
+
+                        NavigationLink {
+                            RiskInfoListView()
+                        } label: {
+                            helpRow(
+                                icon: "book",
+                                title: "Risiko-Infos",
+                                subtitle: "Nachschlagewerk, kein Startpunkt"
+                            )
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityIdentifier("help.riskInfo")
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.top, 8)
-                    .padding(.bottom, 24)
                 }
-                .scrollIndicators(.hidden)
             }
             .fullScreenCover(isPresented: $isSOSPresented) {
                 CravingSOSView()
