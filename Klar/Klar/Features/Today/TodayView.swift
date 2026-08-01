@@ -38,8 +38,8 @@ struct TodayView: View {
                     header
                         .padding(.bottom, 16)
 
-                    // B3 · Only on the 1st. The quota resets, and the app says so out loud —
-                    // "Jeder Monat beginnt bei null." Absolution, built into the calendar.
+                    // B3 · Only on the 1st. The quota resets, and the card says so — the number
+                    // and nothing else.
                     if KlarDate.isFirstOfMonth(today), !quotaSubstances.isEmpty {
                         NewMonthCard(
                             quotas: quotaSubstances.map { (name: $0.substance.name, limit: $0.quota.limit ?? 0) }
@@ -307,11 +307,6 @@ struct NewMonthCard: View {
             Text(quotaLine)
                 .font(Klar.TypeScale.display(24))
                 .foregroundStyle(.white)
-                .padding(.bottom, 6)
-
-            Text("Jeder Monat beginnt bei null. Kein Rückblick auf den letzten, kein Vorwurf.")
-                .font(Klar.TypeScale.bodySmall)
-                .foregroundStyle(Klar.textOnInverseSecondary)
         }
     }
 
