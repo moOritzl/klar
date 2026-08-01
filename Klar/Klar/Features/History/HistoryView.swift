@@ -138,6 +138,21 @@ struct CalendarStatsView: View {
 
 // MARK: - E1 · Monatskalender
 
+/// Month stepping, pulled out of the view so the chevrons and the swipe cannot drift apart and
+/// so the "no future months" rule is testable.
+enum CalendarMonthNavigation {
+    static func month(after delta: Int, from visibleMonth: Date, today: Date = Date()) -> Date? {
+        let calendar = KlarDate.calendar
+        guard let shifted = calendar.date(byAdding: .month, value: delta, to: visibleMonth) else {
+            return nil
+        }
+        guard shifted <= today || calendar.isDate(shifted, equalTo: today, toGranularity: .month) else {
+            return nil
+        }
+        return shifted
+    }
+}
+
 struct CalendarSectionView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var entries: [Entry]
@@ -177,6 +192,16 @@ struct CalendarSectionView: View {
 
                 dayGrid
             }
+            // Horizontal-only, and higher priority than the section swipe this card sits inside:
+            // a drag that starts on the calendar means "another month", not "another section".
+            // A mostly-vertical drag belongs to the scroll view, and the day cells keep their taps.
+            .highPriorityGesture(
+                DragGesture(minimumDistance: 24)
+                    .onEnded { value in
+                        guard abs(value.translation.width) > abs(value.translation.height) else { return }
+                        shiftMonth(value.translation.width < 0 ? 1 : -1)
+                    }
+            )
 
             legend
                 .padding(.top, 14)
@@ -328,8 +353,10 @@ struct CalendarSectionView: View {
     }
 
     private func shiftMonth(_ delta: Int) {
-        guard let shifted = calendar.date(byAdding: .month, value: delta, to: visibleMonth) else { return }
-        visibleMonth = shifted
+        guard let shifted = CalendarMonthNavigation.month(after: delta, from: visibleMonth) else { return }
+        withAnimation(.easeInOut(duration: 0.2)) {
+            visibleMonth = shifted
+        }
     }
 
     private func dayDate(_ day: Int) -> Date? {
