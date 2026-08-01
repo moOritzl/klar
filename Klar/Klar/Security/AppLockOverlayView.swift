@@ -4,8 +4,7 @@ import SwiftUI
 /// app is for.
 struct AppLockOverlayView: View {
     @Bindable var lockManager: AppLockManager
-
-    private var didFail: Bool { lockManager.didFail }
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         ZStack {
@@ -28,7 +27,7 @@ struct AppLockOverlayView: View {
                 }
                 .accessibilityLabel("Mit Face ID entsperren")
 
-                Text(didFail ? "Erneut versuchen" : "Mit Face ID entsperren")
+                Text(lockManager.didFail ? "Erneut versuchen" : "Mit Face ID entsperren")
                     .font(Klar.TypeScale.bodySmall)
                     .foregroundStyle(Klar.textTertiary)
             }
@@ -36,6 +35,13 @@ struct AppLockOverlayView: View {
         }
         .task {
             await lockManager.attemptUnlock()
+        }
+        // `.task` fires once per view identity. When the app backgrounds while already locked,
+        // the overlay never leaves the hierarchy, so without this the user comes back to a dead
+        // wordmark screen and no prompt.
+        .onChange(of: scenePhase) { _, newPhase in
+            guard newPhase == .active, lockManager.isLocked else { return }
+            Task { await lockManager.attemptUnlock() }
         }
     }
 }
