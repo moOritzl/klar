@@ -44,9 +44,9 @@ Nothing is written to the store until the final step. Abandoning halfway leaves 
 
 | Screen | State | Wiring |
 |---|---|---|
-| **B1** Heute (gefüllt) | ✅ | Quota card leads with `KlarStore.primaryQuotaSubstance()` (the reduction goal with the tightest remaining allowance). The bar **drains** rather than fills — filled segments are what *remains*. |
+| **B1** Heute (gefüllt) | ✅ | `KlarStore.quotaSubstances()` lists **every** active reduction limit, tightest remaining first. One substance → the large quota card (with the substance named); several → one combined `MultiQuotaCard` with a row + bar per substance. The bar **drains** rather than fills — filled segments are what *remains*. |
 | **B2** Heute (leerer Tag) | ✅ | "Ein ruhiger Tag." No "Noch nichts geloggt!" — an entry-free day is the calm baseline, not a gap. Asserted in `testOnboardingThenLogFirstEntry`. |
-| **B3** Monatserster | ✅ | The dark "Neuer Monat · Kontingent: N" card renders when `KlarDate.isFirstOfMonth()`. |
+| **B3** Monatserster | ✅ | The dark "Neuer Monat" card renders when `KlarDate.isFirstOfMonth()` — "Kontingent: N." for one limit, "Kontingente: Alkohol 4 · Nikotin 10." for several. |
 
 Over the limit, the headline flips from "Noch 2 von 4" to "5 von 4 diesen Monat" — factual, no red,
 no appeal.

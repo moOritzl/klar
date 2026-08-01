@@ -223,6 +223,9 @@
     "Diese Woche" : {
 
     },
+    "Diesen Monat" : {
+
+    },
     "Dieses Gefühl geht vorbei. Du hast einen Plan." : {
 
     },
@@ -450,9 +453,6 @@
 
     },
     "Kontingent" : {
-
-    },
-    "Kontingent: %lld." : {
 
     },
     "Kosten je %@" : {
