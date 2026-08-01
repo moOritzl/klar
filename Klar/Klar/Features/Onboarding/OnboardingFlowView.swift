@@ -194,11 +194,14 @@ struct PrivacyStepView: View {
         isAuthenticating = true
         defer { isAuthenticating = false }
 
-        let manager = AppLockManager()
-        await manager.attemptUnlock()
-        if !manager.isLocked {
+        // `.unavailable` counts as proof enough: the device has no gate to fail, and refusing to
+        // advance would strand the user on a step they cannot satisfy.
+        switch await AppLockManager().attemptUnlock() {
+        case .success, .unavailable:
             draft.enableAppLock = true
             onContinue()
+        case .failure, .cancelled:
+            break
         }
     }
 }

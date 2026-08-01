@@ -25,6 +25,9 @@ struct AppLockOverlayView: View {
                             Circle().strokeBorder(Klar.borderStrong, lineWidth: 2)
                         }
                 }
+                // A tap during an in-flight evaluation is coalesced, not acted on, so the button
+                // must not look live. Matches how A1 disables its own button while authenticating.
+                .disabled(lockManager.isAuthenticating)
                 .accessibilityLabel("Mit Face ID entsperren")
 
                 Text(lockManager.didFail ? "Erneut versuchen" : "Mit Face ID entsperren")
@@ -33,15 +36,18 @@ struct AppLockOverlayView: View {
             }
             .padding(.bottom, 70)
         }
-        .task {
+        // Keyed on the scene phase, so this is both the initial trigger and the re-trigger on
+        // every foregrounding — the overlay stays in the hierarchy while backgrounded, so a plain
+        // `.task` would fire once and leave the user on a dead wordmark screen on the way back.
+        //
+        // The `.active` guard is what keeps us out of the default "Sofort" trap: backgrounding
+        // locks immediately, mounting this view while the app is *not* active, and an evaluation
+        // started there is either doomed to be cancelled or comes back `.notInteractive` — the
+        // user's first sight of the lock screen would read "Erneut versuchen" for an attempt they
+        // never made.
+        .task(id: scenePhase) {
+            guard scenePhase == .active, lockManager.isLocked else { return }
             await lockManager.attemptUnlock()
-        }
-        // `.task` fires once per view identity. When the app backgrounds while already locked,
-        // the overlay never leaves the hierarchy, so without this the user comes back to a dead
-        // wordmark screen and no prompt.
-        .onChange(of: scenePhase) { _, newPhase in
-            guard newPhase == .active, lockManager.isLocked else { return }
-            Task { await lockManager.attemptUnlock() }
         }
     }
 }
