@@ -98,7 +98,7 @@ struct SettingsView: View {
 
                             SettingsNavigationRow(
                                 icon: "square.and.arrow.down",
-                                title: "Daten exportieren / löschen"
+                                title: "Daten"
                             ) { isShowingDataScreen = true }
                         }
                         .padding(.bottom, 16)
