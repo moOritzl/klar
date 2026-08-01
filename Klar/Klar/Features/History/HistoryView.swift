@@ -17,42 +17,88 @@ struct HistoryView: View {
     }
 
     @State private var section: Section = .calendar
+    @State private var visibleMonth = Date()
 
     var body: some View {
-        ZStack {
-            Klar.bgSubtle.ignoresSafeArea()
-
-            VStack(alignment: .leading, spacing: 0) {
-                Text(title)
-                    .font(Klar.TypeScale.title)
-                    .foregroundStyle(Klar.text)
-                    .padding(.bottom, 14)
-
-                KlarSegmentedControl(
-                    options: [
-                        (Section.calendar, "Kalender"),
-                        (Section.trends, "Trends"),
-                        (Section.review, "Rückblick")
-                    ],
-                    selection: $section
-                )
-                .padding(.bottom, 16)
-
-                switch section {
-                case .calendar: CalendarSectionView()
-                case .trends: TrendsSectionView()
-                case .review: ReviewArchiveSectionView()
+        KlarScreen {
+            KlarScreenBanner(title: title) {
+                if section == .calendar {
+                    CalendarStatsView(visibleMonth: visibleMonth)
                 }
             }
+        } content: {
+            switch section {
+            case .calendar: CalendarSectionView(visibleMonth: $visibleMonth)
+            case .trends: TrendsSectionView()
+            case .review: ReviewArchiveSectionView()
+            }
+        }
+        // The segmented control is interactive, so by the screen's own rule it belongs at the
+        // bottom. It sits in its own inset rather than in the scrolling content so it does not
+        // scroll away, and inset from the edges so it does not read as a second tab bar.
+        .safeAreaInset(edge: .bottom) {
+            KlarSegmentedControl(
+                options: [
+                    (Section.calendar, "Kalender"),
+                    (Section.trends, "Trends"),
+                    (Section.review, "Rückblick")
+                ],
+                selection: $section
+            )
             .padding(.horizontal, 16)
-            .padding(.top, 8)
+            .padding(.bottom, 8)
         }
     }
 
-    private var title: String {
+    private var title: LocalizedStringKey {
         switch section {
         case .calendar, .trends: "Verlauf"
         case .review: "Wochenrückblicke"
+        }
+    }
+}
+
+/// The month's two numbers. Pure output — the only thing on this screen nobody taps, which is
+/// why it is the one thing that stays at the top.
+struct CalendarStatsView: View {
+    let visibleMonth: Date
+
+    @Environment(\.modelContext) private var modelContext
+    @Query private var entries: [Entry]
+
+    private var store: KlarStore { KlarStore(context: modelContext) }
+    private var calendar: Calendar { KlarDate.calendar }
+
+    private var daysInMonth: Int {
+        calendar.range(of: .day, in: .month, for: visibleMonth)?.count ?? 30
+    }
+
+    private var entryCount: Int {
+        entries.filter {
+            let day = KlarDate.logicalDay(for: $0.timestamp, timezoneID: $0.timezoneID)
+            return calendar.isDate(day, equalTo: visibleMonth, toGranularity: .month)
+        }.count
+    }
+
+    private var entryFreeDays: Int {
+        daysInMonth - store.loggedDays(inMonthOf: visibleMonth).count
+    }
+
+    var body: some View {
+        HStack(spacing: 12) {
+            tile(label: "Einträge", value: "\(entryCount)", color: Klar.text)
+            tile(label: "Eintragsfrei", value: "\(entryFreeDays)", color: Klar.Palette.emerald700)
+        }
+    }
+
+    private func tile(label: LocalizedStringKey, value: String, color: Color) -> some View {
+        KlarCard(padding: 14) {
+            Text(label)
+                .font(Klar.TypeScale.caption)
+                .foregroundStyle(Klar.textTertiary)
+            Text(value)
+                .font(Klar.TypeScale.numeral)
+                .foregroundStyle(color)
         }
     }
 }
@@ -63,7 +109,7 @@ struct CalendarSectionView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var entries: [Entry]
 
-    @State private var visibleMonth = Date()
+    @Binding var visibleMonth: Date
     @State private var selectedDay: Date?
 
     private var store: KlarStore { KlarStore(context: modelContext) }
@@ -84,44 +130,21 @@ struct CalendarSectionView: View {
         return (weekday + 5) % 7
     }
 
-    private var entryCount: Int {
-        entries.filter {
-            let day = KlarDate.logicalDay(for: $0.timestamp, timezoneID: $0.timezoneID)
-            return calendar.isDate(day, equalTo: visibleMonth, toGranularity: .month)
-        }.count
-    }
-
-    private var entryFreeDays: Int { daysInMonth - loggedDays.count }
-
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 0) {
-                KlarCard(padding: 16) {
-                    monthHeader
-                        .padding(.bottom, 12)
+        VStack(alignment: .leading, spacing: 0) {
+            KlarCard(padding: 16) {
+                monthHeader
+                    .padding(.bottom, 12)
 
-                    weekdayHeader
-                        .padding(.bottom, 6)
+                weekdayHeader
+                    .padding(.bottom, 6)
 
-                    dayGrid
-                }
-
-                legend
-                    .padding(.top, 14)
-
-                HStack(spacing: 12) {
-                    statTile(label: "Einträge", value: "\(entryCount)", color: Klar.text)
-                    statTile(
-                        label: "Eintragsfrei",
-                        value: "\(entryFreeDays)",
-                        color: Klar.Palette.emerald700
-                    )
-                }
-                .padding(.top, 18)
+                dayGrid
             }
-            .padding(.bottom, 24)
+
+            legend
+                .padding(.top, 14)
         }
-        .scrollIndicators(.hidden)
         .sheet(item: Binding(
             get: { selectedDay.map { IdentifiableDate(date: $0) } },
             set: { selectedDay = $0?.date }
@@ -260,17 +283,6 @@ struct CalendarSectionView: View {
         }
         .font(Klar.TypeScale.bodySmall)
         .foregroundStyle(Klar.textTertiary)
-    }
-
-    private func statTile(label: LocalizedStringKey, value: String, color: Color) -> some View {
-        KlarCard(padding: 14) {
-            Text(label)
-                .font(Klar.TypeScale.caption)
-                .foregroundStyle(Klar.textTertiary)
-            Text(value)
-                .font(Klar.TypeScale.numeral)
-                .foregroundStyle(color)
-        }
     }
 
     // MARK: - Month math
