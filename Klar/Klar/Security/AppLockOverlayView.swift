@@ -4,7 +4,8 @@ import SwiftUI
 /// app is for.
 struct AppLockOverlayView: View {
     @Bindable var lockManager: AppLockManager
-    @State private var didFail = false
+
+    private var didFail: Bool { lockManager.didFail }
 
     var body: some View {
         ZStack {
@@ -15,7 +16,7 @@ struct AppLockOverlayView: View {
             VStack(spacing: 12) {
                 Spacer()
                 Button {
-                    Task { await unlock() }
+                    Task { await lockManager.attemptUnlock() }
                 } label: {
                     Image(systemName: "faceid")
                         .font(.system(size: 26, weight: .light))
@@ -34,12 +35,7 @@ struct AppLockOverlayView: View {
             .padding(.bottom, 70)
         }
         .task {
-            await unlock()
+            await lockManager.attemptUnlock()
         }
-    }
-
-    private func unlock() async {
-        let success = await lockManager.attemptUnlock()
-        didFail = !success
     }
 }

@@ -195,8 +195,8 @@ struct PrivacyStepView: View {
         defer { isAuthenticating = false }
 
         let manager = AppLockManager()
-        let success = await manager.attemptUnlock()
-        if success {
+        await manager.attemptUnlock()
+        if !manager.isLocked {
             draft.enableAppLock = true
             onContinue()
         }
