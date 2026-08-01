@@ -224,7 +224,7 @@ struct SubstanceSelectionStepView: View {
     var body: some View {
         OnboardingScaffold(
             title: "Was möchtest du erfassen?",
-            subtitle: "Alphabetisch, ohne Wertung. Mehrfachauswahl. Jederzeit änderbar — die Auswahl ist kein Bekenntnis.",
+            subtitle: "Alphabetisch, ohne Wertung. Mehrfachauswahl. Jederzeit änderbar.",
             step: 1,
             primaryTitle: "Weiter",
             isPrimaryEnabled: !draft.chosenSubstances.isEmpty,
@@ -324,7 +324,7 @@ struct GoalStepView: View {
     var body: some View {
         OnboardingScaffold(
             title: "Was ist dein Ziel?",
-            subtitle: "Kein Ziel am Tag 1 nötig. „Nur beobachten“ ist Stufe 1 — anfangen darfst du trotzdem.",
+            subtitle: "Kein Ziel am Tag 1 nötig. „Nur beobachten“ ist Stufe 1.",
             step: 2,
             primaryTitle: "Weiter",
             onPrimary: onContinue
@@ -373,13 +373,13 @@ struct GoalStepView: View {
                 .padding(.top, 14)
 
             case .abstinence:
-                Text("Abstinenz — jeder Eintrag wird trotzdem ohne Wertung erfasst.")
+                Text("Abstinenz. Jeder Eintrag wird trotzdem ohne Wertung erfasst.")
                     .font(Klar.TypeScale.bodySmall)
                     .foregroundStyle(Klar.textTertiary)
                     .padding(.top, 12)
 
             case .observe:
-                Text("Erstmal nur beobachten — kein Limit, kein Druck.")
+                Text("Erstmal nur beobachten. Kein Limit.")
                     .font(Klar.TypeScale.bodySmall)
                     .foregroundStyle(Klar.textTertiary)
                     .padding(.top, 12)
@@ -404,7 +404,7 @@ struct SubstitutionStepView: View {
     var body: some View {
         OnboardingScaffold(
             title: "Was hilft dir im Moment?",
-            subtitle: "2–3 persönliche Alternativen. Im Craving ist keine Zeit, sie zu suchen — darum jetzt, in Ruhe.",
+            subtitle: "2–3 persönliche Alternativen. Im Craving ist keine Zeit, sie zu suchen.",
             step: 3,
             primaryTitle: "Fertig — App öffnen",
             onPrimary: onFinish

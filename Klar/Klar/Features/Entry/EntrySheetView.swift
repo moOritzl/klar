@@ -142,8 +142,8 @@ struct EntrySheetView: View {
 
     // MARK: - C3 · Über dem Limit
 
-    /// Factual, never punitive. No red, no warning icon, no appeal to do better — the entry is
-    /// simply stated, and the offer to look at the plan is explicitly optional.
+    /// Factual, never punitive. No red, no warning icon, no appeal to do better. The entry is
+    /// simply stated.
     private func overLimitNotice(entry: Entry, occasions: Int, limit: Int) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             SavedHeader(entry: entry)
@@ -166,13 +166,6 @@ struct EntrySheetView: View {
                     .strokeBorder(Klar.border, lineWidth: 1)
             }
             .padding(.bottom, 18)
-
-            Text("Möchtest du deinen Plan dazu ansehen? — Freiwillig, nicht jetzt nötig.")
-                .font(Klar.TypeScale.bodySmall)
-                .foregroundStyle(Klar.textTertiary)
-                .multilineTextAlignment(.center)
-                .frame(maxWidth: .infinity)
-                .padding(.bottom, 20)
 
             Spacer()
 

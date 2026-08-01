@@ -87,7 +87,7 @@ struct SettingsView: View {
                             SettingsToggleRow(
                                 icon: "bell",
                                 title: "Benachrichtigungen",
-                                subtitle: "Generische Texte — nie Substanznamen",
+                                subtitle: "Generische Texte, nie Substanznamen",
                                 isOn: Binding(
                                     get: { settings.areNotificationsEnabled },
                                     set: { enableNotifications($0) }
@@ -321,7 +321,7 @@ struct WhyNoteSheet: View {
                     TextField("z. B. Ich will die Wochenenden wieder klar erleben.", text: $text, axis: .vertical)
                         .lineLimit(3...6)
                 } footer: {
-                    Text("Erscheint im Craving-SOS — in dem Moment, in dem du es am wenigsten formulieren kannst.")
+                    Text("Erscheint im Craving-SOS.")
                 }
             }
             .navigationTitle("Dein „Warum“")

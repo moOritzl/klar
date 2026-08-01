@@ -76,7 +76,7 @@ struct TodayView: View {
                                     .font(Klar.TypeScale.headline)
                                     .foregroundStyle(Klar.text)
                                     .padding(.bottom, 4)
-                                Text("Ein Plan entsteht aus deinen Mustern — nicht am Tag 1.")
+                                Text("Ein Plan entsteht aus deinen Mustern.")
                                     .font(Klar.TypeScale.bodySmall)
                                     .foregroundStyle(Klar.textTertiary)
                             }

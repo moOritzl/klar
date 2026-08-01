@@ -80,7 +80,7 @@ struct DataManagementView: View {
                         .buttonStyle(.plain)
                         .padding(.bottom, 20)
 
-                        Text("Der Export enthält deine Einträge, Ziele, Pläne und Notizen. Er enthält keine Gerätedaten — Face-ID-Einstellung und Vertrauensperson bleiben auf diesem Gerät.")
+                        Text("Der Export enthält deine Einträge, Ziele, Pläne und Notizen. Er enthält keine Gerätedaten: Face-ID-Einstellung und Vertrauensperson bleiben auf diesem Gerät.")
                             .font(Klar.TypeScale.bodySmall)
                             .foregroundStyle(Klar.textTertiary)
                     }

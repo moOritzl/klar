@@ -175,7 +175,7 @@ struct CravingSOSView: View {
                     .italic()
                     .foregroundStyle(Klar.text)
             } else {
-                Text("Noch kein „Warum“ hinterlegt. Du kannst es in den Einstellungen ergänzen — es steht dann genau hier.")
+                Text("Noch kein „Warum“ hinterlegt. Du kannst es in den Einstellungen ergänzen. Es steht dann genau hier.")
                     .font(Klar.TypeScale.bodySmall)
                     .foregroundStyle(Klar.textTertiary)
             }

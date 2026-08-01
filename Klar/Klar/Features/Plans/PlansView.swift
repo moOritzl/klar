@@ -54,8 +54,8 @@ struct PlansView: View {
 
     private var subtitle: LocalizedStringKey {
         activePlans.isEmpty
-            ? "Noch kein Plan — das ist in Ordnung."
-            : "Max. 3 aktive Pläne — Fokus statt Liste."
+            ? "Noch kein Plan."
+            : "Max. 3 aktive Pläne."
     }
 
     // MARK: - G1 · Pläne (aktiv)
@@ -164,7 +164,7 @@ struct PlansView: View {
         }
 
         VStack {
-            Text("Ein guter Plan braucht Kenntnis der eigenen Muster. Deshalb kommt er nicht am Tag 1 — sondern wenn deine Einträge etwas zeigen.")
+            Text("Ein guter Plan braucht Kenntnis der eigenen Muster. Er entsteht, wenn deine Einträge etwas zeigen.")
                 .font(Klar.TypeScale.bodySmall)
                 .foregroundStyle(Klar.textTertiary)
                 .multilineTextAlignment(.center)
