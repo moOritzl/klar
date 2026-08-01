@@ -930,7 +930,16 @@ store, so it decodes and validates the file before wiping anything."
 
 ---
 
-# Phase 4 · Banner on top, controls in thumb reach
+# Phase 4 · A banner zone on every tab
+
+> **Superseded in part, 2026-08-01.** This phase originally pushed each screen's interactive block
+> down into thumb reach. That was built (Tasks 8–10), shown to the user, and rejected on sight:
+> "sieht leider echt trash aus mit dem kalender unten", and the same for Hilfe. Commit `fe2431b`
+> made `KlarScreen` top-aligned and put the segmented control back under the title, replacing the
+> reachability argument with a swipe gesture between sections. What survives from the original
+> design is the generous banner zone and the stat tiles at the top of Verlauf, both of which the
+> user liked. Read the tasks below with that in mind: the code is still right, the rationale about
+> thumb reach is not.
 
 ### Task 8: Build the `KlarScreen` container
 
@@ -1381,9 +1390,14 @@ stays exactly as it is.
 xcodebuild build -project Klar/Klar.xcodeproj -scheme Klar -destination 'platform=iOS Simulator,id=D9360641-F9CD-4536-870B-3D66A89F6FEE' 2>&1 | tail -3
 ```
 
-Screenshot the Pläne tab with zero plans and with one plan. Expected in both: title, subtitle and
-(when a goal exists) the Ziel card at the top; plan cards, "Neuer Plan" and the two navigation
-rows sitting low. Confirm the Ziel card appears exactly once.
+Screenshot the Pläne tab with zero plans and with one plan. Expected in both: the serif banner
+title, then subtitle, then (when a goal exists) the Ziel card, then plan cards, "Neuer Plan" and
+the two navigation rows — all top-aligned, flowing straight down from the banner with no gap.
+Confirm the Ziel card appears exactly once.
+
+**Do not push anything toward the tab bar.** The bottom-weighted variant of this layout was built,
+shown to the user on 2026-08-01 and rejected: "sieht leider echt trash aus". `KlarScreen` is
+top-aligned now; this task only adopts the banner zone.
 
 - [ ] **Step 4: Run the screenshot UI test**
 
