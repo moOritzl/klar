@@ -59,7 +59,9 @@ struct EntrySheetView: View {
     /// "spacing" complaint.
     private var detents: Set<PresentationDetent> {
         guard stage.isPicker else { return [.large] }
-        return hasSubstances ? [.medium, .large] : [.height(300)]
+        // 300 still left ~140pt of nothing under the button, which is the same complaint in a
+        // smaller box. The empty state measures ~170pt including padding.
+        return hasSubstances ? [.medium, .large] : [.height(230)]
     }
 
     // MARK: - C1 · Substanz wählen
