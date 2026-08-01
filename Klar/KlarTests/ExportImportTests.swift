@@ -157,4 +157,36 @@ final class ExportImportTests: XCTestCase {
         XCTAssertEqual(names, ["Kaffee"])
         XCTAssertEqual(try destinationContext.fetchCount(FetchDescriptor<Entry>()), 1)
     }
+
+    /// The only place in the app that can destroy data it cannot get back. A file that decodes
+    /// but blows up half way through the restore must leave the user where they started.
+    func testAFailedRestoreRollsTheOldStoreBack() throws {
+        struct RestoreFailure: Error {}
+
+        let sourceContext = TestModelContainer.makeInMemoryContext()
+        sourceContext.insert(Substance(name: "Kaffee", unit: .drink, colorIndex: 2, sortOrder: 0))
+        try sourceContext.save()
+        let payload = try ExportImportService.exportJSON(context: sourceContext)
+
+        let destinationContext = TestModelContainer.makeInMemoryContext()
+        let original = Substance(name: "Bier", unit: .drink, colorIndex: 1, sortOrder: 0)
+        destinationContext.insert(original)
+        destinationContext.insert(Entry(
+            substance: original,
+            timestamp: Date(timeIntervalSince1970: 1_770_000_000),
+            timezoneID: "Europe/Berlin",
+            amount: nil
+        ))
+        try destinationContext.save()
+
+        XCTAssertThrowsError(
+            try ExportImportService.replaceAll(with: payload, context: destinationContext) { _, _ in
+                throw RestoreFailure()
+            }
+        )
+
+        let names = try destinationContext.fetch(FetchDescriptor<Substance>()).map(\.name)
+        XCTAssertEqual(names, ["Bier"], "A failed restore must put the old store back")
+        XCTAssertEqual(try destinationContext.fetchCount(FetchDescriptor<Entry>()), 1)
+    }
 }

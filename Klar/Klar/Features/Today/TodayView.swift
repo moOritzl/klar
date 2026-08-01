@@ -115,6 +115,10 @@ struct TodayView: View {
                 .padding(.top, Klar.Space.x4)
                 .padding(.bottom, 100) // clear the FAB
             }
+            // Heute keeps its own layout rather than KlarScreen — it has a FAB and content that
+            // grows with every entry — so it has to opt into the bounce fix by hand. Without
+            // this an empty day rubber-bands with nothing to scroll.
+            .scrollBounceBehavior(.basedOnSize)
             .scrollIndicators(.hidden)
 
             addButton

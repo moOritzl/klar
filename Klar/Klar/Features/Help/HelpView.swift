@@ -3,9 +3,9 @@ import SwiftData
 
 /// H1 · Tab „Hilfe".
 ///
-/// Must be operable one-handed in a bad moment, which is why the whole block sits in the lower
-/// half of the screen: SOS first, reference material last. A permanently visible tab normalizes
-/// asking for help — it's a basic function of the app, not an emergency exit.
+/// Must be operable one-handed in a bad moment: SOS at the very top, reference material at the
+/// very bottom. A permanently visible tab normalizes asking for help — it's a basic function of
+/// the app, not an emergency exit.
 struct HelpView: View {
     @State private var isSOSPresented = false
 

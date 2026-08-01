@@ -155,6 +155,9 @@ enum CalendarMonthNavigation {
 
 struct CalendarSectionView: View {
     @Environment(\.modelContext) private var modelContext
+    /// Unread on purpose. The counts moved to `CalendarStatsView`, but this is what still
+    /// invalidates the grid when an entry is added, so the day dots stay current. Deleting it
+    /// silently stops the calendar updating.
     @Query private var entries: [Entry]
 
     @State private var visibleMonth = Date()

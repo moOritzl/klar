@@ -25,12 +25,32 @@ enum ExportImportService {
         try restore(decode(data), context: context)
     }
 
-    /// What the import screen calls. Decode first, wipe second, restore third — in that order
-    /// a rejected file costs the user nothing.
-    static func replaceAll(with data: Data, context: ModelContext) throws {
+    /// What the import screen calls. Decode first, so a corrupt file is rejected while the old
+    /// data is still there.
+    ///
+    /// Decoding is not enough on its own: `wipeAll` commits, so a file that decodes but fails
+    /// half way through `restore` — a constraint violation, a full disk, a hand-edited payload —
+    /// would leave the user with nothing and no undo. This is the only place in the app that can
+    /// destroy data it cannot get back, so it keeps a snapshot and puts it back if the restore
+    /// throws.
+    /// `restoreStep` exists so a test can make the restore fail; there is no other way to reach
+    /// the rollback, and an untested rollback is a promise rather than a safeguard.
+    static func replaceAll(
+        with data: Data,
+        context: ModelContext,
+        restoreStep: (KlarExport, ModelContext) throws -> Void = restore
+    ) throws {
         let export = try decode(data)
+        let snapshot = try exportJSON(context: context)
+
         try wipeAll(context: context)
-        try restore(export, context: context)
+        do {
+            try restoreStep(export, context)
+        } catch {
+            try? wipeAll(context: context)
+            try? restore(decode(snapshot), context: context)
+            throw error
+        }
     }
 
     static func wipeAll(context: ModelContext) throws {
