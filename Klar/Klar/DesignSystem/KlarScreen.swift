@@ -1,13 +1,15 @@
 import SwiftUI
 
-/// The layout rule for the four tabs: what you look at sits at the top, what you touch sits at
-/// the bottom.
+/// The common scaffold for the four tabs: background, padding, and a banner zone with enough
+/// room above and below the title that it reads as a deliberate top of the screen rather than a
+/// label stuck under the status bar.
 ///
-/// The banner is anchored under the status bar with real breathing room; the content block is
-/// pushed toward the tab bar by flexible space. When the content outgrows the viewport the
-/// flexible space collapses to `Klar.Space.x6` and the screen scrolls like any other. That is
-/// why the inner frame uses `minHeight` and not `containerRelativeFrame` — an exact height would
-/// clip a long month or a full plan list.
+/// An earlier version pushed the content block down into thumb reach with flexible space. It was
+/// built, shipped to the user, and rejected on sight — a half-empty screen with the controls
+/// hovering above the tab bar looked broken, whatever the ergonomics said. Content is top-aligned.
+///
+/// `scrollBounceBehavior(.basedOnSize)` is the other reason this exists: every tab used to
+/// rubber-band vertically even when nothing could scroll.
 struct KlarScreen<Banner: View, Content: View>: View {
     var horizontalPadding: CGFloat = 16
     @ViewBuilder var banner: Banner
@@ -17,26 +19,20 @@ struct KlarScreen<Banner: View, Content: View>: View {
         ZStack {
             Klar.bgSubtle.ignoresSafeArea()
 
-            GeometryReader { proxy in
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 0) {
-                        banner
+            ScrollView {
+                VStack(alignment: .leading, spacing: 0) {
+                    banner
+                        .padding(.bottom, Klar.Space.x5)
 
-                        Spacer(minLength: Klar.Space.x6)
-
-                        content
-                    }
-                    .frame(
-                        maxWidth: .infinity,
-                        minHeight: proxy.size.height - Klar.Space.x6 * 2,
-                        alignment: .leading
-                    )
-                    .padding(.horizontal, horizontalPadding)
-                    .padding(.vertical, Klar.Space.x6)
+                    content
                 }
-                .scrollBounceBehavior(.basedOnSize)
-                .scrollIndicators(.hidden)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, horizontalPadding)
+                .padding(.top, Klar.Space.x4)
+                .padding(.bottom, Klar.Space.x6)
             }
+            .scrollBounceBehavior(.basedOnSize)
+            .scrollIndicators(.hidden)
         }
     }
 }

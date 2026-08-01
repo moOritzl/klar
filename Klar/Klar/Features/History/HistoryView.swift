@@ -12,42 +12,75 @@ import KlarCore
 /// Rückblick) but ships a third screen, "Trends" (E3), with no entry point drawn. A third
 /// segment is the smallest change that makes every designed screen reachable.
 struct HistoryView: View {
-    enum Section: Hashable {
+    enum Section: Hashable, CaseIterable {
         case calendar, trends, review
     }
 
     @State private var section: Section = .calendar
-    @State private var visibleMonth = Date()
+    /// Which way the next section change slides. Set before the change so the animation follows
+    /// the swipe instead of always entering from the same side.
+    @State private var isAdvancing = true
 
     var body: some View {
         KlarScreen {
             KlarScreenBanner(title: title) {
-                if section == .calendar {
-                    CalendarStatsView(visibleMonth: visibleMonth)
-                }
+                KlarSegmentedControl(
+                    options: [
+                        (Section.calendar, "Kalender"),
+                        (Section.trends, "Trends"),
+                        (Section.review, "Rückblick")
+                    ],
+                    selection: Binding(get: { section }, set: { select($0) })
+                )
             }
         } content: {
-            switch section {
-            case .calendar: CalendarSectionView(visibleMonth: $visibleMonth)
-            case .trends: TrendsSectionView()
-            case .review: ReviewArchiveSectionView()
-            }
+            sectionContent
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .id(section)
+                .transition(.asymmetric(
+                    insertion: .move(edge: isAdvancing ? .trailing : .leading).combined(with: .opacity),
+                    removal: .move(edge: isAdvancing ? .leading : .trailing).combined(with: .opacity)
+                ))
         }
-        // The segmented control is interactive, so by the screen's own rule it belongs at the
-        // bottom. It sits in its own inset rather than in the scrolling content so it does not
-        // scroll away, and inset from the edges so it does not read as a second tab bar.
-        .safeAreaInset(edge: .bottom) {
-            KlarSegmentedControl(
-                options: [
-                    (Section.calendar, "Kalender"),
-                    (Section.trends, "Trends"),
-                    (Section.review, "Rückblick")
-                ],
-                selection: $section
-            )
-            .padding(.horizontal, 16)
-            .padding(.bottom, 8)
+        // Swiping anywhere the content does not claim — which on a short month is most of the
+        // screen — moves between the three sections. The segments stay because a bare gesture is
+        // undiscoverable and unreachable with VoiceOver; this is the shortcut, not the only way.
+        .contentShape(Rectangle())
+        .gesture(
+            DragGesture(minimumDistance: 30)
+                .onEnded { value in
+                    guard abs(value.translation.width) > abs(value.translation.height) else { return }
+                    shiftSection(value.translation.width < 0 ? 1 : -1)
+                }
+        )
+    }
+
+    @ViewBuilder
+    private var sectionContent: some View {
+        switch section {
+        case .calendar: CalendarSectionView()
+        case .trends: TrendsSectionView()
+        case .review: ReviewArchiveSectionView()
         }
+    }
+
+    private func select(_ next: Section) {
+        guard next != section,
+              let from = Section.allCases.firstIndex(of: section),
+              let to = Section.allCases.firstIndex(of: next)
+        else { return }
+        isAdvancing = to > from
+        withAnimation(.easeInOut(duration: 0.25)) { section = next }
+    }
+
+    /// Refuses to wrap around: swiping past the last section does nothing, so the ends of the
+    /// range stay felt rather than looping the user back to the start.
+    private func shiftSection(_ delta: Int) {
+        let all = Section.allCases
+        guard let index = all.firstIndex(of: section) else { return }
+        let target = index + delta
+        guard all.indices.contains(target) else { return }
+        select(all[target])
     }
 
     private var title: LocalizedStringKey {
@@ -58,8 +91,8 @@ struct HistoryView: View {
     }
 }
 
-/// The month's two numbers. Pure output — the only thing on this screen nobody taps, which is
-/// why it is the one thing that stays at the top.
+/// The month's two numbers. Pure output, and the first thing on the section — the user singled
+/// these out as the one part of the restructure that worked.
 struct CalendarStatsView: View {
     let visibleMonth: Date
 
@@ -109,7 +142,7 @@ struct CalendarSectionView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var entries: [Entry]
 
-    @Binding var visibleMonth: Date
+    @State private var visibleMonth = Date()
     @State private var selectedDay: Date?
 
     private var store: KlarStore { KlarStore(context: modelContext) }
@@ -132,6 +165,9 @@ struct CalendarSectionView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
+            CalendarStatsView(visibleMonth: visibleMonth)
+                .padding(.bottom, 16)
+
             KlarCard(padding: 16) {
                 monthHeader
                     .padding(.bottom, 12)
