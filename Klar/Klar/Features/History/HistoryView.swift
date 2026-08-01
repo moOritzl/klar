@@ -305,7 +305,7 @@ struct CalendarSectionView: View {
 
                 if hasEntries {
                     Circle()
-                        .fill(isToday ? Color.white : Klar.Palette.cyan600)
+                        .fill(isToday ? Klar.bg : Klar.Palette.cyan600)
                         .frame(width: 5, height: 5)
                         .offset(y: 11)
                 }
@@ -319,7 +319,9 @@ struct CalendarSectionView: View {
     }
 
     private func dayColor(isToday: Bool, isFuture: Bool) -> Color {
-        if isToday { return .white }
+        // The today pill is filled with `Klar.text`, which flips with the scheme, so its
+        // contents have to be the page colour rather than a literal white.
+        if isToday { return Klar.bg }
         return isFuture ? Klar.borderStrong : Klar.text
     }
 

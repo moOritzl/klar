@@ -296,7 +296,9 @@ struct LookAheadStep: View {
             Button(action: onFinish) {
                 Text("Rückblick abschließen")
                     .font(.system(size: 16, weight: .semibold))
-                    .foregroundStyle(.white)
+                    // The button is filled with `Klar.text`, which flips with the scheme, so its
+                    // label has to be the page colour rather than a literal white.
+                    .foregroundStyle(Klar.bg)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
                     .background(Klar.text)
