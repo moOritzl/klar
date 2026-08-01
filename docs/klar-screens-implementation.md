@@ -3,8 +3,8 @@
 Implements `Klar App Draft.dc.html` from the Claude Design project *Klar iOS App Design*
 (`3914b56a-7154-4644-ab7e-6585381fe30f`). All 33 drafted screens are built.
 
-**Status:** builds clean; 5 unit tests + 3 UI tests + 13 KlarCore tests pass; every screen below
-has been driven end-to-end in the simulator (`KlarUITests/ScreenshotTests`).
+**Status:** builds clean; 30 unit tests + 5 UI tests pass; every screen below has been driven
+end-to-end in the simulator (`KlarUITests/ScreenshotTests`).
 
 ---
 
@@ -12,8 +12,9 @@ has been driven end-to-end in the simulator (`KlarUITests/ScreenshotTests`).
 
 | Layer | File | Notes |
 |---|---|---|
-| Design tokens | [KlarTheme.swift](../Klar/Klar/DesignSystem/KlarTheme.swift) | 1:1 port of `tokens/{colors,typography,spacing}.css`. Names mirror the CSS custom properties, so one token change in the design maps to one change here. |
+| Design tokens | [KlarTheme.swift](../Klar/Klar/DesignSystem/KlarTheme.swift) | 1:1 port of `tokens/{colors,typography,spacing}.css`. Names mirror the CSS custom properties, so one token change in the design maps to one change here. Each semantic alias resolves per trait collection, which is how dark mode stays one line per token. |
 | Shared components | [KlarComponents.swift](../Klar/Klar/DesignSystem/KlarComponents.swift) | Card, buttons, chips, segmented control, quota bar, step dots, flow layout. |
+| Screen scaffold | [KlarScreen.swift](../Klar/Klar/DesignSystem/KlarScreen.swift) | Background, padding, the banner zone, and `scrollBounceBehavior(.basedOnSize)`. Used by Verlauf, Pläne and Hilfe. Heute keeps its own layout (FAB + growing content) and opts into the bounce fix by hand. |
 | Settings (device) | [AppSettings.swift](../Klar/Klar/App/AppSettings.swift) | UserDefaults. Deliberately **not** SwiftData — device prefs must not land in the data export. |
 | Data access | [KlarStore.swift](../Klar/Klar/App/KlarStore.swift) | The single write path, and the bridge to `KlarCore`'s pure calculators. |
 | Dates | [KlarDate.swift](../Klar/Klar/App/KlarDate.swift) | **05:00 logical-day boundary.** An entry at 02:30 belongs to the night before. Every "today"/"this month" question goes through here. |
@@ -23,7 +24,11 @@ has been driven end-to-end in the simulator (`KlarUITests/ScreenshotTests`).
 `Font.system(design: .serif)` and `Font.system(...)`. No font files are bundled — on iOS both
 registers are free.
 
-**Light only.** The draft ships light mode; `RootView` pins `.preferredColorScheme(.light)`.
+**Light and dark.** The draft ships light mode only; the dark values are derived from the same teal
+ramp read from the other end, so both schemes stay one family. Einstellungen → Darstellung offers
+System / Hell / Dunkel, defaulting to System. `RootView` applies it by setting
+`window.overrideUserInterfaceStyle` rather than `.preferredColorScheme`, because the latter leaves
+sheets and tab-bar chrome following the system.
 
 ---
 
@@ -163,27 +168,21 @@ notification text may ever name a substance, a dose, or an entry
 ([NotificationScheduler](../Klar/Klar/Features/Settings/NotificationScheduler.swift)). Not built: a
 plan-check-in nudge, quota-reset notice. Both are currently surfaced in-app on launch instead.
 
-### 3.4 Import has a service but no UI
-
-`ExportImportService.importJSON` exists and is tested (round-trips), but nothing calls it. It refuses
-a non-empty store, so it's a restore-onto-fresh-install path. Add a "Daten importieren" row to
-[DataManagementView](../Klar/Klar/Features/Settings/DataManagementView.swift) when you want it.
-
-### 3.5 Not built, because the draft doesn't draw them
+### 3.4 Not built, because the draft doesn't draw them
 
 From the concept (§ 4, Modul D): **eintragsfreie Serien, Meilensteine, Geld-gespart-Schätzung.** The
 cost basis is captured (Substanzen & Kosten) and `Substance.costPerUnit` is populated, but nothing
 consumes it. The draft's closing panel argues *against* a stats surface ("Zahlen ohne Handlungsfrage
 sind Selbstzweck"), so this is a product decision, not an oversight.
 
-### 3.6 App Group is not provisioned
+### 3.5 App Group is not provisioned
 
 [AppGroupContainer](../Klar/Klar/Persistence/AppGroupContainer.swift) prefers
 `group.de.lenhard.klar` and silently falls back to Application Support. Fine today; **required** the
 moment you add a widget or App Intent that must read the same store. Needs a paid Apple Developer
 account.
 
-### 3.7 Strings are inline German
+### 3.6 Strings are inline German
 
 There is no localization catalog work — `Localizable.xcstrings` is essentially untouched (and had an
 uncommitted modification before this change). German-only is the stated MVP scope; if EN is ever in
