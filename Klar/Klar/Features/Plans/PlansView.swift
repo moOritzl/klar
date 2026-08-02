@@ -93,7 +93,7 @@ struct PlansView: View {
                         }
                         .padding(.bottom, 8)
 
-                        Text("Wenn \(plan.situationText), dann \(plan.actionText)")
+                        Text("Wenn \(PlanSentence.fragment(plan.situationText)), dann \(PlanSentence.fragment(plan.actionText))")
                             .font(Klar.TypeScale.body)
                             .foregroundStyle(Klar.text)
                             .multilineTextAlignment(.leading)

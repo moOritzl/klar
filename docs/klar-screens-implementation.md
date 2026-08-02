@@ -113,6 +113,11 @@ behaviourally inert (Konzept § 2.1).
 > Settings"). (2) The draft's "WENN" row shows only tag chips, but the model — and the resulting
 > "Wenn …, dann …" sentence — also needs a situation *phrase*. Picking a tag pre-fills it from a
 > template ([PlanTemplates](../Klar/Klar/Features/Plans/PlanEditorView.swift)); the field stays editable.
+> (3) Both phrases are typed standalone ("Auf einer Party"), so wherever they're read back as one
+> sentence — the plan card, the Check-in, the Plan-Bilanz — they run through
+> [PlanSentence.fragment](../Packages/KlarCore/Sources/KlarCore/PlanSentence.swift), which lowercases
+> the leading word unless it was deliberately capitalised ("AA-Meeting", "U-Bahn"). The Heute-Karte
+> keeps the raw text: it labels the halves WENN / DANN instead of composing them.
 
 ### H · Hilfe — [HelpView.swift](../Klar/Klar/Features/Help/HelpView.swift) · [CravingSOSView.swift](../Klar/Klar/Features/Help/CravingSOSView.swift) · [HelpContent.swift](../Klar/Klar/Features/Help/HelpContent.swift)
 

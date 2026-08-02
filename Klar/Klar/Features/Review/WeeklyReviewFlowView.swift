@@ -202,7 +202,7 @@ struct GoalAndPlanStep: View {
                         } else {
                             ForEach(summary.planTallies) { tally in
                                 HStack(alignment: .top, spacing: 10) {
-                                    Text("„Wenn \(tally.situationText), dann \(tally.actionText).“")
+                                    Text("„Wenn \(PlanSentence.fragment(tally.situationText)), dann \(PlanSentence.fragment(tally.actionText)).“")
                                         .font(Klar.TypeScale.bodySmall)
                                         .foregroundStyle(Klar.text)
                                     Spacer(minLength: 8)
@@ -368,7 +368,7 @@ struct ArchivedReviewView: View {
                                     .padding(.bottom, 12)
                                 ForEach(summary.planTallies) { tally in
                                     HStack(alignment: .top) {
-                                        Text("„Wenn \(tally.situationText), dann \(tally.actionText).“")
+                                        Text("„Wenn \(PlanSentence.fragment(tally.situationText)), dann \(PlanSentence.fragment(tally.actionText)).“")
                                             .font(Klar.TypeScale.bodySmall)
                                             .foregroundStyle(Klar.text)
                                         Spacer(minLength: 8)
