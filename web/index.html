@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Klar — iOS-App zur Reduktion von Substanzkonsum</title>
+<meta name="description" content="Klar ist eine iOS-App für Menschen, die ihren Substanzkonsum reduzieren wollen, ohne dafür aufhören zu müssen. Alles bleibt auf dem Gerät: kein Konto, kein Server.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/css/site.css">
+</head>
+<body>
+<a class="skip-link" href="#hero">Zum Inhalt springen</a>
+
+<header class="site-header">
+  <div class="shell site-header__bar">
+    <a class="wordmark" href="#hero">
+      <svg class="ring" width="20" height="20" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="18" fill="none" stroke="var(--emerald-500)" stroke-width="6" stroke-linecap="round" stroke-dasharray="87.9 25.2" transform="rotate(-50 24 24)"/></svg>
+      <span class="wordmark__text">KLAR</span>
+    </a>
+    <nav class="site-nav" aria-label="Hauptnavigation">
+      <a class="site-nav__link" href="fallstudie.html">Fallstudie</a>
+      <a class="site-nav__link" href="https://github.com/moOritzl/klar">GitHub</a>
+      <div class="lang-switch" role="group" aria-label="Sprache">
+        <button type="button" class="lang-switch__btn" data-lang="de" aria-pressed="true">DE</button>
+        <button type="button" class="lang-switch__btn" data-lang="en" aria-pressed="false">EN</button>
+      </div>
+      <button type="button" class="theme-toggle" data-theme-toggle>Dunkel</button>
+    </nav>
+  </div>
+  <div class="notice" data-lang-notice hidden>
+    <p class="shell notice__text">EN — English version in preparation. This page is currently German only.</p>
+  </div>
+</header>
+
+<main>
+
+  <section class="shell hero" id="hero">
+    <div class="hero__layout">
+      <div class="hero__main">
+        <h1 class="hero__wordmark" data-reveal>KLAR</h1>
+        <div data-reveal>
+          <p class="hero__lead">Eine iOS-App für Menschen, die ihren Substanzkonsum reduzieren wollen, ohne dafür aufhören zu müssen.</p>
+          <p class="hero__sub">Alles bleibt auf dem Gerät. Kein Konto, kein Server.</p>
+        </div>
+        <div class="hero__aside" data-reveal>
+          <div class="status-chip">
+            <svg class="ring" width="15" height="15" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="18" fill="none" stroke="var(--emerald-500)" stroke-width="7" stroke-linecap="round" stroke-dasharray="56 57" transform="rotate(-50 24 24)"/></svg>
+            <span>Bald im App Store</span>
+          </div>
+          <div class="hero__actions">
+            <a class="btn" href="https://github.com/moOritzl/klar">Auf GitHub verfolgen</a>
+            <a class="link-underline" href="fallstudie.html">Wie Klar gebaut ist</a>
+          </div>
+        </div>
+      </div>
+      <div class="hero__device" data-reveal>
+        <div class="device">
+          <div class="device__body">
+            <div class="device__screen">
+              <img class="shot__img shot__img--light" src="assets/img/heute-light.webp" width="662" height="1440" decoding="async" alt="Der Startbildschirm von Klar: das Monatsziel für Alkohol mit sechs verbleibenden Anlässen, ein aktiver Wenn-Dann-Plan und der Hinweis „Ein ruhiger Tag.“">
+              <img class="shot__img shot__img--dark" src="assets/img/heute-dark.webp" width="662" height="1440" decoding="async" alt="Der Startbildschirm von Klar: das Monatsziel für Alkohol mit sechs verbleibenden Anlässen, ein aktiver Wenn-Dann-Plan und der Hinweis „Ein ruhiger Tag.“">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-label="So funktioniert Klar">
+    <div class="shell section__inner">
+      <div class="steps">
+
+        <article class="step" data-reveal>
+          <div class="step__label">
+            <svg class="ring" width="17" height="17" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="18" fill="none" stroke="var(--emerald-500)" stroke-width="7" stroke-linecap="round" stroke-dasharray="38 75" transform="rotate(-50 24 24)"/></svg>
+            <span>SCHRITT 01</span>
+          </div>
+          <h2 class="step__title">Erfassen</h2>
+          <p class="step__body">Zwei Taps: Substanz, Menge. Der Zeitpunkt kommt von selbst, der Rest ist optional. Dauert das Erfassen zu lange, wird es unvollständig, und dann trägt es nichts.</p>
+          <figure class="shot device">
+            <div class="device__body">
+              <div class="device__screen">
+                <img class="shot__img shot__img--light" src="assets/img/erfassen-light.webp" width="662" height="1440" loading="lazy" decoding="async" alt="Der Eintrag-Screen von Klar: eine kurze Liste mit Kaffee, Alkohol und Nikotin, darüber der Hinweis „Tippen genügt. Details kannst du später ergänzen.“">
+                <img class="shot__img shot__img--dark" src="assets/img/erfassen-dark.webp" width="662" height="1440" loading="lazy" decoding="async" alt="Der Eintrag-Screen von Klar: eine kurze Liste mit Kaffee, Alkohol und Nikotin, darüber der Hinweis „Tippen genügt. Details kannst du später ergänzen.“">
+              </div>
+            </div>
+          </figure>
+        </article>
+
+        <article class="step" data-reveal>
+          <div class="step__label">
+            <svg class="ring" width="17" height="17" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="18" fill="none" stroke="var(--emerald-500)" stroke-width="7" stroke-linecap="round" stroke-dasharray="64 49" transform="rotate(-50 24 24)"/></svg>
+            <span>SCHRITT 02</span>
+          </div>
+          <h2 class="step__title">Wochenrückblick</h2>
+          <p class="step__body">Einmal pro Woche ein sachlicher Blick zurück: Häufigkeit, Mengen, wiederkehrende Situationen. Bezugsgröße ist der eigene Verlauf, nicht der Durchschnitt anderer.</p>
+          <figure class="shot device">
+            <div class="device__body">
+              <div class="device__screen">
+                <img class="shot__img shot__img--light" src="assets/img/rueckblick-light.webp" width="662" height="1440" loading="lazy" decoding="async" alt="Ein Wochenrückblick in Klar für den 20. bis 26. Juli: acht Einträge, durchschnittliche Dosis je Substanz und die Plan-Bilanz der Woche.">
+                <img class="shot__img shot__img--dark" src="assets/img/rueckblick-dark.webp" width="662" height="1440" loading="lazy" decoding="async" alt="Ein Wochenrückblick in Klar für den 20. bis 26. Juli: acht Einträge, durchschnittliche Dosis je Substanz und die Plan-Bilanz der Woche.">
+              </div>
+            </div>
+          </figure>
+        </article>
+
+        <article class="step" data-reveal>
+          <div class="step__label">
+            <svg class="ring" width="17" height="17" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="18" fill="none" stroke="var(--emerald-500)" stroke-width="7" stroke-linecap="round" stroke-dasharray="88 25" transform="rotate(-50 24 24)"/></svg>
+            <span>SCHRITT 03</span>
+          </div>
+          <h2 class="step__title">Wenn-Dann-Pläne</h2>
+          <p class="step__body">Vorsätze, die an eine Situation gebunden sind: <em>Wenn Freitagabend die Runde beginnt, dann bleibe ich beim ersten Getränk.</em> Pläne in dieser Form gehören zu den am besten untersuchten Werkzeugen der Selbstregulation.</p>
+          <figure class="shot device">
+            <div class="device__body">
+              <div class="device__screen">
+                <img class="shot__img shot__img--light" src="assets/img/plaene-light.webp" width="662" height="1440" loading="lazy" decoding="async" alt="Der Pläne-Screen von Klar mit zwei aktiven Wenn-Dann-Plänen und dem Ziel „Reduktion, max. 6× pro Monat“.">
+                <img class="shot__img shot__img--dark" src="assets/img/plaene-dark.webp" width="662" height="1440" loading="lazy" decoding="async" alt="Der Pläne-Screen von Klar mit zwei aktiven Wenn-Dann-Plänen und dem Ziel „Reduktion, max. 6× pro Monat“.">
+              </div>
+            </div>
+          </figure>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <section class="privacy" aria-labelledby="privacy-title">
+    <div class="shell section__inner">
+      <div class="section__head" data-reveal>
+        <h2 class="section__title" id="privacy-title">Privatsphäre ist die Architektur, nicht eine Einstellung</h2>
+        <p class="section__lead">Keine Verarbeitung außerhalb des Geräts, und keine Funktion, die sich nachträglich zu einer Übertragung ausbauen ließe. Wer den eigenen Konsum ehrlich dokumentiert, legt etwas offen, das anderswo Konsequenzen hat.</p>
+      </div>
+      <div class="cards">
+
+        <div class="card" data-reveal>
+          <div class="card__icon">
+            <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="m17 8 5 5"/><path d="m22 8-5 5"/></svg>
+          </div>
+          <h3 class="card__title">Kein Konto</h3>
+          <p class="card__body">Keine Registrierung, keine E-Mail-Adresse. Es existiert kein Konto, das sich zuordnen ließe.</p>
+        </div>
+
+        <div class="card" data-reveal>
+          <div class="card__icon">
+            <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.5 19H9a7 7 0 0 1-6.71-9"/><path d="M8.5 5.2A7 7 0 0 1 15.71 10h1.79a4.5 4.5 0 0 1 3.16 7.7"/><path d="m2 2 20 20"/></svg>
+          </div>
+          <h3 class="card__title">Kein Server</h3>
+          <p class="card__body">Keine Cloud, keine Analytics, keine Drittanbieter-SDKs. Es gibt keinen Netzwerkpfad, über den Einträge das Gerät verlassen könnten.</p>
+        </div>
+
+        <div class="card" data-reveal>
+          <div class="card__icon">
+            <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M9 9h.01"/><path d="M15 9h.01"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/></svg>
+          </div>
+          <h3 class="card__title">Face-ID-Sperre</h3>
+          <p class="card__body">Optionale Sperre beim Öffnen. Wer das Gerät kurz aus der Hand gibt, gibt die Einträge nicht mit.</p>
+        </div>
+
+      </div>
+      <p class="privacy__note" data-reveal>Diese Website folgt demselben Prinzip: keine Cookies, kein Tracking, keine externen Skripte.</p>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="evidence-title">
+    <div class="shell section__inner">
+      <div class="section__head" data-reveal>
+        <h2 class="section__title" id="evidence-title">Auf Grundlage der Studienlage entworfen</h2>
+        <p class="section__lead">Der Zuschnitt folgt einem Literatur-Review, nicht einer Feature-Liste. Drei Befunde haben die Entscheidungen getragen.</p>
+      </div>
+      <div class="findings">
+
+        <article class="finding" data-reveal>
+          <div class="finding__kicker">BEFUND</div>
+          <p class="finding__claim">Reines Protokollieren verändert Konsum kaum.</p>
+          <div class="finding__kicker finding__kicker--consequence">KONSEQUENZ</div>
+          <p class="finding__body">Jede Erfassung mündet in eine Rückmeldung. Ein Eintrag ohne Auswertung wäre Buchhaltung.</p>
+        </article>
+
+        <article class="finding" data-reveal>
+          <div class="finding__kicker">BEFUND</div>
+          <p class="finding__claim">Konkrete Wenn-Dann-Pläne gehören zu den robustesten Befunden der Selbstregulationsforschung.</p>
+          <div class="finding__kicker finding__kicker--consequence">KONSEQUENZ</div>
+          <p class="finding__body">Sie sind ein Kernfeature, direkt aus dem Rückblick anlegbar.</p>
+        </article>
+
+        <article class="finding" data-reveal>
+          <div class="finding__kicker">BEFUND</div>
+          <p class="finding__claim">Vergleiche mit dem Durchschnitt anderer können nach hinten losgehen.</p>
+          <div class="finding__kicker finding__kicker--consequence">KONSEQUENZ</div>
+          <p class="finding__body">Klar misst am eigenen Verlauf. Keine Normwerte, keine Rangliste.</p>
+        </article>
+
+      </div>
+      <p class="findings__more" data-reveal><a href="fallstudie.html#studienlage">Die Studienlage im Detail</a></p>
+    </div>
+  </section>
+
+  <section class="section" aria-label="Notfall und Beratung">
+    <div class="shell help" data-reveal>
+      <div class="help__label">Im Notfall und bei Beratungsbedarf</div>
+      <div>
+        <h2 class="help__title">Notruf 112</h2>
+        <p class="help__detail">Bei akuter gesundheitlicher Gefahr. Rund um die Uhr.</p>
+      </div>
+      <div>
+        <h2 class="help__title">Sucht &amp; Drogen Hotline</h2>
+        <p class="help__detail">01806 313031, täglich erreichbar, anonym.</p>
+      </div>
+      <div>
+        <h2 class="help__title"><a href="https://www.drugcom.de">drugcom.de</a></h2>
+        <p class="help__detail">Information und Selbsttests der BZgA.</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<a class="teaser" href="fallstudie.html">
+  <div class="shell teaser__inner" data-reveal>
+    <div>
+      <div class="teaser__kicker">
+        <svg class="ring" width="17" height="17" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="18" fill="none" stroke="var(--emerald-500)" stroke-width="7" stroke-linecap="round" stroke-dasharray="88 25" transform="rotate(-50 24 24)"/></svg>
+        <span>Fallstudie</span>
+      </div>
+      <p class="teaser__title">Wie Klar gebaut ist</p>
+    </div>
+    <div class="teaser__side">
+      <p class="teaser__body">Studienlage, Architektur, Trade-offs, Entwicklungsstand. Die technische Seite des Projekts.</p>
+      <span class="teaser__cta">Zur Fallstudie →</span>
+    </div>
+  </div>
+</a>
+
+<footer class="site-footer">
+  <div class="shell site-footer__inner">
+    <div class="site-footer__mark">
+      <svg class="ring" width="14" height="14" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="18" fill="none" stroke="var(--emerald-500)" stroke-width="7" stroke-linecap="round" stroke-dasharray="88 25" transform="rotate(-50 24 24)"/></svg>
+      <span>KLAR</span>
+    </div>
+    <nav class="site-footer__nav" aria-label="Rechtliches">
+      <a href="https://lenhard.xyz/impressum">Impressum</a>
+      <a href="https://lenhard.xyz/impressum#datenschutz">Datenschutz</a>
+      <a href="fallstudie.html">Fallstudie</a>
+      <a href="https://github.com/moOritzl/klar">GitHub</a>
+    </nav>
+    <div>© 2026 · Keine Cookies, kein Tracking</div>
+  </div>
+</footer>
+
+<script src="assets/js/site.js"></script>
+</body>
+</html>

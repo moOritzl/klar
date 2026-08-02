@@ -1,0 +1,828 @@
+@import url('tokens/colors.css');
+@import url('tokens/fonts.css');
+@import url('tokens/typography.css');
+@import url('tokens/spacing.css');
+
+/* ---------------------------------------------------------------------------
+   Page-level theme surface
+   The site follows the visitor's system setting, same as the app does. The
+   header toggle writes data-theme onto <html> and wins in both directions.
+--------------------------------------------------------------------------- */
+
+:root {
+  --klar-bg: #FAF8F3;
+  --klar-text: #15272B;
+  --klar-muted: #4A5F64;
+  --klar-faint: #55696E;
+  --klar-line: rgba(21, 39, 43, 0.16);
+  --klar-line-soft: rgba(21, 39, 43, 0.08);
+  --klar-surface: #FFFFFF;
+
+  /* The two dark bands (case-study teaser, footer) stay dark in both themes. */
+  --klar-dbg: #15272B;
+  --klar-dtext: #EDF2F0;
+  --klar-dmuted: #9CB5B2;
+  --klar-dline: rgba(237, 242, 240, 0.18);
+
+  /* Handset frame. Dark body on the warm paper ground; the rim is a shadow. */
+  --device-face: #1D3036;
+  --device-edge: #4C6066;
+  --device-button: #3A4D53;
+  --device-rim: rgba(10, 20, 22, 0.5);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --klar-bg: #15272B;
+    --klar-text: #EDF2F0;
+    --klar-muted: #A6BDBA;
+    --klar-faint: #7F9895;
+    --klar-line: rgba(237, 242, 240, 0.18);
+    --klar-line-soft: rgba(237, 242, 240, 0.09);
+    --klar-surface: #1C3236;
+
+    --klar-dbg: #0A1416;
+    --klar-dmuted: #8FB2AE;
+    --klar-dline: rgba(237, 242, 240, 0.16);
+
+    /* On the dark ground the frame needs to be lifted, and the rim becomes a
+       highlight instead of a shadow. */
+    --device-face: #21353B;
+    --device-edge: #5A7076;
+    --device-button: #4A6067;
+    --device-rim: rgba(237, 242, 240, 0.14);
+  }
+}
+
+:root[data-theme='dark'] {
+  --klar-bg: #15272B;
+  --klar-text: #EDF2F0;
+  --klar-muted: #A6BDBA;
+  --klar-faint: #7F9895;
+  --klar-line: rgba(237, 242, 240, 0.18);
+  --klar-line-soft: rgba(237, 242, 240, 0.09);
+  --klar-surface: #1C3236;
+
+  --klar-dbg: #0A1416;
+  --klar-dmuted: #8FB2AE;
+  --klar-dline: rgba(237, 242, 240, 0.16);
+
+  --device-face: #21353B;
+  --device-edge: #5A7076;
+  --device-button: #4A6067;
+  --device-rim: rgba(237, 242, 240, 0.14);
+}
+
+/* --------------------------------------------------------------------------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--klar-bg);
+  color: var(--klar-text);
+  font-family: var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--emerald-500);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
+}
+
+::selection {
+  background: var(--emerald-500);
+  color: var(--teal-950);
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: var(--space-2);
+  background: var(--klar-surface);
+  border: 1px solid var(--klar-line);
+  border-radius: var(--radius-pill);
+  padding: var(--space-2) var(--space-5);
+  font-size: 14px;
+  z-index: 100;
+}
+
+.skip-link:focus {
+  left: var(--space-5);
+}
+
+.shell {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding-inline: clamp(20px, 5vw, 64px);
+}
+
+.section {
+  border-top: 1px solid var(--klar-line-soft);
+}
+
+.section__inner {
+  padding-block: clamp(72px, 9vw, 132px);
+}
+
+.ring {
+  flex: none;
+}
+
+.mono {
+  font-family: var(--font-mono);
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--klar-faint);
+}
+
+.section__title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(30px, 4vw, 50px);
+  line-height: 1.12;
+  margin: 0;
+  text-wrap: balance;
+}
+
+.section__lead {
+  font-size: clamp(16px, 1.3vw, 18px);
+  line-height: 1.7;
+  color: var(--klar-muted);
+  margin: 22px 0 0;
+  text-wrap: pretty;
+}
+
+/* ---- Header ------------------------------------------------------------- */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--klar-bg);
+  border-bottom: 1px solid var(--klar-line-soft);
+}
+
+.site-header__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-6);
+  padding-block: var(--space-4);
+}
+
+.wordmark {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.wordmark__text {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.34em;
+}
+
+.site-nav {
+  display: flex;
+  align-items: center;
+  gap: clamp(12px, 2vw, 28px);
+}
+
+.site-nav__link {
+  font-size: 13px;
+  color: var(--klar-muted);
+  letter-spacing: 0.02em;
+}
+
+.lang-switch {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--klar-line);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+
+.lang-switch__btn,
+.theme-toggle {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  background: transparent;
+  color: var(--klar-muted);
+  transition: background var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
+}
+
+.lang-switch__btn {
+  padding: 6px 11px;
+  border: 0;
+}
+
+.lang-switch__btn[aria-pressed='true'] {
+  background: var(--klar-text);
+  color: var(--klar-bg);
+}
+
+.theme-toggle {
+  padding: 6px 12px;
+  border: 1px solid var(--klar-line);
+  border-radius: var(--radius-pill);
+}
+
+/* Below roughly 640px the nav no longer fits beside the wordmark, so it takes
+   a line of its own instead of running off the edge. */
+@media (max-width: 640px) {
+  .site-header__bar {
+    flex-wrap: wrap;
+    row-gap: var(--space-3);
+  }
+
+  .site-nav {
+    width: 100%;
+    gap: var(--space-4);
+  }
+}
+
+.notice {
+  border-top: 1px solid var(--klar-line-soft);
+  background: var(--klar-surface);
+}
+
+.notice__text {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.04em;
+  color: var(--klar-muted);
+  padding-block: 10px;
+  margin: 0;
+}
+
+.notice[hidden] {
+  display: none;
+}
+
+/* ---- Hero --------------------------------------------------------------- */
+
+.hero {
+  padding-top: clamp(64px, 8vw, 112px);
+  padding-bottom: clamp(64px, 8vw, 112px);
+}
+
+.hero__layout {
+  display: grid;
+  gap: clamp(48px, 6vw, 88px);
+}
+
+/* Two columns only once the wordmark still has room to be the largest thing on
+   the page. Below that the handset moves under the call to action. */
+@media (min-width: 900px) {
+  .hero__layout {
+    grid-template-columns: minmax(0, 1.08fr) minmax(260px, 0.92fr);
+    align-items: center;
+  }
+}
+
+.hero__main {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(28px, 3vw, 40px);
+}
+
+.hero__wordmark {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(64px, 13vw, 168px);
+  line-height: 0.9;
+  letter-spacing: 0.16em;
+  text-indent: 0.16em;
+  margin: 0;
+}
+
+/* Capped so the handset still fits above the fold on a laptop screen —
+   a phone cut off by the section edge looks like a mistake, not a crop. */
+.hero__device {
+  justify-self: center;
+  width: 100%;
+  max-width: 278px;
+}
+
+.hero__lead {
+  font-family: var(--font-display);
+  font-size: clamp(21px, 2.4vw, 30px);
+  line-height: 1.45;
+  margin: 0 0 22px;
+  text-wrap: pretty;
+}
+
+.hero__sub {
+  font-size: 16px;
+  line-height: 1.65;
+  color: var(--klar-muted);
+  margin: 0;
+  max-width: 44ch;
+  text-wrap: pretty;
+}
+
+.hero__aside {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.status-chip {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  border: 1px solid var(--klar-line);
+  border-radius: var(--radius-pill);
+  padding: 9px 18px 9px 14px;
+  align-self: start;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  color: var(--klar-muted);
+}
+
+.hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 18px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding-inline: var(--space-6);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--emerald-500);
+  color: var(--teal-950);
+  font: var(--text-ui-headline);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-standard);
+}
+
+.btn:hover {
+  background: var(--emerald-600);
+  color: var(--teal-950);
+}
+
+.link-underline {
+  font-size: 15px;
+  color: var(--klar-muted);
+  border-bottom: 1px solid var(--klar-line);
+  padding-bottom: 3px;
+}
+
+/* ---- Steps -------------------------------------------------------------- */
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(272px, 1fr));
+  gap: clamp(28px, 3.5vw, 56px);
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.step__label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  color: var(--klar-faint);
+}
+
+.step__title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(22px, 2vw, 28px);
+  line-height: 1.25;
+  margin: 0;
+}
+
+.step__body {
+  font-size: 15.5px;
+  line-height: 1.7;
+  color: var(--klar-muted);
+  margin: 0;
+}
+
+.step__body em {
+  font-style: italic;
+  color: var(--klar-text);
+}
+
+/* ---- Device frame ------------------------------------------------------- */
+
+/* The handset is drawn in CSS rather than shipped as a mockup image: it stays
+   sharp at any size, weighs nothing, and picks up the page's own theme.
+   Everything is sized in container query units, so bezel, corner radius and
+   buttons stay in proportion however wide the frame ends up. */
+.device {
+  container-type: inline-size;
+  width: 100%;
+}
+
+.device__body {
+  position: relative;
+  padding: 2.6cqw;
+  border-radius: 14cqw;
+  background: linear-gradient(
+    152deg,
+    var(--device-edge) 0%,
+    var(--device-face) 34%,
+    var(--device-face) 64%,
+    var(--device-edge) 100%
+  );
+  box-shadow:
+    0 0 0 0.3cqw var(--device-rim),
+    0 3cqw 7cqw -2cqw rgba(10, 20, 22, 0.28),
+    0 12cqw 24cqw -8cqw rgba(10, 20, 22, 0.42);
+}
+
+/* Volume cluster on the left, side button on the right. */
+.device__body::before,
+.device__body::after {
+  content: '';
+  position: absolute;
+  width: 0.65cqw;
+  border-radius: 0.4cqw;
+  background: var(--device-button);
+}
+
+.device__body::before {
+  left: -0.5cqw;
+  top: 26cqw;
+  height: 26cqw;
+}
+
+.device__body::after {
+  right: -0.5cqw;
+  top: 34cqw;
+  height: 17cqw;
+}
+
+.device__screen {
+  position: relative;
+  border-radius: 11.4cqw;
+  overflow: hidden;
+  background: var(--klar-surface);
+}
+
+/* Screenshots come in a light and a dark variant. Both ship, and the one that
+   does not match the active theme is removed from the box — display:none also
+   keeps it out of the accessibility tree, so the alt text is never read twice.
+   Eight WebP files weigh under 230 KB in total, so shipping both costs little. */
+.shot__img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.shot__img--dark {
+  display: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .shot__img--light {
+    display: none;
+  }
+
+  :root:not([data-theme='light']) .shot__img--dark {
+    display: block;
+  }
+}
+
+:root[data-theme='dark'] .shot__img--light {
+  display: none;
+}
+
+:root[data-theme='dark'] .shot__img--dark {
+  display: block;
+}
+
+.shot {
+  /* Bottom-aligned so the three frames line up even when the copy above them
+     runs to different lengths. */
+  margin: auto 0 0;
+}
+
+/* The step frames are cut to a ratio and faded out at the bottom rather than
+   shown whole. Every one of these screens carries its content in the upper
+   half, so the lower half was empty pixels either way, and the fade says "the
+   screen goes on" instead of "the image ends". It is a mask on the element,
+   so it works over any background.
+
+   The hero handset is deliberately exempt: there the whole device is the
+   picture. */
+.steps .shot {
+  aspect-ratio: 9 / 13;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to bottom, #000 76%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 76%, transparent 100%);
+}
+
+/* Once the grid collapses to a single column the section would otherwise run
+   to roughly seven screenfuls, so the crop gets tighter. */
+@media (max-width: 640px) {
+  .steps .shot {
+    aspect-ratio: 9 / 10;
+  }
+}
+
+/* ---- Privacy ------------------------------------------------------------ */
+
+.privacy {
+  background: var(--klar-surface);
+  border-top: 1px solid var(--klar-line-soft);
+  border-bottom: 1px solid var(--klar-line-soft);
+}
+
+.section__head {
+  max-width: 56ch;
+  margin-bottom: clamp(48px, 6vw, 80px);
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--space-4);
+}
+
+.card {
+  /* One step off the section's surface, so the cards read as objects on it
+     rather than dissolving into it. */
+  background: var(--klar-bg);
+  border: 1px solid var(--klar-line-soft);
+  border-radius: var(--radius-lg);
+  padding: clamp(24px, 3vw, 34px);
+}
+
+.card__icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-pill);
+  background: var(--emerald-500);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 22px;
+  color: var(--teal-950);
+}
+
+.card__title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 19px;
+  margin: 0 0 var(--space-3);
+}
+
+.card__body {
+  font-size: 14.5px;
+  line-height: 1.65;
+  color: var(--klar-muted);
+  margin: 0;
+}
+
+.privacy__note {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  line-height: 1.8;
+  color: var(--klar-faint);
+  margin: 28px 0 0;
+  max-width: 74ch;
+}
+
+/* ---- Evidence ----------------------------------------------------------- */
+
+.findings {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  gap: clamp(28px, 4vw, 64px);
+}
+
+.finding {
+  border-top: 1px solid var(--klar-line);
+  padding-top: 26px;
+}
+
+.finding__kicker {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--klar-faint);
+  margin-bottom: 14px;
+}
+
+.finding__kicker--consequence {
+  color: var(--emerald-600);
+  margin-bottom: var(--space-3);
+}
+
+.finding__claim {
+  font-family: var(--font-display);
+  font-size: 19px;
+  line-height: 1.5;
+  margin: 0 0 22px;
+}
+
+.finding__body {
+  font-size: 15.5px;
+  line-height: 1.7;
+  color: var(--klar-muted);
+  margin: 0;
+}
+
+.findings__more {
+  margin: clamp(36px, 4vw, 52px) 0 0;
+}
+
+.findings__more a {
+  font-size: 15px;
+  color: var(--klar-text);
+  border-bottom: 1px solid var(--klar-line);
+  padding-bottom: 3px;
+}
+
+/* ---- Help band ---------------------------------------------------------- */
+
+.help {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: clamp(20px, 3vw, 48px);
+  align-items: start;
+  padding-block: clamp(40px, 5vw, 56px);
+}
+
+.help__label {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--klar-faint);
+  padding-top: var(--space-1);
+}
+
+.help__title {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 6px;
+}
+
+.help__detail {
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--klar-muted);
+  margin: 0;
+}
+
+/* ---- Case-study teaser + footer ----------------------------------------- */
+
+.teaser {
+  display: block;
+  background: var(--klar-dbg);
+  color: var(--klar-dtext);
+}
+
+.teaser:hover {
+  color: var(--klar-dtext);
+}
+
+.teaser__inner {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: clamp(24px, 4vw, 56px);
+  align-items: end;
+  padding-block: clamp(56px, 7vw, 104px);
+}
+
+.teaser__kicker {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--emerald-500);
+}
+
+.teaser__title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(30px, 4.6vw, 58px);
+  line-height: 1.08;
+  margin: 0;
+}
+
+.teaser__side {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.teaser__body {
+  font-size: 15.5px;
+  line-height: 1.7;
+  color: var(--klar-dmuted);
+  margin: 0;
+  max-width: 44ch;
+}
+
+.teaser__cta {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  border-bottom: 1px solid var(--klar-dline);
+  padding-bottom: var(--space-2);
+  align-self: start;
+}
+
+.site-footer {
+  background: var(--klar-dbg);
+  color: var(--klar-dtext);
+  border-top: 1px solid var(--klar-dline);
+}
+
+.site-footer__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-5);
+  padding-block: var(--space-8);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--klar-dmuted);
+}
+
+.site-footer__mark {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  letter-spacing: 0.24em;
+  color: var(--klar-dtext);
+}
+
+.site-footer__nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-6);
+}
+
+/* ---- Reveal on scroll --------------------------------------------------- */
+
+/* Hiding is gated on the .js class, which the script sets as its first
+   statement. Without JS, or if the script throws before that point, the page
+   renders fully rather than invisibly. */
+.js [data-reveal] {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 520ms var(--ease-standard), transform 520ms var(--ease-standard);
+}
+
+.js [data-reveal].is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .js [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
