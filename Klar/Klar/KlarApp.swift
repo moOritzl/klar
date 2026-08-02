@@ -20,6 +20,10 @@ struct KlarApp: App {
         if UITestSupport.isResetRequested {
             UITestSupport.reset()
         }
+        if DemoModeSupport.isRequested {
+            UITestSupport.reset()
+            DemoModeSupport.skipOnboarding()
+        }
         #endif
 
         _settings = State(initialValue: AppSettings())
@@ -27,6 +31,12 @@ struct KlarApp: App {
         let container = ModelContainerFactory.makeContainer()
         self.container = container
         try? ContextTagSeeder.seedIfNeeded(context: ModelContext(container))
+
+        #if DEBUG
+        if DemoModeSupport.isRequested {
+            DemoModeSupport.seed(container: container)
+        }
+        #endif
     }
 
     var body: some Scene {

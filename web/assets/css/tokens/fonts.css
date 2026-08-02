@@ -1,0 +1,39 @@
+/* Klar — Web fonts
+   PT Serif (SIL Open Font License) carries the editorial-serif role in
+   headlines. Self-hosted: no request leaves the visitor's browser to a font
+   CDN, which matters on this site more than on most.
+
+   The UI stack deliberately has no @font-face. An iOS product should render in
+   real SF Pro, and Apple does not license it for self-hosted web use, so the
+   system stack renders it natively on Apple devices and falls back elsewhere. */
+
+@font-face {
+  font-family: 'PT Serif';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../../fonts/pt-serif-400.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'PT Serif';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('../../fonts/pt-serif-700.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'PT Serif';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../../fonts/pt-serif-400italic.woff2') format('woff2');
+}
+
+:root {
+  /* Editorial serif: headlines, section titles. Never the app UI. */
+  --font-display: 'PT Serif', Georgia, 'Times New Roman', serif;
+
+  --font-ui: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
+
+  --font-mono: 'SF Mono', ui-monospace, 'Menlo', 'Consolas', monospace;
+}

@@ -1,0 +1,66 @@
+/* Klar — Color tokens
+   Mirrors the Klar design system (claude.ai/design), which derives the palette
+   from the pitch deck and the app's KlarTheme.swift. Deep teal ink plus a
+   single emerald accent, kept deliberately narrow. */
+
+:root {
+  /* ---- Base palette ---- */
+  --teal-950: #15272B;
+  --teal-900: #0E3B43;
+  --teal-800: #17444C;
+  --teal-700: #28545C;
+  --teal-600: #44585E;
+  --teal-500: #5C7078;
+  --teal-400: #8FB2AE;
+  --teal-300: #BFD8D4;
+  --teal-200: #D5E4E2;
+  --teal-100: #E6F2F0;
+  --teal-50:  #EEF6F5;
+  --teal-25:  #F7FAFA;
+  --gray-25:  #F4F6F6;
+  --white:    #FFFFFF;
+
+  --emerald-700: #1A6B62;
+  --emerald-600: #02A488;
+  --emerald-500: #02C39A; /* primary brand accent */
+  --emerald-100: #D9F2EB;
+
+  --cyan-600: #028090; /* secondary accent — used sparingly, badges/links */
+
+  --red-600: #C0392B;
+  --red-100: #FBECEA;
+
+  /* ---- Semantic aliases ---- */
+  --color-bg: var(--white);
+  --color-bg-subtle: var(--teal-25);
+  --color-bg-sunken: var(--gray-25);
+  --color-bg-inverse: var(--teal-900);
+  --color-bg-inverse-deep: var(--teal-950);
+
+  --color-surface: var(--white);
+  --color-surface-raised: var(--white);
+  --color-surface-tint: var(--teal-50);
+
+  --color-border: var(--teal-200);
+  --color-border-subtle: var(--teal-100);
+  --color-border-strong: var(--teal-300);
+
+  --color-text: var(--teal-950);
+  --color-text-secondary: var(--teal-600);
+  --color-text-tertiary: var(--teal-500);
+  --color-text-on-inverse: var(--white);
+  --color-text-on-inverse-secondary: var(--teal-300);
+
+  --color-accent: var(--emerald-500);
+  --color-accent-strong: var(--emerald-700);
+  --color-accent-tint: var(--emerald-100);
+  --color-accent-contrast: var(--white);
+
+  --color-link: var(--cyan-600);
+  --color-link-hover: var(--emerald-700);
+
+  --color-danger: var(--red-600);
+  --color-danger-tint: var(--red-100);
+
+  --color-focus-ring: var(--emerald-500);
+}
