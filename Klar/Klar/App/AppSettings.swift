@@ -32,7 +32,6 @@ final class AppSettings {
         self.defaults = defaults
         self.hasCompletedOnboarding = defaults.bool(forKey: Keys.hasCompletedOnboarding)
         self.isAppLockEnabled = defaults.object(forKey: Keys.isAppLockEnabled) as? Bool ?? false
-        self.isPanicGestureEnabled = defaults.object(forKey: Keys.isPanicGestureEnabled) as? Bool ?? false
         self.autoLockDelay = AutoLockDelay(
             rawValue: defaults.object(forKey: Keys.autoLockDelay) as? Int ?? 0
         ) ?? .immediately
@@ -41,6 +40,10 @@ final class AppSettings {
         self.lastReviewedWeekStart = defaults.object(forKey: Keys.lastReviewedWeekStart) as? Date
         self.supportContactName = defaults.string(forKey: Keys.supportContactName)
         self.supportContactPhone = defaults.string(forKey: Keys.supportContactPhone)
+        // No stored value means System, so existing installs adopt the default without a migration.
+        self.appearance = AppAppearance(
+            rawValue: defaults.string(forKey: Keys.appearance) ?? ""
+        ) ?? .system
     }
 
     var hasCompletedOnboarding: Bool {
@@ -52,13 +55,12 @@ final class AppSettings {
         didSet { defaults.set(isAppLockEnabled, forKey: Keys.isAppLockEnabled) }
     }
 
-    /// When on, a two-finger double-tap anywhere swaps the UI for the calculator façade (J2).
-    var isPanicGestureEnabled: Bool {
-        didSet { defaults.set(isPanicGestureEnabled, forKey: Keys.isPanicGestureEnabled) }
-    }
-
     var autoLockDelay: AutoLockDelay {
         didSet { defaults.set(autoLockDelay.rawValue, forKey: Keys.autoLockDelay) }
+    }
+
+    var appearance: AppAppearance {
+        didSet { defaults.set(appearance.rawValue, forKey: Keys.appearance) }
     }
 
     var areNotificationsEnabled: Bool {
@@ -95,8 +97,8 @@ final class AppSettings {
         static let supportContactPhone = "klar.supportContactPhone"
         static let hasCompletedOnboarding = "klar.hasCompletedOnboarding"
         static let isAppLockEnabled = "klar.isAppLockEnabled"
-        static let isPanicGestureEnabled = "klar.isPanicGestureEnabled"
         static let autoLockDelay = "klar.autoLockDelay"
+        static let appearance = "klar.appearance"
         static let areNotificationsEnabled = "klar.areNotificationsEnabled"
         static let counselingCity = "klar.counselingCity"
         static let lastReviewedWeekStart = "klar.lastReviewedWeekStart"

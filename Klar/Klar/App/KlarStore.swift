@@ -238,17 +238,29 @@ struct KlarStore {
         )
     }
 
-    /// The substance the Today screen leads with: the one with an active reduction goal and
-    /// the tightest remaining allowance. Abstinence and observe-only goals have no quota card.
-    func primaryQuotaSubstance() -> Substance? {
+    /// Every substance the Today screen shows a quota for: all active reduction goals, the
+    /// tightest remaining allowance first. Abstinence and observe-only goals have no quota card.
+    ///
+    /// Ties resolve by `sortOrder` so the list never reshuffles arbitrarily between renders.
+    func quotaSubstances(on date: Date = Date()) -> [SubstanceQuota] {
         allSubstances()
-            .compactMap { substance -> (Substance, QuotaResult)? in
-                let result = quota(for: substance)
+            .compactMap { substance -> SubstanceQuota? in
+                let result = quota(for: substance, on: date)
                 guard result.goalType == .reduction, result.limit != nil else { return nil }
-                return (substance, result)
+                return SubstanceQuota(substance: substance, quota: result)
             }
-            .min { ($0.1.remaining ?? .max) < ($1.1.remaining ?? .max) }?
-            .0
+            .sorted {
+                let lhs = $0.quota.remaining ?? .max
+                let rhs = $1.quota.remaining ?? .max
+                if lhs != rhs { return lhs < rhs }
+                return $0.substance.sortOrder < $1.substance.sortOrder
+            }
+    }
+
+    /// The single substance surfaces with room for only one quota (weekly review) lead with:
+    /// the one with the tightest remaining allowance.
+    func primaryQuotaSubstance() -> Substance? {
+        quotaSubstances().first?.substance
     }
 
     // MARK: - Plans
@@ -446,4 +458,12 @@ struct KlarStore {
             assertionFailure("KlarStore save failed: \(error)")
         }
     }
+}
+
+/// One row of the Today screen's quota list: a substance and its month-to-date quota.
+struct SubstanceQuota: Identifiable {
+    let substance: Substance
+    let quota: QuotaResult
+
+    var id: UUID { substance.id }
 }

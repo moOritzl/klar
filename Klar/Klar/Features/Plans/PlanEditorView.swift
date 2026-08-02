@@ -78,7 +78,7 @@ struct PlanEditorView: View {
                         }
                         .padding(.bottom, 20)
 
-                    KlarSectionLabel(text: "Dann … (Handlung — Vorlage, frei editierbar)")
+                    KlarSectionLabel(text: "Dann … (Handlung: Vorlage, frei editierbar)")
                         .padding(.bottom, 8)
 
                     TextField("Handlung beschreiben …", text: $actionText, axis: .vertical)
@@ -164,7 +164,7 @@ struct PlanEditorView: View {
         .alert("Schon 3 aktive Pläne", isPresented: $limitReached) {
             Button("Verstanden", role: .cancel) {}
         } message: {
-            Text("Max. 3 aktive Pläne — Fokus statt Liste. Pausiere einen bestehenden Plan, um Platz zu schaffen.")
+            Text("Max. 3 aktive Pläne. Pausiere einen bestehenden Plan, um Platz zu schaffen.")
         }
         .task {
             loadInitialState()

@@ -25,7 +25,9 @@ struct TodayView: View {
     private var today: Date { Date() }
     private var todaysEntries: [Entry] { store.entries(onLogicalDayOf: today) }
     private var activePlan: Plan? { store.activePlans().first }
-    private var quotaSubstance: Substance? { store.primaryQuotaSubstance() }
+    private var quotaSubstances: [SubstanceQuota] {
+        store.quotaSubstances()
+    }
 
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
@@ -36,20 +38,27 @@ struct TodayView: View {
                     header
                         .padding(.bottom, 16)
 
-                    // B3 · Only on the 1st. The quota resets, and the app says so out loud —
-                    // "Jeder Monat beginnt bei null." Absolution, built into the calendar.
-                    if KlarDate.isFirstOfMonth(today), let substance = quotaSubstance {
-                        NewMonthCard(limit: store.quota(for: substance).limit ?? 0)
-                            .padding(.bottom, 14)
+                    // B3 · Only on the 1st. The quota resets, and the card says so — the number
+                    // and nothing else.
+                    if KlarDate.isFirstOfMonth(today), !quotaSubstances.isEmpty {
+                        NewMonthCard(
+                            quotas: quotaSubstances.map { (name: $0.substance.name, limit: $0.quota.limit ?? 0) }
+                        )
+                        .padding(.bottom, 14)
                     }
 
-                    if let substance = quotaSubstance {
+                    // One substance keeps the original large card; several share one combined
+                    // card — every limit visible at a glance, tightest first.
+                    if quotaSubstances.count == 1, let single = quotaSubstances.first {
                         QuotaCard(
-                            substance: substance,
-                            quota: store.quota(for: substance),
-                            daysSinceLast: store.stats(for: substance).daysSinceLastOccasion
+                            substance: single.substance,
+                            quota: single.quota,
+                            daysSinceLast: store.stats(for: single.substance).daysSinceLastOccasion
                         )
                         .padding(.bottom, 12)
+                    } else if quotaSubstances.count > 1 {
+                        MultiQuotaCard(quotas: quotaSubstances)
+                            .padding(.bottom, 12)
                     }
 
                     if let activePlan {
@@ -67,7 +76,7 @@ struct TodayView: View {
                                     .font(Klar.TypeScale.headline)
                                     .foregroundStyle(Klar.text)
                                     .padding(.bottom, 4)
-                                Text("Ein Plan entsteht aus deinen Mustern — nicht am Tag 1.")
+                                Text("Ein Plan entsteht aus deinen Mustern.")
                                     .font(Klar.TypeScale.bodySmall)
                                     .foregroundStyle(Klar.textTertiary)
                             }
@@ -103,9 +112,13 @@ struct TodayView: View {
                     }
                 }
                 .padding(.horizontal, 16)
-                .padding(.top, 8)
+                .padding(.top, Klar.Space.x4)
                 .padding(.bottom, 100) // clear the FAB
             }
+            // Heute keeps its own layout rather than KlarScreen — it has a FAB and content that
+            // grows with every entry — so it has to opt into the bounce fix by hand. Without
+            // this an empty day rubber-bands with nothing to scroll.
+            .scrollBounceBehavior(.basedOnSize)
             .scrollIndicators(.hidden)
 
             addButton
@@ -129,9 +142,9 @@ struct TodayView: View {
     // MARK: - Pieces
 
     private var header: some View {
-        HStack {
+        HStack(alignment: .firstTextBaseline) {
             Text("Heute")
-                .font(Klar.TypeScale.title)
+                .font(Klar.TypeScale.display(30))
                 .foregroundStyle(Klar.text)
             Spacer()
             Text(KlarDate.shortWeekdayDate(today))
@@ -169,6 +182,16 @@ struct QuotaCard: View {
 
     var body: some View {
         KlarCard {
+            HStack(spacing: 8) {
+                Circle()
+                    .fill(Klar.substanceColor(substance.colorIndex))
+                    .frame(width: 8, height: 8)
+                Text(substance.name)
+                    .font(Klar.TypeScale.caption.weight(.semibold))
+                    .foregroundStyle(Klar.textTertiary)
+            }
+            .padding(.bottom, 6)
+
             Text(headline)
                 .font(Klar.TypeScale.headline)
                 .foregroundStyle(Klar.text)
@@ -188,7 +211,7 @@ struct QuotaCard: View {
 
     private var headline: String {
         guard let limit = quota.limit, let remaining = quota.remaining else {
-            return "\(substance.name) · nur beobachten"
+            return "Nur beobachten"
         }
         // Over the limit we state the fact and stop. No red, no exclamation, no appeal.
         if remaining <= 0 {
@@ -211,10 +234,67 @@ struct QuotaCard: View {
     }
 }
 
+/// B1 with several limits: one calm card, one row per substance, tightest remaining on top.
+/// Same drain-not-fill bar as the single card — just every budget visible at a glance.
+struct MultiQuotaCard: View {
+    let quotas: [SubstanceQuota]
+
+    var body: some View {
+        KlarCard {
+            Text("Diesen Monat")
+                .font(Klar.TypeScale.headline)
+                .foregroundStyle(Klar.text)
+                .padding(.bottom, 14)
+
+            VStack(alignment: .leading, spacing: 16) {
+                ForEach(quotas) { pair in
+                    MultiQuotaRow(substance: pair.substance, quota: pair.quota)
+                }
+            }
+        }
+    }
+}
+
+struct MultiQuotaRow: View {
+    let substance: Substance
+    let quota: QuotaResult
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 7) {
+            HStack(spacing: 8) {
+                Circle()
+                    .fill(Klar.substanceColor(substance.colorIndex))
+                    .frame(width: 8, height: 8)
+                Text(substance.name)
+                    .font(Klar.TypeScale.bodySmall.weight(.semibold))
+                    .foregroundStyle(Klar.text)
+                Spacer()
+                Text(countText)
+                    .font(Klar.TypeScale.bodySmall)
+                    .foregroundStyle(Klar.textSecondary)
+            }
+
+            if let limit = quota.limit, let remaining = quota.remaining {
+                KlarQuotaBar(limit: limit, remaining: remaining)
+            }
+        }
+        .accessibilityElement(children: .combine)
+    }
+
+    private var countText: String {
+        guard let limit = quota.limit, let remaining = quota.remaining else { return "" }
+        // Same wording rule as the single card: over the limit, state the fact and stop.
+        if remaining <= 0 {
+            return "\(quota.occasions) von \(limit)"
+        }
+        return "Noch \(remaining) von \(limit)"
+    }
+}
+
 // MARK: - New month card (B3)
 
 struct NewMonthCard: View {
-    let limit: Int
+    let quotas: [(name: String, limit: Int)]
 
     var body: some View {
         KlarInverseCard {
@@ -228,15 +308,17 @@ struct NewMonthCard: View {
             }
             .padding(.bottom, 8)
 
-            Text("Kontingent: \(limit).")
+            Text(quotaLine)
                 .font(Klar.TypeScale.display(24))
                 .foregroundStyle(.white)
-                .padding(.bottom, 6)
-
-            Text("Jeder Monat beginnt bei null. Kein Rückblick auf den letzten, kein Vorwurf.")
-                .font(Klar.TypeScale.bodySmall)
-                .foregroundStyle(Klar.textOnInverseSecondary)
         }
+    }
+
+    private var quotaLine: String {
+        if quotas.count == 1, let single = quotas.first {
+            return "Kontingent: \(single.limit)."
+        }
+        return "Kontingente: " + quotas.map { "\($0.name) \($0.limit)" }.joined(separator: " · ") + "."
     }
 }
 

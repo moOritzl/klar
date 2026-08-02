@@ -43,7 +43,7 @@ struct OnboardingFlowView: View {
 
 // MARK: - Draft
 
-/// Everything the flow gathers, held in memory until "Fertig — App öffnen".
+/// Everything the flow gathers, held in memory until "App öffnen".
 @Observable
 final class OnboardingDraft {
     var enableAppLock = false
@@ -194,11 +194,14 @@ struct PrivacyStepView: View {
         isAuthenticating = true
         defer { isAuthenticating = false }
 
-        let manager = AppLockManager()
-        let success = await manager.attemptUnlock()
-        if success {
+        // `.unavailable` counts as proof enough: the device has no gate to fail, and refusing to
+        // advance would strand the user on a step they cannot satisfy.
+        switch await AppLockManager().attemptUnlock() {
+        case .success, .unavailable:
             draft.enableAppLock = true
             onContinue()
+        case .failure, .cancelled:
+            break
         }
     }
 }
@@ -221,7 +224,7 @@ struct SubstanceSelectionStepView: View {
     var body: some View {
         OnboardingScaffold(
             title: "Was möchtest du erfassen?",
-            subtitle: "Alphabetisch, ohne Wertung. Mehrfachauswahl. Jederzeit änderbar — die Auswahl ist kein Bekenntnis.",
+            subtitle: "Alphabetisch, ohne Wertung. Mehrfachauswahl. Jederzeit änderbar.",
             step: 1,
             primaryTitle: "Weiter",
             isPrimaryEnabled: !draft.chosenSubstances.isEmpty,
@@ -321,7 +324,7 @@ struct GoalStepView: View {
     var body: some View {
         OnboardingScaffold(
             title: "Was ist dein Ziel?",
-            subtitle: "Kein Ziel am Tag 1 nötig. „Nur beobachten“ ist Stufe 1 — anfangen darfst du trotzdem.",
+            subtitle: "Kein Ziel am Tag 1 nötig. „Nur beobachten“ ist Stufe 1.",
             step: 2,
             primaryTitle: "Weiter",
             onPrimary: onContinue
@@ -370,13 +373,13 @@ struct GoalStepView: View {
                 .padding(.top, 14)
 
             case .abstinence:
-                Text("Abstinenz — jeder Eintrag wird trotzdem ohne Wertung erfasst.")
+                Text("Abstinenz. Jeder Eintrag wird trotzdem ohne Wertung erfasst.")
                     .font(Klar.TypeScale.bodySmall)
                     .foregroundStyle(Klar.textTertiary)
                     .padding(.top, 12)
 
             case .observe:
-                Text("Erstmal nur beobachten — kein Limit, kein Druck.")
+                Text("Erstmal nur beobachten. Kein Limit.")
                     .font(Klar.TypeScale.bodySmall)
                     .foregroundStyle(Klar.textTertiary)
                     .padding(.top, 12)
@@ -401,9 +404,9 @@ struct SubstitutionStepView: View {
     var body: some View {
         OnboardingScaffold(
             title: "Was hilft dir im Moment?",
-            subtitle: "2–3 persönliche Alternativen. Im Craving ist keine Zeit, sie zu suchen — darum jetzt, in Ruhe.",
+            subtitle: "2–3 persönliche Alternativen. Im Craving ist keine Zeit, sie zu suchen.",
             step: 3,
-            primaryTitle: "Fertig — App öffnen",
+            primaryTitle: "App öffnen",
             onPrimary: onFinish
         ) {
             VStack(spacing: 10) {

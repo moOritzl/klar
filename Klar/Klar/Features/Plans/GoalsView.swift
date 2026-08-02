@@ -90,7 +90,7 @@ struct GoalCard: View {
                     }
 
             case (false, .abstinence):
-                Text("Abstinenz — Einträge werden weiterhin ohne Wertung erfasst.")
+                Text("Abstinenz. Einträge werden weiterhin ohne Wertung erfasst.")
                     .font(Klar.TypeScale.bodySmall)
                     .foregroundStyle(Klar.textTertiary)
 
@@ -186,7 +186,7 @@ struct SubstancesView: View {
                         KlarScreenHeader(title: "Substanzen & Kosten") { dismiss() }
                             .padding(.bottom, 6)
 
-                        Text("Die Kostenbasis ist deine eigene Schätzung — sie speist die „Geld gespart“-Rechnung.")
+                        Text("Die Kostenbasis ist deine eigene Schätzung. Sie speist die „Geld gespart“-Rechnung.")
                             .font(Klar.TypeScale.bodySmall)
                             .foregroundStyle(Klar.textTertiary)
                             .padding(.bottom, 18)

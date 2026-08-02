@@ -11,58 +11,47 @@ struct HelpView: View {
 
     var body: some View {
         NavigationStack {
-            ZStack {
-                Klar.bgSubtle.ignoresSafeArea()
+            KlarScreen {
+                KlarScreenBanner(title: "Hilfe")
+            } content: {
+                VStack(alignment: .leading, spacing: 0) {
+                    sosButton
+                        .padding(.bottom, 16)
 
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 0) {
-                        Text("Hilfe")
-                            .font(Klar.TypeScale.title)
-                            .foregroundStyle(Klar.text)
-                            .padding(.bottom, 14)
-
-                        sosButton
-                            .padding(.bottom, 16)
-
-                        VStack(spacing: 10) {
-                            NavigationLink {
-                                EmergencyView()
-                            } label: {
-                                emergencyRow
-                            }
-                            .buttonStyle(.plain)
-                            .accessibilityIdentifier("help.emergency")
-
-                            NavigationLink {
-                                CounselingView()
-                            } label: {
-                                helpRow(
-                                    icon: "person.2",
-                                    title: "Beratung",
-                                    subtitle: "Suchtberatung · Hotlines · anonym"
-                                )
-                            }
-                            .buttonStyle(.plain)
-                            .accessibilityIdentifier("help.counseling")
-
-                            NavigationLink {
-                                RiskInfoListView()
-                            } label: {
-                                helpRow(
-                                    icon: "book",
-                                    title: "Risiko-Infos",
-                                    subtitle: "Nachschlagewerk, kein Startpunkt"
-                                )
-                            }
-                            .buttonStyle(.plain)
-                            .accessibilityIdentifier("help.riskInfo")
+                    VStack(spacing: 10) {
+                        NavigationLink {
+                            EmergencyView()
+                        } label: {
+                            emergencyRow
                         }
+                        .buttonStyle(.plain)
+                        .accessibilityIdentifier("help.emergency")
+
+                        NavigationLink {
+                            CounselingView()
+                        } label: {
+                            helpRow(
+                                icon: "person.2",
+                                title: "Beratung",
+                                subtitle: "Suchtberatung · Hotlines · anonym"
+                            )
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityIdentifier("help.counseling")
+
+                        NavigationLink {
+                            RiskInfoListView()
+                        } label: {
+                            helpRow(
+                                icon: "book",
+                                title: "Risiko-Infos",
+                                subtitle: "Nachschlagewerk, kein Startpunkt"
+                            )
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityIdentifier("help.riskInfo")
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.top, 8)
-                    .padding(.bottom, 24)
                 }
-                .scrollIndicators(.hidden)
             }
             .fullScreenCover(isPresented: $isSOSPresented) {
                 CravingSOSView()
@@ -85,7 +74,7 @@ struct HelpView: View {
                     Text("Craving-SOS")
                         .font(.system(size: 19, weight: .semibold))
                         .foregroundStyle(.white)
-                    Text("Ein Tap — die App führt dich.")
+                    Text("Ein Tap. Die App führt dich.")
                         .font(Klar.TypeScale.bodySmall)
                         .foregroundStyle(.white.opacity(0.85))
                 }
@@ -99,7 +88,7 @@ struct HelpView: View {
         }
         .buttonStyle(.plain)
         .accessibilityIdentifier("help.sos")
-        .accessibilityLabel("Craving-SOS. Ein Tap — die App führt dich.")
+        .accessibilityLabel("Craving-SOS. Ein Tap. Die App führt dich.")
     }
 
     /// The only place in the app that uses red — and it means "call an ambulance", not
@@ -241,7 +230,7 @@ struct EmergencyView: View {
                     }
                     .padding(.bottom, 12)
 
-                    Text("Notruf hilft, ohne die Polizei zu rufen. Sag ehrlich, was konsumiert wurde — das entscheidet über die richtige Behandlung.")
+                    Text("Notruf hilft, ohne die Polizei zu rufen. Sag ehrlich, was konsumiert wurde. Das entscheidet über die richtige Behandlung.")
                         .font(Klar.TypeScale.bodySmall)
                         .foregroundStyle(Klar.textTertiary)
                 }
@@ -298,7 +287,7 @@ struct CounselingView: View {
                                     Text("Suchthilfeverzeichnis der DHS")
                                         .font(Klar.TypeScale.headline)
                                         .foregroundStyle(Klar.text)
-                                    Text("Beratungsstellen in deiner Stadt — offiziell gepflegt, laufend aktuell.")
+                                    Text("Beratungsstellen in deiner Stadt. Offiziell gepflegt, laufend aktuell.")
                                         .font(Klar.TypeScale.bodySmall)
                                         .foregroundStyle(Klar.textTertiary)
                                         .multilineTextAlignment(.leading)

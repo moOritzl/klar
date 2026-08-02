@@ -117,4 +117,76 @@ final class ExportImportTests: XCTestCase {
             XCTAssertEqual(error as? ExportImportError, .unknownSchemaVersion(999))
         }
     }
+
+    func testDecodeRejectsMalformedJSONWithoutTouchingTheStore() throws {
+        let context = TestModelContainer.makeInMemoryContext()
+        context.insert(Substance(name: "Kaffee", unit: .drink, colorIndex: 0, sortOrder: 0))
+        try context.save()
+
+        XCTAssertThrowsError(try ExportImportService.decode(Data("nicht json".utf8)))
+
+        let survivors = try context.fetch(FetchDescriptor<Substance>())
+        XCTAssertEqual(survivors.count, 1, "A rejected file must leave the store untouched")
+    }
+
+    func testDecodeRejectsAnUnknownSchemaVersion() throws {
+        let payload = #"{"schemaVersion": 999, "exportedAt": "1970-01-01T00:00:00Z", "substances": [], "entries": [], "contextTags": [], "goalPeriods": [], "plans": [], "planCheckIns": [], "substitutionActions": [], "whyNotes": [], "reviewDecisions": []}"#
+
+        XCTAssertThrowsError(try ExportImportService.decode(Data(payload.utf8))) { error in
+            XCTAssertEqual(error as? ExportImportError, .unknownSchemaVersion(999))
+        }
+    }
+
+    /// The import screen's real sequence: decode, then wipe, then restore. Exercised end to end
+    /// because the ordering is the whole safety property.
+    func testReplaceAllReplacesAPopulatedStore() throws {
+        let sourceContext = TestModelContainer.makeInMemoryContext()
+        let substance = Substance(name: "Kaffee", unit: .drink, colorIndex: 2, sortOrder: 0)
+        sourceContext.insert(substance)
+        sourceContext.insert(Entry(substance: substance, timestamp: Date(timeIntervalSince1970: 1_770_000_000), timezoneID: "Europe/Berlin", amount: nil))
+        try sourceContext.save()
+        let payload = try ExportImportService.exportJSON(context: sourceContext)
+
+        let destinationContext = TestModelContainer.makeInMemoryContext()
+        destinationContext.insert(Substance(name: "Bier", unit: .drink, colorIndex: 1, sortOrder: 0))
+        try destinationContext.save()
+
+        try ExportImportService.replaceAll(with: payload, context: destinationContext)
+
+        let names = try destinationContext.fetch(FetchDescriptor<Substance>()).map(\.name)
+        XCTAssertEqual(names, ["Kaffee"])
+        XCTAssertEqual(try destinationContext.fetchCount(FetchDescriptor<Entry>()), 1)
+    }
+
+    /// The only place in the app that can destroy data it cannot get back. A file that decodes
+    /// but blows up half way through the restore must leave the user where they started.
+    func testAFailedRestoreRollsTheOldStoreBack() throws {
+        struct RestoreFailure: Error {}
+
+        let sourceContext = TestModelContainer.makeInMemoryContext()
+        sourceContext.insert(Substance(name: "Kaffee", unit: .drink, colorIndex: 2, sortOrder: 0))
+        try sourceContext.save()
+        let payload = try ExportImportService.exportJSON(context: sourceContext)
+
+        let destinationContext = TestModelContainer.makeInMemoryContext()
+        let original = Substance(name: "Bier", unit: .drink, colorIndex: 1, sortOrder: 0)
+        destinationContext.insert(original)
+        destinationContext.insert(Entry(
+            substance: original,
+            timestamp: Date(timeIntervalSince1970: 1_770_000_000),
+            timezoneID: "Europe/Berlin",
+            amount: nil
+        ))
+        try destinationContext.save()
+
+        XCTAssertThrowsError(
+            try ExportImportService.replaceAll(with: payload, context: destinationContext) { _, _ in
+                throw RestoreFailure()
+            }
+        )
+
+        let names = try destinationContext.fetch(FetchDescriptor<Substance>()).map(\.name)
+        XCTAssertEqual(names, ["Bier"], "A failed restore must put the old store back")
+        XCTAssertEqual(try destinationContext.fetchCount(FetchDescriptor<Entry>()), 1)
+    }
 }

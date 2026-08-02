@@ -111,7 +111,7 @@ struct WhatHappenedStep: View {
 
                     if summary.entryCount == 0 {
                         KlarCard(padding: 16) {
-                            Text("Eine eintragsfreie Woche. Rein deskriptiv — kein Lob, keine Wertung.")
+                            Text("Eine eintragsfreie Woche.")
                                 .font(Klar.TypeScale.bodySmall)
                                 .foregroundStyle(Klar.textTertiary)
                         }
@@ -253,7 +253,7 @@ struct LookAheadStep: View {
                 .foregroundStyle(Klar.text)
                 .padding(.bottom, 8)
 
-            Text("Dein Plan für nächste Woche — du entscheidest.")
+            Text("Dein Plan für nächste Woche.")
                 .font(Klar.TypeScale.bodySmall)
                 .foregroundStyle(Klar.textSecondary)
                 .padding(.bottom, 24)
@@ -296,7 +296,9 @@ struct LookAheadStep: View {
             Button(action: onFinish) {
                 Text("Rückblick abschließen")
                     .font(.system(size: 16, weight: .semibold))
-                    .foregroundStyle(.white)
+                    // The button is filled with `Klar.text`, which flips with the scheme, so its
+                    // label has to be the page colour rather than a literal white.
+                    .foregroundStyle(Klar.bg)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 16)
                     .background(Klar.text)

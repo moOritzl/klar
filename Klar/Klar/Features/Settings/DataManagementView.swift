@@ -2,11 +2,11 @@ import SwiftUI
 import SwiftData
 import UniformTypeIdentifiers
 
-/// „Daten exportieren / löschen" — the promise in A1 made operable.
+/// „Daten" — the promise in A1 made operable.
 ///
-/// Export is complete (JSON round-trips through `ExportImportService.importJSON`), and deletion
-/// is real deletion, not a flag. An app whose whole pitch is "nothing to compromise" has to make
-/// both of these trivially reachable.
+/// Export is complete (the JSON round-trips back in through the import below), and deletion is
+/// real deletion, not a flag. An app whose whole pitch is "nothing to compromise" has to make all
+/// three trivially reachable.
 struct DataManagementView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
@@ -14,8 +14,9 @@ struct DataManagementView: View {
 
     @State private var exportDocument: ExportDocument?
     @State private var isExportingJSON = false
-    @State private var isExportingCSV = false
     @State private var isConfirmingWipe = false
+    @State private var isImporting = false
+    @State private var pendingImport: Data?
     @State private var errorMessage: String?
 
     var body: some View {
@@ -30,18 +31,21 @@ struct DataManagementView: View {
 
                         SettingsGroup {
                             SettingsNavigationRow(
-                                icon: "doc.text",
-                                title: "Als JSON exportieren",
-                                subtitle: "Vollständig — lässt sich wieder importieren"
+                                icon: "square.and.arrow.up",
+                                title: "Daten exportieren"
                             ) { exportJSON() }
+                        }
+                        .padding(.bottom, 20)
 
-                            SettingsDivider()
+                        KlarSectionLabel(text: "Import")
+                            .padding(.bottom, 8)
 
+                        SettingsGroup {
                             SettingsNavigationRow(
-                                icon: "tablecells",
-                                title: "Als CSV exportieren",
-                                subtitle: "Nur Einträge, für Tabellenprogramme"
-                            ) { exportCSV() }
+                                icon: "square.and.arrow.down",
+                                title: "Daten importieren",
+                                subtitle: "Ersetzt alle Daten auf diesem Gerät"
+                            ) { isImporting = true }
                         }
                         .padding(.bottom, 20)
 
@@ -76,7 +80,7 @@ struct DataManagementView: View {
                         .buttonStyle(.plain)
                         .padding(.bottom, 20)
 
-                        Text("Der Export enthält deine Einträge, Ziele, Pläne und Notizen. Er enthält keine Gerätedaten — Face-ID-Einstellung und Vertrauensperson bleiben auf diesem Gerät.")
+                        Text("Der Export enthält deine Einträge, Ziele, Pläne und Notizen. Er enthält keine Gerätedaten: Face-ID-Einstellung und Vertrauensperson bleiben auf diesem Gerät.")
                             .font(Klar.TypeScale.bodySmall)
                             .foregroundStyle(Klar.textTertiary)
                     }
@@ -100,12 +104,30 @@ struct DataManagementView: View {
             contentType: .json,
             defaultFilename: "klar-export-\(filenameStamp)"
         ) { handle($0) }
-        .fileExporter(
-            isPresented: $isExportingCSV,
-            document: exportDocument,
-            contentType: .commaSeparatedText,
-            defaultFilename: "klar-eintraege-\(filenameStamp)"
-        ) { handle($0) }
+        .fileImporter(
+            isPresented: $isImporting,
+            allowedContentTypes: [.json]
+        ) { result in
+            switch result {
+            case .success(let url):
+                loadForImport(url)
+            case .failure(let error):
+                errorMessage = error.localizedDescription
+            }
+        }
+        .confirmationDialog(
+            "Alle Daten ersetzen?",
+            isPresented: Binding(
+                get: { pendingImport != nil },
+                set: { if !$0 { pendingImport = nil } }
+            ),
+            titleVisibility: .visible
+        ) {
+            Button("Ersetzen", role: .destructive) { performImport() }
+            Button("Abbrechen", role: .cancel) { pendingImport = nil }
+        } message: {
+            Text("Einträge, Ziele, Pläne und Notizen auf diesem Gerät werden durch die Datei ersetzt.")
+        }
         .confirmationDialog(
             "Wirklich alle Daten löschen?",
             isPresented: $isConfirmingWipe,
@@ -145,11 +167,30 @@ struct DataManagementView: View {
         }
     }
 
-    private func exportCSV() {
+    /// Reads and validates before anything is destroyed. A file that cannot be decoded never
+    /// reaches the confirmation dialog, so the user is never asked to approve a wipe that would
+    /// then fail halfway.
+    private func loadForImport(_ url: URL) {
+        let needsScope = url.startAccessingSecurityScopedResource()
+        defer { if needsScope { url.stopAccessingSecurityScopedResource() } }
+
         do {
-            let data = try ExportImportService.exportCSV(context: modelContext)
-            exportDocument = ExportDocument(data: data)
-            isExportingCSV = true
+            let data = try Data(contentsOf: url)
+            _ = try ExportImportService.decode(data)
+            pendingImport = data
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    private func performImport() {
+        guard let data = pendingImport else { return }
+        pendingImport = nil
+        do {
+            try ExportImportService.replaceAll(with: data, context: modelContext)
+            // Without this the user lands back in onboarding on top of a full store.
+            settings.hasCompletedOnboarding = true
+            dismiss()
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -182,7 +223,7 @@ struct DataManagementView: View {
 
 /// Bridges raw `Data` into `fileExporter`.
 struct ExportDocument: FileDocument {
-    static var readableContentTypes: [UTType] { [.json, .commaSeparatedText] }
+    static var readableContentTypes: [UTType] { [.json] }
 
     let data: Data
 

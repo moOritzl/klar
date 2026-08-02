@@ -246,7 +246,7 @@ struct ContextDistributionCard: View {
                 .padding(.bottom, 14)
 
             if distribution.isEmpty {
-                Text("Noch keine Kontext-Tags erfasst. Sie sind optional — und der Rohstoff für deine Pläne.")
+                Text("Noch keine Kontext-Tags erfasst. Sie sind optional und der Rohstoff für deine Pläne.")
                     .font(Klar.TypeScale.bodySmall)
                     .foregroundStyle(Klar.textTertiary)
             } else {
@@ -308,7 +308,7 @@ struct ReviewArchiveSectionView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
-                Text("Dein Archiv — nur deine eigene Ausgangslage.")
+                Text("Dein Archiv.")
                     .font(Klar.TypeScale.bodySmall)
                     .foregroundStyle(Klar.textTertiary)
                     .padding(.bottom, 18)

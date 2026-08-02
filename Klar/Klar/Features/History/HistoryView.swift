@@ -12,44 +12,78 @@ import KlarCore
 /// Rückblick) but ships a third screen, "Trends" (E3), with no entry point drawn. A third
 /// segment is the smallest change that makes every designed screen reachable.
 struct HistoryView: View {
-    enum Section: Hashable {
+    enum Section: Hashable, CaseIterable {
         case calendar, trends, review
     }
 
     @State private var section: Section = .calendar
+    /// Which way the next section change slides. Set before the change so the animation follows
+    /// the swipe instead of always entering from the same side.
+    @State private var isAdvancing = true
 
     var body: some View {
-        ZStack {
-            Klar.bgSubtle.ignoresSafeArea()
-
-            VStack(alignment: .leading, spacing: 0) {
-                Text(title)
-                    .font(Klar.TypeScale.title)
-                    .foregroundStyle(Klar.text)
-                    .padding(.bottom, 14)
-
+        KlarScreen {
+            KlarScreenBanner(title: title) {
                 KlarSegmentedControl(
                     options: [
                         (Section.calendar, "Kalender"),
                         (Section.trends, "Trends"),
                         (Section.review, "Rückblick")
                     ],
-                    selection: $section
+                    selection: Binding(get: { section }, set: { select($0) })
                 )
-                .padding(.bottom, 16)
-
-                switch section {
-                case .calendar: CalendarSectionView()
-                case .trends: TrendsSectionView()
-                case .review: ReviewArchiveSectionView()
-                }
             }
-            .padding(.horizontal, 16)
-            .padding(.top, 8)
+        } content: {
+            sectionContent
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .id(section)
+                .transition(.asymmetric(
+                    insertion: .move(edge: isAdvancing ? .trailing : .leading).combined(with: .opacity),
+                    removal: .move(edge: isAdvancing ? .leading : .trailing).combined(with: .opacity)
+                ))
+        }
+        // Swiping anywhere the content does not claim — which on a short month is most of the
+        // screen — moves between the three sections. The segments stay because a bare gesture is
+        // undiscoverable and unreachable with VoiceOver; this is the shortcut, not the only way.
+        .contentShape(Rectangle())
+        .gesture(
+            DragGesture(minimumDistance: 30)
+                .onEnded { value in
+                    guard abs(value.translation.width) > abs(value.translation.height) else { return }
+                    shiftSection(value.translation.width < 0 ? 1 : -1)
+                }
+        )
+    }
+
+    @ViewBuilder
+    private var sectionContent: some View {
+        switch section {
+        case .calendar: CalendarSectionView()
+        case .trends: TrendsSectionView()
+        case .review: ReviewArchiveSectionView()
         }
     }
 
-    private var title: String {
+    private func select(_ next: Section) {
+        guard next != section,
+              let from = Section.allCases.firstIndex(of: section),
+              let to = Section.allCases.firstIndex(of: next)
+        else { return }
+        isAdvancing = to > from
+        withAnimation(.easeInOut(duration: 0.25)) { section = next }
+    }
+
+    /// Refuses to wrap around: swiping past the last section does nothing, so the ends of the
+    /// range stay felt rather than looping the user back to the start.
+    private func shiftSection(_ delta: Int) {
+        let all = Section.allCases
+        guard let index = all.firstIndex(of: section) else { return }
+        let target = index + delta
+        guard all.indices.contains(target) else { return }
+        select(all[target])
+    }
+
+    private var title: LocalizedStringKey {
         switch section {
         case .calendar, .trends: "Verlauf"
         case .review: "Wochenrückblicke"
@@ -57,10 +91,73 @@ struct HistoryView: View {
     }
 }
 
+/// The month's two numbers. Pure output, and the first thing on the section — the user singled
+/// these out as the one part of the restructure that worked.
+struct CalendarStatsView: View {
+    let visibleMonth: Date
+
+    @Environment(\.modelContext) private var modelContext
+    @Query private var entries: [Entry]
+
+    private var store: KlarStore { KlarStore(context: modelContext) }
+    private var calendar: Calendar { KlarDate.calendar }
+
+    private var daysInMonth: Int {
+        calendar.range(of: .day, in: .month, for: visibleMonth)?.count ?? 30
+    }
+
+    private var entryCount: Int {
+        entries.filter {
+            let day = KlarDate.logicalDay(for: $0.timestamp, timezoneID: $0.timezoneID)
+            return calendar.isDate(day, equalTo: visibleMonth, toGranularity: .month)
+        }.count
+    }
+
+    private var entryFreeDays: Int {
+        daysInMonth - store.loggedDays(inMonthOf: visibleMonth).count
+    }
+
+    var body: some View {
+        HStack(spacing: 12) {
+            tile(label: "Einträge", value: "\(entryCount)", color: Klar.text)
+            tile(label: "Eintragsfrei", value: "\(entryFreeDays)", color: Klar.Palette.emerald700)
+        }
+    }
+
+    private func tile(label: LocalizedStringKey, value: String, color: Color) -> some View {
+        KlarCard(padding: 14) {
+            Text(label)
+                .font(Klar.TypeScale.caption)
+                .foregroundStyle(Klar.textTertiary)
+            Text(value)
+                .font(Klar.TypeScale.numeral)
+                .foregroundStyle(color)
+        }
+    }
+}
+
 // MARK: - E1 · Monatskalender
+
+/// Month stepping, pulled out of the view so the chevrons and the swipe cannot drift apart and
+/// so the "no future months" rule is testable.
+enum CalendarMonthNavigation {
+    static func month(after delta: Int, from visibleMonth: Date, today: Date = Date()) -> Date? {
+        let calendar = KlarDate.calendar
+        guard let shifted = calendar.date(byAdding: .month, value: delta, to: visibleMonth) else {
+            return nil
+        }
+        guard shifted <= today || calendar.isDate(shifted, equalTo: today, toGranularity: .month) else {
+            return nil
+        }
+        return shifted
+    }
+}
 
 struct CalendarSectionView: View {
     @Environment(\.modelContext) private var modelContext
+    /// Unread on purpose. The counts moved to `CalendarStatsView`, but this is what still
+    /// invalidates the grid when an entry is added, so the day dots stay current. Deleting it
+    /// silently stops the calendar updating.
     @Query private var entries: [Entry]
 
     @State private var visibleMonth = Date()
@@ -84,44 +181,34 @@ struct CalendarSectionView: View {
         return (weekday + 5) % 7
     }
 
-    private var entryCount: Int {
-        entries.filter {
-            let day = KlarDate.logicalDay(for: $0.timestamp, timezoneID: $0.timezoneID)
-            return calendar.isDate(day, equalTo: visibleMonth, toGranularity: .month)
-        }.count
-    }
-
-    private var entryFreeDays: Int { daysInMonth - loggedDays.count }
-
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 0) {
-                KlarCard(padding: 16) {
-                    monthHeader
-                        .padding(.bottom, 12)
+        VStack(alignment: .leading, spacing: 0) {
+            CalendarStatsView(visibleMonth: visibleMonth)
+                .padding(.bottom, 16)
 
-                    weekdayHeader
-                        .padding(.bottom, 6)
+            KlarCard(padding: 16) {
+                monthHeader
+                    .padding(.bottom, 12)
 
-                    dayGrid
-                }
+                weekdayHeader
+                    .padding(.bottom, 6)
 
-                legend
-                    .padding(.top, 14)
-
-                HStack(spacing: 12) {
-                    statTile(label: "Einträge", value: "\(entryCount)", color: Klar.text)
-                    statTile(
-                        label: "Eintragsfrei",
-                        value: "\(entryFreeDays)",
-                        color: Klar.Palette.emerald700
-                    )
-                }
-                .padding(.top, 18)
+                dayGrid
             }
-            .padding(.bottom, 24)
+            // Horizontal-only, and higher priority than the section swipe this card sits inside:
+            // a drag that starts on the calendar means "another month", not "another section".
+            // A mostly-vertical drag belongs to the scroll view, and the day cells keep their taps.
+            .highPriorityGesture(
+                DragGesture(minimumDistance: 24)
+                    .onEnded { value in
+                        guard abs(value.translation.width) > abs(value.translation.height) else { return }
+                        shiftMonth(value.translation.width < 0 ? 1 : -1)
+                    }
+            )
+
+            legend
+                .padding(.top, 14)
         }
-        .scrollIndicators(.hidden)
         .sheet(item: Binding(
             get: { selectedDay.map { IdentifiableDate(date: $0) } },
             set: { selectedDay = $0?.date }
@@ -221,7 +308,7 @@ struct CalendarSectionView: View {
 
                 if hasEntries {
                     Circle()
-                        .fill(isToday ? Color.white : Klar.Palette.cyan600)
+                        .fill(isToday ? Klar.bg : Klar.Palette.cyan600)
                         .frame(width: 5, height: 5)
                         .offset(y: 11)
                 }
@@ -235,7 +322,9 @@ struct CalendarSectionView: View {
     }
 
     private func dayColor(isToday: Bool, isFuture: Bool) -> Color {
-        if isToday { return .white }
+        // The today pill is filled with `Klar.text`, which flips with the scheme, so its
+        // contents have to be the page colour rather than a literal white.
+        if isToday { return Klar.bg }
         return isFuture ? Klar.borderStrong : Klar.text
     }
 
@@ -262,17 +351,6 @@ struct CalendarSectionView: View {
         .foregroundStyle(Klar.textTertiary)
     }
 
-    private func statTile(label: LocalizedStringKey, value: String, color: Color) -> some View {
-        KlarCard(padding: 14) {
-            Text(label)
-                .font(Klar.TypeScale.caption)
-                .foregroundStyle(Klar.textTertiary)
-            Text(value)
-                .font(Klar.TypeScale.numeral)
-                .foregroundStyle(color)
-        }
-    }
-
     // MARK: - Month math
 
     private var isCurrentMonth: Bool {
@@ -280,8 +358,10 @@ struct CalendarSectionView: View {
     }
 
     private func shiftMonth(_ delta: Int) {
-        guard let shifted = calendar.date(byAdding: .month, value: delta, to: visibleMonth) else { return }
-        visibleMonth = shifted
+        guard let shifted = CalendarMonthNavigation.month(after: delta, from: visibleMonth) else { return }
+        withAnimation(.easeInOut(duration: 0.2)) {
+            visibleMonth = shifted
+        }
     }
 
     private func dayDate(_ day: Int) -> Date? {

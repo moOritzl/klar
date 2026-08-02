@@ -100,16 +100,19 @@
     "1 Eintrag" : {
 
     },
-    "2–3 persönliche Alternativen. Im Craving ist keine Zeit, sie zu suchen — darum jetzt, in Ruhe." : {
+    "2–3 persönliche Alternativen. Im Craving ist keine Zeit, sie zu suchen." : {
 
     },
     "Abbrechen" : {
 
     },
-    "Abstinenz — Einträge werden weiterhin ohne Wertung erfasst." : {
+    "Abstinenz. Einträge werden weiterhin ohne Wertung erfasst." : {
 
     },
-    "Abstinenz — jeder Eintrag wird trotzdem ohne Wertung erfasst." : {
+    "Abstinenz. Jeder Eintrag wird trotzdem ohne Wertung erfasst." : {
+
+    },
+    "Alle Daten ersetzen?" : {
 
     },
     "Alle Daten löschen" : {
@@ -118,16 +121,16 @@
     "Alles bleibt auf deinem Gerät." : {
 
     },
-    "Alphabetisch, ohne Wertung. Mehrfachauswahl. Jederzeit änderbar — die Auswahl ist kein Bekenntnis." : {
-
-    },
-    "Als CSV exportieren" : {
+    "Alphabetisch, ohne Wertung. Mehrfachauswahl. Jederzeit änderbar." : {
 
     },
     "Als JSON exportieren" : {
 
     },
     "Alternative hinzufügen" : {
+
+    },
+    "App öffnen" : {
 
     },
     "Archivieren" : {
@@ -148,7 +151,7 @@
     "Beratung" : {
 
     },
-    "Beratungsstellen in deiner Stadt — offiziell gepflegt, laufend aktuell." : {
+    "Beratungsstellen in deiner Stadt. Offiziell gepflegt, laufend aktuell." : {
 
     },
     "Bestehende Einträge bleiben erhalten. Die Substanz verschwindet nur aus der Auswahl." : {
@@ -163,16 +166,16 @@
     "Craving-SOS" : {
 
     },
-    "Craving-SOS. Ein Tap — die App führt dich." : {
-
-    },
-    "CSV teilen" : {
+    "Craving-SOS. Ein Tap. Die App führt dich." : {
 
     },
     "DANN" : {
 
     },
-    "Dann … (Handlung — Vorlage, frei editierbar)" : {
+    "Dann … (Handlung: Vorlage, frei editierbar)" : {
+
+    },
+    "Darstellung" : {
 
     },
     "Das hat nicht geklappt" : {
@@ -181,13 +184,16 @@
     "Daten" : {
 
     },
-    "Daten exportieren / löschen" : {
+    "Daten exportieren" : {
+
+    },
+    "Daten importieren" : {
 
     },
     "Dein „Warum“" : {
 
     },
-    "Dein Archiv — nur deine eigene Ausgangslage." : {
+    "Dein Archiv." : {
 
     },
     "Dein Plan" : {
@@ -196,7 +202,7 @@
     "Dein Plan für „%@“" : {
 
     },
-    "Dein Plan für nächste Woche — du entscheidest." : {
+    "Dein Plan für nächste Woche." : {
 
     },
     "Dein Wochenrückblick ist da." : {
@@ -211,16 +217,19 @@
     "Der Eintrag wird endgültig entfernt." : {
 
     },
-    "Der Export enthält deine Einträge, Ziele, Pläne und Notizen. Er enthält keine Gerätedaten — Face-ID-Einstellung und Vertrauensperson bleiben auf diesem Gerät." : {
+    "Der Export enthält deine Einträge, Ziele, Pläne und Notizen. Er enthält keine Gerätedaten: Face-ID-Einstellung und Vertrauensperson bleiben auf diesem Gerät." : {
 
     },
     "Der Weg zu Menschen ist immer einen Tap entfernt." : {
 
     },
-    "Die Kostenbasis ist deine eigene Schätzung — sie speist die „Geld gespart“-Rechnung." : {
+    "Die Kostenbasis ist deine eigene Schätzung. Sie speist die „Geld gespart“-Rechnung." : {
 
     },
     "Diese Woche" : {
+
+    },
+    "Diesen Monat" : {
 
     },
     "Dieses Gefühl geht vorbei. Du hast einen Plan." : {
@@ -235,19 +244,19 @@
     "Eigene Substanz" : {
 
     },
-    "Ein guter Plan braucht Kenntnis der eigenen Muster. Deshalb kommt er nicht am Tag 1 — sondern wenn deine Einträge etwas zeigen." : {
+    "Ein guter Plan braucht Kenntnis der eigenen Muster. Er entsteht, wenn deine Einträge etwas zeigen." : {
 
     },
-    "Ein Plan entsteht aus deinen Mustern — nicht am Tag 1." : {
+    "Ein Plan entsteht aus deinen Mustern." : {
 
     },
     "Ein ruhiger Tag." : {
 
     },
-    "Ein Tap — die App führt dich." : {
+    "Ein Tap. Die App führt dich." : {
 
     },
-    "Eine eintragsfreie Woche. Rein deskriptiv — kein Lob, keine Wertung." : {
+    "Eine eintragsfreie Woche." : {
 
     },
     "Eine Frage nach vorn." : {
@@ -288,6 +297,9 @@
 
     },
     "Einträge" : {
+
+    },
+    "Einträge, Ziele, Pläne und Notizen auf diesem Gerät werden durch die Datei ersetzt." : {
 
     },
     "Einträge, Ziele, Pläne und Notizen werden entfernt. Das lässt sich nicht rückgängig machen." : {
@@ -339,13 +351,19 @@
     "Ersatzhandlungen" : {
 
     },
-    "Erscheint im Craving-SOS — in dem Moment, in dem du es am wenigsten formulieren kannst." : {
+    "Erscheint im Craving-SOS." : {
+
+    },
+    "Erscheinungsbild" : {
+
+    },
+    "Ersetzen" : {
 
     },
     "Erste-Hilfe-Schritte" : {
 
     },
-    "Erstmal nur beobachten — kein Limit, kein Druck." : {
+    "Erstmal nur beobachten. Kein Limit." : {
 
     },
     "Export" : {
@@ -363,16 +381,13 @@
     "Fertig" : {
 
     },
-    "Fertig — App öffnen" : {
-
-    },
     "Gefahren" : {
 
     },
     "Gefahrenvermeidung mit Quellen. Keine Dosisempfehlungen, keine Wirkoptimierung." : {
 
     },
-    "Generische Texte — nie Substanznamen" : {
+    "Generische Texte, nie Substanznamen" : {
 
     },
     "Genutzt im Craving-SOS" : {
@@ -416,9 +431,6 @@
     "Ja, hat geholfen" : {
 
     },
-    "Jeder Monat beginnt bei null. Kein Rückblick auf den letzten, kein Vorwurf." : {
-
-    },
     "JSON importieren" : {
 
     },
@@ -434,7 +446,7 @@
     "Kein Vergleich, keine Norm. Nur, was dein Plan diese Woche getan hat." : {
 
     },
-    "Kein Ziel am Tag 1 nötig. „Nur beobachten“ ist Stufe 1 — anfangen darfst du trotzdem." : {
+    "Kein Ziel am Tag 1 nötig. „Nur beobachten“ ist Stufe 1." : {
 
     },
     "KLAR" : {
@@ -452,16 +464,10 @@
     "Kontingent" : {
 
     },
-    "Kontingent: %lld." : {
-
-    },
     "Kosten je %@" : {
 
     },
     "Kurz nachdenken" : {
-
-    },
-    "Lange gedrückt halten, um Klar zu öffnen" : {
 
     },
     "Limit / Monat" : {
@@ -476,19 +482,16 @@
     "Löschen" : {
 
     },
-    "Max. 3 aktive Pläne — Fokus statt Liste." : {
+    "Max. 3 aktive Pläne." : {
 
     },
-    "Max. 3 aktive Pläne — Fokus statt Liste. Pausiere einen bestehenden Plan, um Platz zu schaffen." : {
+    "Max. 3 aktive Pläne. Pausiere einen bestehenden Plan, um Platz zu schaffen." : {
 
     },
     "Mit Face ID entsperren" : {
 
     },
     "Mit Face ID sichern" : {
-
-    },
-    "Möchtest du deinen Plan dazu ansehen? — Freiwillig, nicht jetzt nötig." : {
 
     },
     "Nachschlagewerk, kein Startpunkt" : {
@@ -522,13 +525,10 @@
         }
       }
     },
-    "Noch kein „Warum“ hinterlegt. Du kannst es in den Einstellungen ergänzen — es steht dann genau hier." : {
+    "Noch kein „Warum“ hinterlegt. Du kannst es in den Einstellungen ergänzen. Es steht dann genau hier." : {
 
     },
     "Noch kein aktiver Plan. Die Bilanz erscheint, sobald einer läuft." : {
-
-    },
-    "Noch kein Plan — das ist in Ordnung." : {
 
     },
     "Noch kein Plan." : {
@@ -540,10 +540,10 @@
     "Noch keine Ersatzhandlungen hinterlegt. Du kannst sie unter Pläne → Ersatzhandlungen ergänzen." : {
 
     },
-    "Noch keine Kontext-Tags erfasst. Sie sind optional — und der Rohstoff für deine Pläne." : {
+    "Noch keine Kontext-Tags erfasst. Sie sind optional und der Rohstoff für deine Pläne." : {
 
     },
-    "Noch keine Substanz ausgewählt. Du kannst sie in den Einstellungen ergänzen." : {
+    "Noch keine Substanz ausgewählt." : {
 
     },
     "Noch keine Substanzen. Sobald du etwas erfasst, entstehen hier Muster." : {
@@ -558,7 +558,7 @@
     "Notruf 112 anrufen" : {
 
     },
-    "Notruf hilft, ohne die Polizei zu rufen. Sag ehrlich, was konsumiert wurde — das entscheidet über die richtige Behandlung." : {
+    "Notruf hilft, ohne die Polizei zu rufen. Sag ehrlich, was konsumiert wurde. Das entscheidet über die richtige Behandlung." : {
 
     },
     "Ø Abstand" : {
@@ -574,9 +574,6 @@
 
     },
     "OK" : {
-
-    },
-    "Panik-Geste" : {
 
     },
     "Pausiert" : {
@@ -664,6 +661,9 @@
 
     },
     "Substanzen & Kosten" : {
+
+    },
+    "Substanzen auswählen" : {
 
     },
     "Substanzen verwalten" : {
@@ -787,6 +787,9 @@
     "Woche" : {
 
     },
+    "Wochenrückblicke" : {
+
+    },
     "z. B. Ich will die Wochenenden wieder klar erleben." : {
 
     },
@@ -818,9 +821,6 @@
 
     },
     "Zurück" : {
-
-    },
-    "Zwei Finger, doppelt tippen — zeigt einen Taschenrechner. Zum Zurückkehren die Anzeige lange gedrückt halten." : {
 
     }
   },

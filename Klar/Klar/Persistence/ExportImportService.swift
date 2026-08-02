@@ -8,33 +8,49 @@ enum ExportImportService {
         return try KlarExportCoding.makeEncoder().encode(export)
     }
 
-    static func exportCSV(context: ModelContext) throws -> Data {
-        let entries = try context.fetch(FetchDescriptor<Entry>())
-        var csv = "\u{FEFF}"
-        csv += "ID;Substanz;Zeitstempel;Zeitzone;Menge;Einheit;Kontext;Stimmung;Notiz\n"
-        let formatter = ISO8601DateFormatter()
-        for entry in entries.sorted(by: { $0.timestamp < $1.timestamp }) {
-            let substanceName = entry.substance?.name ?? ""
-            let timestamp = formatter.string(from: entry.timestamp)
-            let amount = entry.amount.map { "\($0)" } ?? ""
-            let unit = entry.unitOverride ?? entry.substance?.unit.rawValue ?? ""
-            let contextTagNames = (entry.contextTags ?? []).map(\.name).joined(separator: ",")
-            let mood = entry.mood.map { "\($0)" } ?? ""
-            let note = (entry.note ?? "").replacingOccurrences(of: ";", with: ",")
-            csv += "\(entry.id);\(substanceName);\(timestamp);\(entry.timezoneID);\(amount);\(unit);\(contextTagNames);\(mood);\(note)\n"
+    /// Decodes and validates without touching the store. Split out from the import so a corrupt
+    /// or wrong-version file can be rejected *before* anything is deleted.
+    static func decode(_ data: Data) throws -> KlarExport {
+        let export = try KlarExportCoding.makeDecoder().decode(KlarExport.self, from: data)
+        guard export.schemaVersion == KlarExport.currentSchemaVersion else {
+            throw ExportImportError.unknownSchemaVersion(export.schemaVersion)
         }
-        return csv.data(using: .utf8) ?? Data()
+        return export
     }
 
     static func importJSON(_ data: Data, context: ModelContext) throws {
         guard try isStoreEmpty(context: context) else {
             throw ExportImportError.storeNotEmpty
         }
-        let export = try KlarExportCoding.makeDecoder().decode(KlarExport.self, from: data)
-        guard export.schemaVersion == KlarExport.currentSchemaVersion else {
-            throw ExportImportError.unknownSchemaVersion(export.schemaVersion)
+        try restore(decode(data), context: context)
+    }
+
+    /// What the import screen calls. Decode first, so a corrupt file is rejected while the old
+    /// data is still there.
+    ///
+    /// Decoding is not enough on its own: `wipeAll` commits, so a file that decodes but fails
+    /// half way through `restore` — a constraint violation, a full disk, a hand-edited payload —
+    /// would leave the user with nothing and no undo. This is the only place in the app that can
+    /// destroy data it cannot get back, so it keeps a snapshot and puts it back if the restore
+    /// throws.
+    /// `restoreStep` exists so a test can make the restore fail; there is no other way to reach
+    /// the rollback, and an untested rollback is a promise rather than a safeguard.
+    static func replaceAll(
+        with data: Data,
+        context: ModelContext,
+        restoreStep: (KlarExport, ModelContext) throws -> Void = restore
+    ) throws {
+        let export = try decode(data)
+        let snapshot = try exportJSON(context: context)
+
+        try wipeAll(context: context)
+        do {
+            try restoreStep(export, context)
+        } catch {
+            try? wipeAll(context: context)
+            try? restore(decode(snapshot), context: context)
+            throw error
         }
-        try restore(export, context: context)
     }
 
     static func wipeAll(context: ModelContext) throws {
@@ -48,6 +64,12 @@ enum ExportImportService {
         try context.delete(model: WhyNote.self)
         try context.delete(model: ReviewDecision.self)
         try context.save()
+    }
+
+    /// Writes a decoded export into a store. Callers are responsible for the store being empty
+    /// first — `importJSON` checks, `replaceAll` wipes.
+    static func restore(_ export: KlarExport, context: ModelContext) throws {
+        try insert(export, into: context)
     }
 
     // MARK: - Private
@@ -73,7 +95,7 @@ enum ExportImportService {
         )
     }
 
-    private static func restore(_ export: KlarExport, context: ModelContext) throws {
+    private static func insert(_ export: KlarExport, into context: ModelContext) throws {
         var substanceByID: [UUID: Substance] = [:]
         for dto in export.substances {
             let substance = Substance(id: dto.id, name: dto.name, unit: dto.unit, colorIndex: dto.colorIndex, costPerUnit: dto.costPerUnit, sortOrder: dto.sortOrder, isArchived: dto.isArchived)

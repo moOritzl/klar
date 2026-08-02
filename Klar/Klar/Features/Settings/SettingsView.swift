@@ -49,19 +49,26 @@ struct SettingsView: View {
 
                             SettingsDivider()
 
-                            SettingsToggleRow(
-                                icon: "eye.slash",
-                                title: "Panik-Geste",
-                                subtitle: "Zwei Finger, doppelt tippen — zeigt einen Taschenrechner. Zum Zurückkehren die Anzeige lange gedrückt halten.",
-                                isOn: $settings.isPanicGestureEnabled
-                            )
-
-                            SettingsDivider()
-
                             SettingsPickerRow(
                                 icon: "timer",
                                 title: "Auto-Sperre",
+                                options: AutoLockDelay.allCases,
+                                label: \.label,
                                 selection: $settings.autoLockDelay
+                            )
+                        }
+                        .padding(.bottom, 16)
+
+                        KlarSectionLabel(text: "Darstellung")
+                            .padding(.bottom, 8)
+
+                        SettingsGroup {
+                            SettingsPickerRow(
+                                icon: "circle.lefthalf.filled",
+                                title: "Erscheinungsbild",
+                                options: AppAppearance.allCases,
+                                label: \.label,
+                                selection: $settings.appearance
                             )
                         }
                         .padding(.bottom, 16)
@@ -96,7 +103,7 @@ struct SettingsView: View {
                             SettingsToggleRow(
                                 icon: "bell",
                                 title: "Benachrichtigungen",
-                                subtitle: "Generische Texte — nie Substanznamen",
+                                subtitle: "Generische Texte, nie Substanznamen",
                                 isOn: Binding(
                                     get: { settings.areNotificationsEnabled },
                                     set: { enableNotifications($0) }
@@ -107,7 +114,7 @@ struct SettingsView: View {
 
                             SettingsNavigationRow(
                                 icon: "square.and.arrow.down",
-                                title: "Daten exportieren / löschen"
+                                title: "Daten"
                             ) { isShowingDataScreen = true }
                         }
                         .padding(.bottom, 16)
@@ -244,10 +251,12 @@ struct SettingsToggleRow: View {
     }
 }
 
-struct SettingsPickerRow: View {
+struct SettingsPickerRow<Value: Hashable & Identifiable>: View {
     let icon: String
     let title: LocalizedStringKey
-    @Binding var selection: AutoLockDelay
+    let options: [Value]
+    let label: (Value) -> String
+    @Binding var selection: Value
 
     var body: some View {
         HStack(spacing: 12) {
@@ -260,8 +269,8 @@ struct SettingsPickerRow: View {
                 .foregroundStyle(Klar.text)
             Spacer()
             Picker(title, selection: $selection) {
-                ForEach(AutoLockDelay.allCases) { delay in
-                    Text(delay.label).tag(delay)
+                ForEach(options) { option in
+                    Text(label(option)).tag(option)
                 }
             }
             .labelsHidden()
@@ -330,7 +339,7 @@ struct WhyNoteSheet: View {
                     TextField("z. B. Ich will die Wochenenden wieder klar erleben.", text: $text, axis: .vertical)
                         .lineLimit(3...6)
                 } footer: {
-                    Text("Erscheint im Craving-SOS — in dem Moment, in dem du es am wenigsten formulieren kannst.")
+                    Text("Erscheint im Craving-SOS.")
                 }
             }
             .navigationTitle("Dein „Warum“")

@@ -25,35 +25,23 @@ struct PlansView: View {
 
     var body: some View {
         NavigationStack {
-            ZStack {
-                Klar.bgSubtle.ignoresSafeArea()
-
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 0) {
-                        Text("Pläne")
-                            .font(Klar.TypeScale.title)
-                            .foregroundStyle(Klar.text)
-                            .padding(.bottom, 4)
-
-                        Text(subtitle)
-                            .font(Klar.TypeScale.bodySmall)
-                            .foregroundStyle(Klar.textTertiary)
-                            .padding(.bottom, 16)
-
-                        if activePlans.isEmpty {
-                            emptyState
-                        } else {
-                            filledState
-                        }
-
-                        navigationRows
-                            .padding(.top, 24)
-                    }
-                    .padding(.horizontal, 16)
-                    .padding(.top, 8)
-                    .padding(.bottom, 24)
+            KlarScreen {
+                KlarScreenBanner(title: "Pläne") {
+                    Text(subtitle)
+                        .font(Klar.TypeScale.bodySmall)
+                        .foregroundStyle(Klar.textTertiary)
                 }
-                .scrollIndicators(.hidden)
+            } content: {
+                VStack(alignment: .leading, spacing: 0) {
+                    if activePlans.isEmpty {
+                        emptyState
+                    } else {
+                        filledState
+                    }
+
+                    navigationRows
+                        .padding(.top, 24)
+                }
             }
             .sheet(item: $editorSeed) { seed in
                 PlanEditorView(
@@ -66,8 +54,8 @@ struct PlansView: View {
 
     private var subtitle: LocalizedStringKey {
         activePlans.isEmpty
-            ? "Noch kein Plan — das ist in Ordnung."
-            : "Max. 3 aktive Pläne — Fokus statt Liste."
+            ? "Noch kein Plan."
+            : "Max. 3 aktive Pläne."
     }
 
     // MARK: - G1 · Pläne (aktiv)
@@ -176,7 +164,7 @@ struct PlansView: View {
         }
 
         VStack {
-            Text("Ein guter Plan braucht Kenntnis der eigenen Muster. Deshalb kommt er nicht am Tag 1 — sondern wenn deine Einträge etwas zeigen.")
+            Text("Ein guter Plan braucht Kenntnis der eigenen Muster. Er entsteht, wenn deine Einträge etwas zeigen.")
                 .font(Klar.TypeScale.bodySmall)
                 .foregroundStyle(Klar.textTertiary)
                 .multilineTextAlignment(.center)

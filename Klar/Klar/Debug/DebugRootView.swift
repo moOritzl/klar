@@ -10,7 +10,6 @@ struct DebugRootView: View {
     @State private var quotaSummary: String?
     @State private var statsSummary: String?
     @State private var exportedJSONURL: URL?
-    @State private var exportedCSVURL: URL?
     @State private var showWipeConfirmation1 = false
     @State private var showWipeConfirmation2 = false
     @State private var showImporter = false
@@ -29,12 +28,6 @@ struct DebugRootView: View {
                     if let exportedJSONURL {
                         ShareLink(item: exportedJSONURL) {
                             Label("JSON teilen", systemImage: "square.and.arrow.up")
-                        }
-                    }
-                    Button("Als CSV exportieren") { exportCSV() }
-                    if let exportedCSVURL {
-                        ShareLink(item: exportedCSVURL) {
-                            Label("CSV teilen", systemImage: "square.and.arrow.up")
                         }
                     }
                 }
@@ -127,18 +120,6 @@ struct DebugRootView: View {
             try data.write(to: url)
             exportedJSONURL = url
             statusMessage = "JSON-Export bereit."
-        } catch {
-            statusMessage = "Fehler beim Export: \(error.localizedDescription)"
-        }
-    }
-
-    private func exportCSV() {
-        do {
-            let data = try ExportImportService.exportCSV(context: modelContext)
-            let url = FileManager.default.temporaryDirectory.appendingPathComponent("klar-export-\(Int(Date().timeIntervalSince1970)).csv")
-            try data.write(to: url)
-            exportedCSVURL = url
-            statusMessage = "CSV-Export bereit."
         } catch {
             statusMessage = "Fehler beim Export: \(error.localizedDescription)"
         }

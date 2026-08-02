@@ -16,6 +16,9 @@ struct EntrySheetView: View {
     @Query private var substances: [Substance]
 
     @State private var stage: Stage = .pickSubstance
+    @State private var isManagingSubstances = false
+
+    private var hasSubstances: Bool { !activeSubstances.isEmpty }
 
     private var store: KlarStore { KlarStore(context: modelContext) }
 
@@ -47,8 +50,18 @@ struct EntrySheetView: View {
                 overLimitNotice(entry: entry, occasions: occasions, limit: limit)
             }
         }
-        .presentationDetents(stage.isPicker ? [.medium, .large] : [.large])
+        .presentationDetents(detents)
         .presentationDragIndicator(.visible)
+        .sheet(isPresented: $isManagingSubstances) { SubstancesView() }
+    }
+
+    /// The empty state is three lines and a button; a half-screen detent around it is the
+    /// "spacing" complaint.
+    private var detents: Set<PresentationDetent> {
+        guard stage.isPicker else { return [.large] }
+        // 300 still left ~140pt of nothing under the button, which is the same complaint in a
+        // smaller box. The empty state measures ~170pt including padding.
+        return hasSubstances ? [.medium, .large] : [.height(230)]
     }
 
     // MARK: - C1 · Substanz wählen
@@ -60,54 +73,60 @@ struct EntrySheetView: View {
                 .foregroundStyle(Klar.text)
                 .padding(.bottom, 4)
 
-            Text("Tippen genügt. Details kannst du später ergänzen.")
+            Text(hasSubstances
+                 ? "Tippen genügt. Details kannst du später ergänzen."
+                 : "Noch keine Substanz ausgewählt.")
                 .font(Klar.TypeScale.bodySmall)
                 .foregroundStyle(Klar.textTertiary)
                 .padding(.bottom, 18)
 
-            if activeSubstances.isEmpty {
-                Text("Noch keine Substanz ausgewählt. Du kannst sie in den Einstellungen ergänzen.")
-                    .font(Klar.TypeScale.bodySmall)
-                    .foregroundStyle(Klar.textTertiary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.vertical, 24)
-            }
-
-            ScrollView {
-                VStack(spacing: 10) {
-                    ForEach(activeSubstances) { substance in
-                        Button {
-                            save(substance)
-                        } label: {
-                            HStack(spacing: 14) {
-                                Circle()
-                                    .fill(Klar.substanceColor(substance.colorIndex))
-                                    .frame(width: 12, height: 12)
-                                Text(substance.name)
-                                    .font(Klar.TypeScale.body)
-                                    .foregroundStyle(Klar.text)
-                                Spacer()
+            if hasSubstances {
+                ScrollView {
+                    VStack(spacing: 10) {
+                        ForEach(activeSubstances) { substance in
+                            Button {
+                                save(substance)
+                            } label: {
+                                substanceRow(substance)
                             }
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 18)
-                            .background(Klar.surface)
-                            .clipShape(RoundedRectangle(cornerRadius: Klar.Radius.md, style: .continuous))
-                            .overlay {
-                                RoundedRectangle(cornerRadius: Klar.Radius.md, style: .continuous)
-                                    .strokeBorder(Klar.border, lineWidth: 1)
-                            }
+                            .buttonStyle(.plain)
                         }
-                        .buttonStyle(.plain)
                     }
                 }
+                .scrollIndicators(.hidden)
+            } else {
+                // Pointing at Einstellungen and leaving the user to find it was the old copy.
+                // The button is the same distance away and does not have to be searched for.
+                KlarPrimaryButton(title: "Substanzen auswählen") {
+                    isManagingSubstances = true
+                }
             }
-            .scrollIndicators(.hidden)
         }
         .padding(.horizontal, 20)
         .padding(.top, 14)
         .padding(.bottom, 34)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .background(Klar.surface)
+    }
+
+    private func substanceRow(_ substance: Substance) -> some View {
+        HStack(spacing: 14) {
+            Circle()
+                .fill(Klar.substanceColor(substance.colorIndex))
+                .frame(width: 12, height: 12)
+            Text(substance.name)
+                .font(Klar.TypeScale.body)
+                .foregroundStyle(Klar.text)
+            Spacer()
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 18)
+        .background(Klar.surface)
+        .clipShape(RoundedRectangle(cornerRadius: Klar.Radius.md, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: Klar.Radius.md, style: .continuous)
+                .strokeBorder(Klar.border, lineWidth: 1)
+        }
     }
 
     private func save(_ substance: Substance) {
@@ -123,8 +142,8 @@ struct EntrySheetView: View {
 
     // MARK: - C3 · Über dem Limit
 
-    /// Factual, never punitive. No red, no warning icon, no appeal to do better — the entry is
-    /// simply stated, and the offer to look at the plan is explicitly optional.
+    /// Factual, never punitive. No red, no warning icon, no appeal to do better. The entry is
+    /// simply stated.
     private func overLimitNotice(entry: Entry, occasions: Int, limit: Int) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             SavedHeader(entry: entry)
@@ -147,13 +166,6 @@ struct EntrySheetView: View {
                     .strokeBorder(Klar.border, lineWidth: 1)
             }
             .padding(.bottom, 18)
-
-            Text("Möchtest du deinen Plan dazu ansehen? — Freiwillig, nicht jetzt nötig.")
-                .font(Klar.TypeScale.bodySmall)
-                .foregroundStyle(Klar.textTertiary)
-                .multilineTextAlignment(.center)
-                .frame(maxWidth: .infinity)
-                .padding(.bottom, 20)
 
             Spacer()
 

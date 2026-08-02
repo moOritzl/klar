@@ -31,7 +31,7 @@ struct KlarApp: App {
 
     var body: some Scene {
         WindowGroup {
-            // `RootView` owns the gating (panic façade → app lock → onboarding → tabs).
+            // `RootView` owns the gating (app lock → onboarding → tabs).
             // `DebugRootView` is still in the target and can be swapped in here when
             // exercising the persistence layer by hand.
             RootView()

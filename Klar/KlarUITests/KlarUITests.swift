@@ -50,7 +50,7 @@ final class KlarUITests: XCTestCase {
 
         // A4 · Ersatzhandlungen.
         XCTAssertTrue(app.staticTexts["Was hilft dir im Moment?"].waitForExistence(timeout: 5))
-        app.buttons["Fertig — App öffnen"].tap()
+        app.buttons["App öffnen"].tap()
 
         // B2 · Heute, empty day.
         XCTAssertTrue(app.staticTexts["Heute"].waitForExistence(timeout: 5))
@@ -90,7 +90,7 @@ final class KlarUITests: XCTestCase {
         app.buttons["Alkohol"].tap()
         app.buttons["Weiter"].tap()
         app.buttons["Weiter"].tap()
-        app.buttons["Fertig — App öffnen"].tap()
+        app.buttons["App öffnen"].tap()
 
         XCTAssertTrue(app.staticTexts["Heute"].waitForExistence(timeout: 5))
 
@@ -98,7 +98,7 @@ final class KlarUITests: XCTestCase {
         XCTAssertTrue(app.buttons["Kalender"].waitForExistence(timeout: 5))
 
         app.tabBars.buttons["Pläne"].tap()
-        XCTAssertTrue(app.staticTexts["Noch kein Plan — das ist in Ordnung."].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Noch kein Plan."].waitForExistence(timeout: 5))
 
         app.tabBars.buttons["Hilfe"].tap()
         XCTAssertTrue(app.buttons["help.sos"].waitForExistence(timeout: 5))
