@@ -33,7 +33,7 @@ struct PlanCheckInView: View {
                     .foregroundStyle(Klar.text)
                     .padding(.bottom, 8)
 
-                Text("„Wenn \(plan.situationText), dann \(plan.actionText)“")
+                Text("„Wenn \(PlanSentence.fragment(plan.situationText)), dann \(PlanSentence.fragment(plan.actionText))“")
                     .font(Klar.TypeScale.bodySmall)
                     .foregroundStyle(Klar.textSecondary)
                     .padding(.bottom, 22)
