@@ -34,18 +34,25 @@ enum ExportImportService {
     /// destroy data it cannot get back, so it keeps a snapshot and puts it back if the restore
     /// throws.
     /// `restoreStep` exists so a test can make the restore fail; there is no other way to reach
-    /// the rollback, and an untested rollback is a promise rather than a safeguard.
+    /// the rollback, and an untested rollback is a promise rather than a safeguard. It takes `nil`
+    /// rather than defaulting to `restore` because a default argument expression is evaluated
+    /// outside the enclosing declaration's isolation, and `restore` is main-actor isolated like
+    /// everything else in this target.
     static func replaceAll(
         with data: Data,
         context: ModelContext,
-        restoreStep: (KlarExport, ModelContext) throws -> Void = restore
+        restoreStep: (@MainActor (KlarExport, ModelContext) throws -> Void)? = nil
     ) throws {
         let export = try decode(data)
         let snapshot = try exportJSON(context: context)
 
         try wipeAll(context: context)
         do {
-            try restoreStep(export, context)
+            if let restoreStep {
+                try restoreStep(export, context)
+            } else {
+                try restore(export, context: context)
+            }
         } catch {
             try? wipeAll(context: context)
             try? restore(decode(snapshot), context: context)
