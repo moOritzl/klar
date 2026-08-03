@@ -157,6 +157,9 @@
     "Bestehende Einträge bleiben erhalten. Die Substanz verschwindet nur aus der Auswahl." : {
 
     },
+    "bis 5 Uhr" : {
+
+    },
     "Bist du sicher? Das kann nicht rückgängig gemacht werden." : {
 
     },
@@ -244,6 +247,9 @@
     "Eigene Substanz" : {
 
     },
+    "Ein Eintrag um 2 Uhr zählt zum Vortag." : {
+
+    },
     "Ein guter Plan braucht Kenntnis der eigenen Muster. Er entsteht, wenn deine Einträge etwas zeigen." : {
 
     },
@@ -251,6 +257,9 @@
 
     },
     "Ein ruhiger Tag." : {
+
+    },
+    "Ein Tag läuft von 5 Uhr bis 5 Uhr" : {
 
     },
     "Ein Tap. Die App führt dich." : {
@@ -673,6 +682,9 @@
 
     },
     "Suchthilfeverzeichnis der DHS" : {
+
+    },
+    "Tag" : {
 
     },
     "Tage" : {

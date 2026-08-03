@@ -11,6 +11,7 @@ struct TodayView: View {
     @Binding var selectedTab: KlarTab
 
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.scenePhase) private var scenePhase
     @Query private var entries: [Entry]
     @Query private var plans: [Plan]
     @Query private var substances: [Substance]
@@ -22,7 +23,14 @@ struct TodayView: View {
 
     private var store: KlarStore { KlarStore(context: modelContext) }
 
-    private var today: Date { Date() }
+    /// Re-read when the app comes forward, not on every render.
+    ///
+    /// The header now states which logical day it is listing, and „bis 5 Uhr" is a claim that stops
+    /// being true at 05:00. A computed `Date()` would be correct but only by accident — it updates
+    /// whenever something else happens to invalidate the view. Refreshing on `.active` covers the
+    /// case that actually occurs (phone put down at 04:50, picked up at 07:00); an app left open
+    /// across the boundary keeps the value it had, and no timer runs to prevent that.
+    @State private var today = Date()
     private var todaysEntries: [Entry] { store.entries(onLogicalDayOf: today) }
     private var activePlan: Plan? { store.activePlans().first }
     private var quotaSubstances: [SubstanceQuota] {
@@ -137,6 +145,10 @@ struct TodayView: View {
         .sheet(item: $entryBeingEdited) { entry in
             EntryDetailSheet(entry: entry)
         }
+        .onChange(of: scenePhase) { _, newPhase in
+            guard newPhase == .active else { return }
+            today = Date()
+        }
     }
 
     // MARK: - Pieces
@@ -147,9 +159,20 @@ struct TodayView: View {
                 .font(Klar.TypeScale.display(30))
                 .foregroundStyle(Klar.text)
             Spacer()
-            Text(KlarDate.shortWeekdayDate(today))
-                .font(Klar.TypeScale.bodySmall)
-                .foregroundStyle(Klar.textTertiary)
+            // The logical day, not the wall clock: between midnight and 05:00 those disagree, and
+            // this line labels the entries listed below it. The hint appears only in that window,
+            // because only there does the date contradict the phone.
+            VStack(alignment: .trailing, spacing: 1) {
+                Text(KlarDate.logicalDayLabel(now: today))
+                    .font(Klar.TypeScale.bodySmall)
+                    .foregroundStyle(Klar.textTertiary)
+                if KlarDate.isBeforeCutoff(today) {
+                    Text("bis 5 Uhr")
+                        .font(Klar.TypeScale.caption)
+                        .foregroundStyle(Klar.textTertiary)
+                }
+            }
+            .accessibilityElement(children: .combine)
             KlarIconButton(systemImage: "gearshape", accessibilityLabel: "Einstellungen") {
                 isSettingsPresented = true
             }

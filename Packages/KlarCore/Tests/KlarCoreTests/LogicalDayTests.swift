@@ -27,6 +27,26 @@ final class LogicalDayTests: XCTestCase {
         XCTAssertEqual(dayBeforeCutoff.day, 14)
     }
 
+    /// The predicate the UI needs to explain itself: is the logical day still the previous
+    /// calendar day, so that a shown date contradicts the phone's clock?
+    func testIsBeforeCutoffIsTrueOnlyBetweenMidnightAndFive() {
+        XCTAssertTrue(LogicalDay.isBeforeCutoff(date(2026, 8, 4, 0, 1, timezoneID: "Europe/Berlin"), timezoneID: "Europe/Berlin"))
+        XCTAssertTrue(LogicalDay.isBeforeCutoff(date(2026, 8, 4, 2, 30, timezoneID: "Europe/Berlin"), timezoneID: "Europe/Berlin"))
+        XCTAssertTrue(LogicalDay.isBeforeCutoff(date(2026, 8, 4, 4, 59, timezoneID: "Europe/Berlin"), timezoneID: "Europe/Berlin"))
+
+        XCTAssertFalse(LogicalDay.isBeforeCutoff(date(2026, 8, 4, 5, 0, timezoneID: "Europe/Berlin"), timezoneID: "Europe/Berlin"))
+        XCTAssertFalse(LogicalDay.isBeforeCutoff(date(2026, 8, 4, 21, 30, timezoneID: "Europe/Berlin"), timezoneID: "Europe/Berlin"))
+    }
+
+    /// The window is wall-clock local, so it has to follow the timezone it is asked about.
+    func testIsBeforeCutoffFollowsTheGivenTimezone() {
+        // 02:30 in Berlin is 20:30 the previous evening in New York: inside the window there,
+        // outside it here.
+        let berlinNight = date(2026, 8, 4, 2, 30, timezoneID: "Europe/Berlin")
+        XCTAssertTrue(LogicalDay.isBeforeCutoff(berlinNight, timezoneID: "Europe/Berlin"))
+        XCTAssertFalse(LogicalDay.isBeforeCutoff(berlinNight, timezoneID: "America/New_York"))
+    }
+
     func testEntryInDifferentTimezoneUsesThatTimezonesWallClock() {
         // 23:30 in New York is still the same evening (after cutoff) -> same day
         let nyEntry = date(2026, 7, 15, 23, 30, timezoneID: "America/New_York")

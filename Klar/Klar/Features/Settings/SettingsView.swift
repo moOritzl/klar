@@ -73,6 +73,21 @@ struct SettingsView: View {
                         }
                         .padding(.bottom, 16)
 
+                        KlarSectionLabel(text: "Tag")
+                            .padding(.bottom, 8)
+
+                        // Read-only on purpose. The boundary decides how every derived number is
+                        // bucketed, and changing it would re-bucket entries that are already
+                        // logged — so it is stated here, not offered as a setting.
+                        SettingsGroup {
+                            SettingsInfoRow(
+                                icon: "clock",
+                                title: "Ein Tag läuft von 5 Uhr bis 5 Uhr",
+                                subtitle: "Ein Eintrag um 2 Uhr zählt zum Vortag."
+                            )
+                        }
+                        .padding(.bottom, 16)
+
                         KlarSectionLabel(text: "Deine Daten")
                             .padding(.bottom, 8)
 
@@ -279,6 +294,38 @@ struct SettingsPickerRow<Value: Hashable & Identifiable>: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 13)
+    }
+}
+
+/// A row that states a rule instead of offering a control. Same anatomy as the interactive rows so
+/// it reads as part of the list, with no tap target and no chevron to promise one.
+struct SettingsInfoRow: View {
+    let icon: String
+    let title: LocalizedStringKey
+    let subtitle: LocalizedStringKey
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: icon)
+                .font(.system(size: 15))
+                .foregroundStyle(Klar.textSecondary)
+                .frame(width: 18)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(Klar.TypeScale.body)
+                    .foregroundStyle(Klar.text)
+                Text(subtitle)
+                    .font(Klar.TypeScale.caption)
+                    .foregroundStyle(Klar.textTertiary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+        .accessibilityElement(children: .combine)
     }
 }
 
