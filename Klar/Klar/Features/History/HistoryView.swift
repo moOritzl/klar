@@ -160,7 +160,11 @@ struct CalendarSectionView: View {
     /// silently stops the calendar updating.
     @Query private var entries: [Entry]
 
-    @State private var visibleMonth = Date()
+    /// The 1st of the visible month at 00:00, never a wall-clock moment: every derived number here
+    /// (the dots, the two tiles, the cell dates) reads its calendar month off this anchor, and they
+    /// can only agree if it carries no time of day to normalize away. `startOfMonth` also means that
+    /// between 00:00 and 05:00 the calendar opens on the month the *logical* today lives in.
+    @State private var visibleMonth = KlarDate.startOfMonth()
     @State private var selectedDay: Date?
 
     private var store: KlarStore { KlarStore(context: modelContext) }
@@ -380,6 +384,7 @@ private struct IdentifiableDate: Identifiable {
 // MARK: - E2 · Tagesdetail
 
 struct DayDetailView: View {
+    /// A normalized logical day (00:00), as the calendar grid produces it — not a wall-clock moment.
     let day: Date
 
     @Environment(\.dismiss) private var dismiss
@@ -392,7 +397,7 @@ struct DayDetailView: View {
     private var store: KlarStore { KlarStore(context: modelContext) }
 
     private var entries: [Entry] {
-        store.entries(onLogicalDayOf: day)
+        store.entries(onLogicalDay: day)
     }
 
     var body: some View {

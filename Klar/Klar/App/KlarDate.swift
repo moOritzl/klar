@@ -30,6 +30,12 @@ enum KlarDate {
         LogicalDay.isSameLogicalDay(date, timezoneID, now, KlarDate.timezoneID)
     }
 
+    /// True while the logical day is still the previous calendar day (00:00 until the 05:00
+    /// cutoff) — the only hours in which the UI has to say which day it means.
+    static func isBeforeCutoff(_ date: Date = Date(), timezoneID: String = KlarDate.timezoneID) -> Bool {
+        LogicalDay.isBeforeCutoff(date, timezoneID: timezoneID)
+    }
+
     /// Monday 00:00 of the week containing `date`.
     static func weekStart(for date: Date) -> Date {
         calendar.dateInterval(of: .weekOfYear, for: date)?.start ?? date
@@ -78,6 +84,22 @@ enum KlarDate {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "de_DE")
         formatter.dateFormat = "EE, d. MMM"
+        return formatter.string(from: date)
+    }
+
+    /// "Mo., 3. Aug." for the logical day `now` falls into — the Heute header.
+    ///
+    /// Deliberately not `shortWeekdayDate(now)`: at 02:15 those two disagree, and the screen is
+    /// titled „Heute", so it has to name the day whose entries it lists.
+    static func logicalDayLabel(now: Date = Date()) -> String {
+        shortWeekdayDate(logicalDay(for: now))
+    }
+
+    /// "Montag"
+    static func weekdayName(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "de_DE")
+        formatter.dateFormat = "EEEE"
         return formatter.string(from: date)
     }
 

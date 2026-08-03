@@ -210,9 +210,19 @@ struct SavedHeader: View {
     private var subtitle: String {
         let name = entry.substance?.name ?? "Eintrag"
         let time = KlarDate.time(entry.timestamp)
-        return KlarDate.isToday(entry.timestamp, timezoneID: entry.timezoneID)
-            ? "\(name) · jetzt, \(time)"
-            : "\(name) · \(KlarDate.dayAndMonth(entry.timestamp)), \(time)"
+        guard KlarDate.isToday(entry.timestamp, timezoneID: entry.timezoneID) else {
+            return "\(name) · \(KlarDate.dayAndMonth(entry.timestamp)), \(time)"
+        }
+        // Logged after midnight: „jetzt" is true, but the day this lands on is not the one the
+        // phone's clock shows. This is the moment a wrong assumption costs the user an action, so
+        // the day gets named here rather than only in the Heute header behind the sheet.
+        guard KlarDate.isBeforeCutoff(entry.timestamp, timezoneID: entry.timezoneID) else {
+            return "\(name) · jetzt, \(time)"
+        }
+        let day = KlarDate.weekdayName(
+            KlarDate.logicalDay(for: entry.timestamp, timezoneID: entry.timezoneID)
+        )
+        return "\(name) · jetzt, \(time) · noch \(day)"
     }
 }
 

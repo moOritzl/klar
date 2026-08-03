@@ -16,6 +16,16 @@ public enum LogicalDay: Sendable {
         return calendar.dateComponents([.year, .month, .day], from: dayStart)
     }
 
+    /// True while `date`'s logical day is still the *previous* calendar day — the hours between
+    /// midnight and the cutoff.
+    ///
+    /// This is the window in which any date the UI shows contradicts the phone's clock, so it is
+    /// also the only window in which the UI owes the user an explanation.
+    public static func isBeforeCutoff(_ date: Date, timezoneID: String) -> Bool {
+        let hour = calendar(for: timezoneID).component(.hour, from: date)
+        return hour < cutoffHour
+    }
+
     public static func date(from components: DateComponents, timezoneID: String) -> Date {
         let calendar = calendar(for: timezoneID)
         return calendar.date(from: components) ?? Date()

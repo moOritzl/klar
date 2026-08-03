@@ -17,7 +17,7 @@ end-to-end in the simulator (`KlarUITests/ScreenshotTests`).
 | Screen scaffold | [KlarScreen.swift](../Klar/Klar/DesignSystem/KlarScreen.swift) | Background, padding, the banner zone, and `scrollBounceBehavior(.basedOnSize)`. Used by Verlauf, Pläne and Hilfe. Heute keeps its own layout (FAB + growing content) and opts into the bounce fix by hand. |
 | Settings (device) | [AppSettings.swift](../Klar/Klar/App/AppSettings.swift) | UserDefaults. Deliberately **not** SwiftData — device prefs must not land in the data export. |
 | Data access | [KlarStore.swift](../Klar/Klar/App/KlarStore.swift) | The single write path, and the bridge to `KlarCore`'s pure calculators. |
-| Dates | [KlarDate.swift](../Klar/Klar/App/KlarDate.swift) | **05:00 logical-day boundary.** An entry at 02:30 belongs to the night before. Every "today"/"this month" question goes through here. |
+| Dates | [KlarDate.swift](../Klar/Klar/App/KlarDate.swift) | **05:00 logical-day boundary.** An entry at 02:30 belongs to the night before. Every "today"/"this month" question goes through here. Normalizing is *not* idempotent — a normalized day is 00:00, which is before the cutoff — so a value that already is a logical day must never be fed back in: `entries(onLogicalDayOf:)` takes wall-clock instants, `entries(onLogicalDay:)` takes normalized days. |
 | Shell | [RootView.swift](../Klar/Klar/App/RootView.swift) | Gate order: app lock → onboarding → tabs. |
 
 **Fonts.** The design's `--font-display` (PT Serif) and `--font-ui` (SF Pro) map to
@@ -55,6 +55,14 @@ Nothing is written to the store until the final step. Abandoning halfway leaves 
 
 Over the limit, the headline flips from "Noch 2 von 4" to "5 von 4 diesen Monat" — factual, no red,
 no appeal.
+
+**The header names the logical day, not the wall clock.** Between midnight and 05:00 those disagree,
+and the date line labels the entries listed under it, so it has to follow them: at 02:15 it reads
+"Mo., 3. Aug." with "bis 5 Uhr" beneath. The hint appears only inside that window, because only
+there does the shown date contradict the phone. `today` is `@State` refreshed when the scene becomes
+active — "bis 5 Uhr" stops being true at 05:00, and a computed `Date()` would only be right by
+accident. The same window makes the entry confirmation name the day ("Alkohol · jetzt, 02:15 · noch
+Montag"), and Settings states the rule under "Tag" without offering it as a control.
 
 ### C · Eintrag erfassen — [EntrySheetView.swift](../Klar/Klar/Features/Entry/EntrySheetView.swift)
 

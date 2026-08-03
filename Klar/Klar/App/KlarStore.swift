@@ -68,17 +68,31 @@ struct KlarStore {
 
     // MARK: - Entries
 
-    /// Entries whose *logical* day equals that of `date`.
+    /// Entries whose *logical* day equals that of the wall-clock instant `date`.
+    ///
+    /// Pass a real moment (`Date()`, an entry's timestamp). Passing an already-normalized logical
+    /// day would apply the 05:00 cutoff a second time and land on the day before — use
+    /// `entries(onLogicalDay:)` for those.
     func entries(onLogicalDayOf date: Date) -> [Entry] {
-        let target = KlarDate.logicalDay(for: date)
-        return allEntries()
-            .filter { KlarDate.logicalDay(for: $0.timestamp, timezoneID: $0.timezoneID) == target }
+        entries(onLogicalDay: KlarDate.logicalDay(for: date))
+    }
+
+    /// Entries on `day`, which must already be a normalized logical day (`KlarDate.logicalDay`) —
+    /// the form the calendar grid and `loggedDays` deal in.
+    func entries(onLogicalDay day: Date) -> [Entry] {
+        allEntries()
+            .filter { KlarDate.logicalDay(for: $0.timestamp, timezoneID: $0.timezoneID) == day }
             .sorted { $0.timestamp < $1.timestamp }
     }
 
     /// The set of logical days in `month` that carry at least one entry — the calendar dots (E1).
+    ///
+    /// `date` is a month anchor from the calendar grid, so its calendar month is taken as given.
+    /// Reading it through `monthComponents` instead would push a 00:00 anchor on the 1st back into
+    /// the previous month, and the dots would then describe a different month than the grid drew.
     func loggedDays(inMonthOf date: Date) -> Set<Date> {
-        let (year, month) = KlarDate.monthComponents(for: date)
+        let anchor = KlarDate.calendar.dateComponents([.year, .month], from: date)
+        guard let year = anchor.year, let month = anchor.month else { return [] }
         var days: Set<Date> = []
         for entry in allEntries() {
             let day = KlarDate.logicalDay(for: entry.timestamp, timezoneID: entry.timezoneID)
