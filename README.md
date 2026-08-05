@@ -5,7 +5,7 @@ No account, no server, no analytics — the data never leaves the phone.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/rendered/heute-dark.png">
-  <img src="docs/screenshots/rendered/heute-light.png" width="700" alt="Close-up of the Heute screen: a monthly quota card showing Alkohol with four of six remaining and Nikotin with six of ten">
+  <img src="docs/screenshots/rendered/heute-light.png" width="700" alt="Close-up of the Heute screen: a monthly quota card showing Alkohol with four of six remaining and Nikotin with six of ten, above an if-then plan reading WENN der Tag ist vorbei und ich komme heim, DANN zuerst 15 Minuten rausgehen">
 </picture>
 
 German UI, German market first. Not shipped: no App Store release and no external
