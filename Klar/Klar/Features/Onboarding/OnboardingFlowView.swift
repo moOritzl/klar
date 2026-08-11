@@ -148,10 +148,6 @@ struct PrivacyStepView: View {
                     .padding(16)
                     .background(Klar.surface)
                     .clipShape(RoundedRectangle(cornerRadius: Klar.Radius.lg, style: .continuous))
-                    .overlay {
-                        RoundedRectangle(cornerRadius: Klar.Radius.lg, style: .continuous)
-                            .strokeBorder(Klar.border, lineWidth: 1)
-                    }
                 }
 
                 Spacer()
@@ -432,10 +428,6 @@ struct SubstitutionStepView: View {
                     .padding(.vertical, 15)
                     .background(Klar.surface)
                     .clipShape(RoundedRectangle(cornerRadius: Klar.Radius.md, style: .continuous))
-                    .overlay {
-                        RoundedRectangle(cornerRadius: Klar.Radius.md, style: .continuous)
-                            .strokeBorder(Klar.border, lineWidth: 1)
-                    }
                 }
 
                 KlarDashedButton(title: "Weitere hinzufügen", tint: Klar.accentStrong) {

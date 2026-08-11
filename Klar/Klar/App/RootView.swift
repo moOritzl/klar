@@ -67,13 +67,19 @@ struct MainTabView: View {
     /// swallowed by whichever tab happens to be showing.
     @State private var pendingCheckIn: PendingCheckIn?
     @State private var isReviewPresented = false
+    /// Lives here rather than in `TodayView` because the button that sets it does too — the
+    /// bottom accessory is a property of the `TabView`, not of any one tab.
+    @State private var isEntrySheetPresented = false
 
     private var store: KlarStore { KlarStore(context: modelContext) }
 
     var body: some View {
         TabView(selection: $selectedTab) {
+            // The tab label matches the screen's `navigationTitle`, as it does in every
+            // first-party app. The case stays `.today` — the file, the screen IDs (B1–B3) and
+            // the docs all still call this the Heute screen; only what the user reads changed.
             TodayView(selectedTab: $selectedTab)
-                .tabItem { Label("Heute", systemImage: "house") }
+                .tabItem { Label("Übersicht", systemImage: "house") }
                 .tag(KlarTab.today)
 
             HistoryView()
@@ -87,6 +93,19 @@ struct MainTabView: View {
             HelpView()
                 .tabItem { Label("Hilfe", systemImage: "lifepreserver") }
                 .tag(KlarTab.help)
+        }
+        // Logging is the app's one recurring action, and it is reachable from every tab rather
+        // than only from Übersicht — which is what the accessory slot is for, and a small gain
+        // over the corner button it replaces.
+        .tabViewBottomAccessory {
+            KlarLogEntryAccessory { isEntrySheetPresented = true }
+        }
+        // No `tabBarMinimizeBehavior`. It was tried and it strands the user: once the bar has
+        // minimized, scrolling back to the top does not bring it back on these screens, and three
+        // of the four tabs are simply gone. Trading permanent access to Verlauf, Pläne and Hilfe
+        // for a bit of scroll polish is not a trade worth making on a four-tab app.
+        .sheet(isPresented: $isEntrySheetPresented) {
+            EntrySheetView()
         }
         .sheet(item: $pendingCheckIn) { pending in
             PlanCheckInView(plan: pending.plan, entry: pending.entry)

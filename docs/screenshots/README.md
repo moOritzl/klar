@@ -1,6 +1,6 @@
 # Screenshots
 
-Captured on an iPhone 17 Pro simulator (iOS 26.5) running the app against
+Captured on an iPhone 17 simulator (iOS 26.5) running the app against
 [`examples/klar-beispieldaten.json`](../../examples/klar-beispieldaten.json).
 Every number visible in them comes from that file — nothing is mocked up.
 
@@ -11,7 +11,7 @@ halves of a pair show identical data.
 | File | Screen | What it shows |
 |---|---|---|
 | `01-checkin.png` | Plan check-in (D1) | Fires on launch, for the one entry the dataset leaves unanswered |
-| `02-heute.png` | Heute (B1) | Combined quota card — two live limits, tightest first — plus the active plan and the day's entries |
+| `02-uebersicht.png` | Übersicht (B1) | Combined quota card headed with the month — two live limits, tightest first, each led by its numeral — plus the active plan and the day's entries |
 | `03-rueckblick-1.png` | Weekly review 1/3 (F1) | "Was war." — the week's counts and the direction against the previous week |
 | `04-rueckblick-2.png` | Weekly review 2/3 (F2) | July landing exactly on its limit: "6 von 6", bar fully drained |
 | `05-rueckblick-3.png` | Weekly review 3/3 (F3) | The decision the review always ends in |
@@ -28,6 +28,23 @@ halves of a pair show identical data.
 
 The check-in in `01` and the review in `03`–`05` are both one-shot: answering them
 consumes them, so re-seed before recapturing.
+
+## The README hero
+
+`rendered/` holds the device mockups, made with [mockframe](https://pypi.org/project/mockframe/)
+from `02-uebersicht.png`:
+
+```bash
+uvx mockframe render docs/screenshots/light/02-uebersicht.png --auto-device \
+  --crop="-0.10,-0.06,1.10,0.72" --preset hero-left --bg none \
+  -o docs/screenshots/rendered/uebersicht-light.png
+```
+
+The crop has to reach `0.72` so the whole if-then plan is in frame — at the shorter `0.56` the
+card was sliced through the middle. `--bg none` keeps the alpha channel, contact shadow
+included, so the render sits on the README's own background rather than on a grey plate that
+only matches in one colour scheme. The full-device shots (`uebersicht-full-*`) are the same
+preset without a crop.
 
 ## Recapturing
 

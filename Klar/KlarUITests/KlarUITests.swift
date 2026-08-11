@@ -53,7 +53,7 @@ final class KlarUITests: XCTestCase {
         app.buttons["App öffnen"].tap()
 
         // B2 · Heute, empty day.
-        XCTAssertTrue(app.staticTexts["Heute"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Übersicht"].waitForExistence(timeout: 5))
         XCTAssertTrue(
             app.staticTexts["Ein ruhiger Tag."].exists,
             "A day with no entries must read as a calm baseline, not as a gap to fill."
@@ -61,7 +61,7 @@ final class KlarUITests: XCTestCase {
 
         // C1 · Two taps to "gespeichert".
         app.buttons["Eintrag erfassen"].tap()
-        XCTAssertTrue(app.staticTexts["Eintrag"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Neuer Eintrag"].waitForExistence(timeout: 5))
         app.buttons["Alkohol"].tap()
 
         // C2 · Saved, details optional.
@@ -92,7 +92,7 @@ final class KlarUITests: XCTestCase {
         app.buttons["Weiter"].tap()
         app.buttons["App öffnen"].tap()
 
-        XCTAssertTrue(app.staticTexts["Heute"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Übersicht"].waitForExistence(timeout: 5))
 
         app.tabBars.buttons["Verlauf"].tap()
         XCTAssertTrue(app.buttons["Kalender"].waitForExistence(timeout: 5))

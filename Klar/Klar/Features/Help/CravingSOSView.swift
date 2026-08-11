@@ -49,13 +49,13 @@ struct CravingSOSView: View {
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 18)
 
-                KlarSectionLabel(text: "Dein „Warum“")
+                KlarGroupHeader(text: "Dein „Warum“")
                     .padding(.bottom, 8)
 
                 whyCard
                     .padding(.bottom, 16)
 
-                KlarSectionLabel(text: "Stattdessen")
+                KlarGroupHeader(text: "Stattdessen")
                     .padding(.bottom, 8)
 
                 if actions.isEmpty {
@@ -184,10 +184,6 @@ struct CravingSOSView: View {
         .padding(14)
         .background(Klar.surface)
         .clipShape(RoundedRectangle(cornerRadius: Klar.Radius.md, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: Klar.Radius.md, style: .continuous)
-                .strokeBorder(Klar.border, lineWidth: 1)
-        }
     }
 
     private var contactButton: some View {

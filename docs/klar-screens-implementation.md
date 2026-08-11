@@ -14,15 +14,30 @@ end-to-end in the simulator (`KlarUITests/ScreenshotTests`).
 |---|---|---|
 | Design tokens | [KlarTheme.swift](../Klar/Klar/DesignSystem/KlarTheme.swift) | 1:1 port of `tokens/{colors,typography,spacing}.css`. Names mirror the CSS custom properties, so one token change in the design maps to one change here. Each semantic alias resolves per trait collection, which is how dark mode stays one line per token. |
 | Shared components | [KlarComponents.swift](../Klar/Klar/DesignSystem/KlarComponents.swift) | Card, buttons, chips, segmented control, quota bar, step dots, flow layout. |
-| Screen scaffold | [KlarScreen.swift](../Klar/Klar/DesignSystem/KlarScreen.swift) | Background, padding, the banner zone, and `scrollBounceBehavior(.basedOnSize)`. Used by Verlauf, Pläne and Hilfe. Heute keeps its own layout (FAB + growing content) and opts into the bounce fix by hand. |
+| Screen scaffold | [KlarScreen.swift](../Klar/Klar/DesignSystem/KlarScreen.swift) | Background, padding, `navigationTitle`/`navigationSubtitle`, and `scrollBounceBehavior(.basedOnSize)`. Used by Verlauf, Pläne and Hilfe. The `NavigationStack` comes from the caller — three of the four tabs already had one for their own links. Heute keeps its own layout (FAB + growing content) and opts into the bounce fix by hand. |
 | Settings (device) | [AppSettings.swift](../Klar/Klar/App/AppSettings.swift) | UserDefaults. Deliberately **not** SwiftData — device prefs must not land in the data export. |
 | Data access | [KlarStore.swift](../Klar/Klar/App/KlarStore.swift) | The single write path, and the bridge to `KlarCore`'s pure calculators. |
 | Dates | [KlarDate.swift](../Klar/Klar/App/KlarDate.swift) | **05:00 logical-day boundary.** An entry at 02:30 belongs to the night before. Every "today"/"this month" question goes through here. Normalizing is *not* idempotent — a normalized day is 00:00, which is before the cutoff — so a value that already is a logical day must never be fed back in: `entries(onLogicalDayOf:)` takes wall-clock instants, `entries(onLogicalDay:)` takes normalized days. |
-| Shell | [RootView.swift](../Klar/Klar/App/RootView.swift) | Gate order: app lock → onboarding → tabs. |
+| Shell | [RootView.swift](../Klar/Klar/App/RootView.swift) | Gate order: app lock → onboarding → tabs. Carries the `tabViewBottomAccessory` — the "Eintrag erfassen" bar that replaced a floating `+` button, and the reason logging is reachable from every tab. No `tabBarMinimizeBehavior`: it was tried and on these screens the bar never came back, taking three of the four tabs with it. |
 
-**Fonts.** The design's `--font-display` (PT Serif) and `--font-ui` (SF Pro) map to
-`Font.system(design: .serif)` and `Font.system(...)`. No font files are bundled — on iOS both
-registers are free.
+**Fonts.** SF Pro throughout, no font files bundled. The design's `--font-display` was PT Serif
+and was ported as `Font.system(design: .serif)` — the one token deliberately dropped since. A
+serif headline is a web-magazine signal, and next to a real `navigationTitle` it read as a
+picture of an app rather than an app. `TypeScale.display(_:)` survives as a size/weight step in
+SF Pro, so the call sites did not have to change.
+
+**Chrome.** Every tab is a `NavigationStack` with a real large title, which is what buys the
+collapse-on-scroll and the scroll-edge treatment. Heute puts the logical-day line in
+`navigationSubtitle` and the gear in a `.topBarTrailing` toolbar item; the hand-built header row
+is gone. No `.toolbarBackground` overrides anywhere — they suppress the very effect the bar is
+there for.
+
+**Cards.** `KlarCard` is a fill on a darker page, never an outline: `Klar.surface` on
+`Klar.bgSubtle`. Controls (text fields, chips, capsule buttons) keep their borders, surfaces do
+not — that split is the whole rule. `bgSubtle` was moved one step down (`#F4F6F6` / `#0E1719`)
+when the borders went, because in dark the old pair measured 1.15:1 and the cards dissolved
+without their outline. The optional `header:` slot adds a label row and a full-bleed hairline,
+the `insetGrouped` pattern.
 
 **Light and dark.** The draft ships light mode only; the dark values are derived from the same teal
 ramp read from the other end, so both schemes stay one family. Einstellungen → Darstellung offers
@@ -45,26 +60,78 @@ Nothing is written to the store until the final step. Abandoning halfway leaves 
 | **A3** Ziel je Substanz | ✅ | Reduktion / Abstinenz / Beobachten. Default is **Beobachten** — "kein Ziel am Tag 1 nötig". The limit stepper only appears for Reduktion. |
 | **A4** Ersatzhandlungen | ✅ | Suggestions are offered but **nothing is pre-selected** — Behavior Substitution only works if the alternative is the user's own. Writes `SubstitutionAction`s consumed by H2. |
 
-### B · Heute — [TodayView.swift](../Klar/Klar/Features/Today/TodayView.swift)
+### B · Übersicht — [TodayView.swift](../Klar/Klar/Features/Today/TodayView.swift)
+
+**The screen is no longer called „Heute".** It leads with a *monthly* quota, carries a standing
+plan under it, and only the third block is about today — so a title promising one day forced the
+quota card to correct it („Diesen Monat") just to be read right. The title is scope-neutral, each
+block names its own timeframe (`AUGUST` on the card, `Di., 11. Aug.` on the „Heute erfasst"
+header), and nothing has to talk its way out of its container. The file, the type and the screen
+IDs below still say Today/Heute; only what the user reads changed.
 
 | Screen | State | Wiring |
 |---|---|---|
-| **B1** Heute (gefüllt) | ✅ | `KlarStore.quotaSubstances()` lists **every** active reduction limit, tightest remaining first. One substance → the large quota card (with the substance named); several → one combined `MultiQuotaCard` with a row + bar per substance. The bar **drains** rather than fills — filled segments are what *remains*. |
+| **B1** Heute (gefüllt) | ✅ | `KlarStore.quotaSubstances()` lists **every** active reduction limit, tightest remaining first. One substance → the large quota card (with the substance named); several → one combined `MultiQuotaCard` with a row + bar per substance. The bar **drains** rather than fills — filled segments are what *remains*. The count is a `QuotaCount`: small „Noch", the number at 28pt with `contentTransition(.numericText())` so it rolls when an entry lands, small „von N". Same wording as before, different weighting. |
 | **B2** Heute (leerer Tag) | ✅ | "Ein ruhiger Tag." No "Noch nichts geloggt!" — an entry-free day is the calm baseline, not a gap. Asserted in `testOnboardingThenLogFirstEntry`. |
 | **B3** Monatserster | ✅ | The dark "Neuer Monat" card renders when `KlarDate.isFirstOfMonth()` — "Kontingent: N." for one limit, "Kontingente: Alkohol 4 · Nikotin 10." for several. |
 
 Over the limit, the headline flips from "Noch 2 von 4" to "5 von 4 diesen Monat" — factual, no red,
 no appeal.
 
-**The header names the logical day, not the wall clock.** Between midnight and 05:00 those disagree,
-and the date line labels the entries listed under it, so it has to follow them: at 02:15 it reads
-"Mo., 3. Aug." with "bis 5 Uhr" beneath. The hint appears only inside that window, because only
-there does the shown date contradict the phone. `today` is `@State` refreshed when the scene becomes
-active — "bis 5 Uhr" stops being true at 05:00, and a computed `Date()` would only be right by
-accident. The same window makes the entry confirmation name the day ("Alkohol · jetzt, 02:15 · noch
-Montag"), and Settings states the rule under "Tag" without offering it as a control.
+**The date names the logical day, not the wall clock.** Between midnight and 05:00 those disagree,
+and the date labels the entries listed under it, so it has to follow them: at 02:15 it reads
+"Mo., 3. Aug. · bis 5 Uhr". It sits on the "Heute erfasst" header rather than on the screen,
+because that is the only block it labels. On an entry-free day there is no such header, and the
+date drops out with it — *except* inside the cutoff window, where it appears under "Ein ruhiger
+Tag." because there it changes what the next tap will do. Same rule throughout: the hint shows
+only where the shown day contradicts the phone. `today` is `@State` refreshed when the scene
+becomes active — "bis 5 Uhr" stops being true at 05:00, and a computed `Date()` would only be
+right by accident. The same window makes the entry confirmation name the day ("Alkohol · jetzt,
+02:15 · noch Montag"), and Settings states the rule under "Tag" without offering it as a control.
 
 ### C · Eintrag erfassen — [EntrySheetView.swift](../Klar/Klar/Features/Entry/EntrySheetView.swift)
+
+**All three states share one header language.** C1 kept a hand-built 22pt `Text` in its content
+for one round while C2 and C3 had a 34pt `navigationTitle` — so saving jumped the title size
+right in the middle of the task. C1 is now a `navigationTitle` too („Neuer Eintrag", which also
+stops two different screens both being called „Eintrag") and carries no toolbar button: it is a
+two-tap screen whose point is speed, and the drag indicator plus the page visible behind a sheet
+that never fills the screen are exit enough.
+
+**The action's placement follows the screen's job, and that difference is deliberate.**
+`EntryDetailForm.Mode` carries it rather than a set of booleans that could be combined into
+states that make no sense:
+
+| | `.saved` | `.edit` |
+|---|---|---|
+| What it is | the terminal step of a flow | an inspector on an existing entry |
+| Detent | `.large` — every field visible with room for large Dynamic Type | `[.medium, .large]` |
+| „Fertig" | prominent, pinned via `safeAreaBar(edge: .bottom)` | toolbar `.confirmationAction` |
+| Delete | no — undoing a tap is a swipe away | yes |
+
+The bottom bar is why `.saved` can afford full height: pinning the action means the extra height
+costs no reachability. `.edit` writes every field as it is changed, so „Fertig" only closes —
+which is what a toolbar button says and a large primary button would overstate.
+
+**„jetzt" is passed in, not inferred.** `EntryStamp.subtitle(for:isFresh:)` used to derive it
+from `isToday`, so *every* entry logged earlier today read „Alkohol · jetzt, 08:05" when opened
+at 20:44. Only the screen that just wrote the entry passes `isFresh: true`; the edit sheet shows
+the plain time.
+
+**„Gespeichert." is the sheet's title, not a badge inside it.** It used to be a `SavedHeader`: a
+green check in a circle with a bold line next to it, and the form starting right underneath. It
+confirmed nothing the haptic had not already confirmed, and it sat in the position a title
+belongs in without being one. Both post-save states now use `navigationTitle` +
+`navigationSubtitle`, with „Fertig" as a `.confirmationAction` toolbar item — reachable without
+scrolling past every optional field to find it. `EntryStamp.subtitle(for:)` builds the
+„Alkohol · jetzt, 02:15 · noch Montag" line for both.
+
+The sheet sits on `Klar.bgSubtle` rather than `Klar.surface`. On the card colour every field had
+to be outlined just to be visible against its own background, which is how borders survived here
+after being removed everywhere else. The dose field keeps its border — it is a text field, and
+iOS outlines controls. Mood is the design system's `KlarSegmentedControl` instead of three
+hand-drawn buttons; tapping the active segment still clears it, which a plain `Picker` cannot
+express.
 
 | Screen | State | Wiring |
 |---|---|---|

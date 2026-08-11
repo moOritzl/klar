@@ -25,13 +25,7 @@ struct PlansView: View {
 
     var body: some View {
         NavigationStack {
-            KlarScreen {
-                KlarScreenBanner(title: "Pläne") {
-                    Text(subtitle)
-                        .font(Klar.TypeScale.bodySmall)
-                        .foregroundStyle(Klar.textTertiary)
-                }
-            } content: {
+            KlarScreen(title: "Pläne", subtitle: subtitle) {
                 VStack(alignment: .leading, spacing: 0) {
                     if activePlans.isEmpty {
                         emptyState
@@ -99,7 +93,7 @@ struct PlansView: View {
                             .multilineTextAlignment(.leading)
                     }
                 }
-                .buttonStyle(.plain)
+                .klarRowButtonStyle()
             }
         }
 
@@ -185,16 +179,16 @@ struct PlansView: View {
     // MARK: - Links to G4 / G5
 
     private var navigationRows: some View {
-        VStack(spacing: 0) {
+        KlarCard(padding: 0) {
             NavigationLink {
                 GoalsView()
             } label: {
                 settingsRow(icon: "target", title: "Ziele", subtitle: "Limit anpassen, Zieltyp wechseln")
             }
-            .buttonStyle(.plain)
+            .klarRowButtonStyle()
             .accessibilityIdentifier("plans.goalsLink")
 
-            Divider().overlay(Klar.borderSubtle)
+            KlarRowDivider(inset: 16)
 
             NavigationLink {
                 SubstitutionActionsView()
@@ -205,14 +199,8 @@ struct PlansView: View {
                     subtitle: "Genutzt im Craving-SOS"
                 )
             }
-            .buttonStyle(.plain)
+            .klarRowButtonStyle()
             .accessibilityIdentifier("plans.substitutionsLink")
-        }
-        .background(Klar.surface)
-        .clipShape(RoundedRectangle(cornerRadius: Klar.Radius.lg, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: Klar.Radius.lg, style: .continuous)
-                .strokeBorder(Klar.border, lineWidth: 1)
         }
     }
 

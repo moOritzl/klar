@@ -22,35 +22,28 @@ struct GoalsView: View {
     }
 
     var body: some View {
-        ZStack {
-            Klar.bgSubtle.ignoresSafeArea()
-
-            ScrollView {
-                VStack(alignment: .leading, spacing: 0) {
-                    Text("Ziele")
-                        .font(Klar.TypeScale.title)
-                        .foregroundStyle(Klar.text)
-                        .padding(.bottom, 16)
-
-                    VStack(spacing: 12) {
-                        ForEach(activeSubstances) { substance in
-                            GoalCard(substance: substance, store: store)
-                        }
+        ScrollView {
+            VStack(alignment: .leading, spacing: 0) {
+                VStack(spacing: 12) {
+                    ForEach(activeSubstances) { substance in
+                        GoalCard(substance: substance, store: store)
                     }
-
-                    KlarDashedButton(title: "Substanzen verwalten", systemImage: "slider.horizontal.3") {
-                        isManagingSubstances = true
-                    }
-                    .padding(.top, 12)
                 }
-                .padding(.horizontal, 16)
-                .padding(.top, 8)
-                .padding(.bottom, 24)
+
+                KlarDashedButton(title: "Substanzen verwalten", systemImage: "slider.horizontal.3") {
+                    isManagingSubstances = true
+                }
+                .padding(.top, 12)
             }
-            .scrollIndicators(.hidden)
+            .padding(.horizontal, 16)
+            .padding(.top, Klar.Space.x2)
+            .padding(.bottom, 24)
         }
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbarBackground(Klar.bgSubtle, for: .navigationBar)
+        .scrollIndicators(.hidden)
+        .background(Klar.bgSubtle)
+        // Pushed inside Pläne's stack, so the bar and its back button are already there — the
+        // title used to be drawn a second time into the content underneath them.
+        .navigationTitle("Ziele")
         .sheet(isPresented: $isManagingSubstances) {
             SubstancesView()
         }
@@ -178,14 +171,8 @@ struct SubstancesView: View {
 
     var body: some View {
         NavigationStack {
-            ZStack {
-                Klar.bgSubtle.ignoresSafeArea()
-
-                ScrollView {
+            ScrollView {
                     VStack(alignment: .leading, spacing: 0) {
-                        KlarScreenHeader(title: "Substanzen & Kosten") { dismiss() }
-                            .padding(.bottom, 6)
-
                         Text("Die Kostenbasis ist deine eigene Schätzung. Sie speist die „Geld gespart“-Rechnung.")
                             .font(Klar.TypeScale.bodySmall)
                             .foregroundStyle(Klar.textTertiary)
@@ -203,12 +190,17 @@ struct SubstancesView: View {
                         .padding(.top, 12)
                     }
                     .padding(.horizontal, 16)
-                    .padding(.top, 20)
+                    .padding(.top, Klar.Space.x2)
                     .padding(.bottom, 24)
-                }
-                .scrollIndicators(.hidden)
             }
-            .toolbar(.hidden, for: .navigationBar)
+            .scrollIndicators(.hidden)
+            .background(Klar.bgSubtle)
+            .navigationTitle("Substanzen & Kosten")
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Fertig") { dismiss() }
+                }
+            }
         }
         .sheet(isPresented: $isAdding) {
             AddSubstanceSheet { name, unit in

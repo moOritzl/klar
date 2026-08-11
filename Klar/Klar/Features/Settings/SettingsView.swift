@@ -24,17 +24,9 @@ struct SettingsView: View {
         @Bindable var settings = settings
 
         NavigationStack {
-            ZStack {
-                Klar.bgSubtle.ignoresSafeArea()
-
-                ScrollView {
+            ScrollView {
                     VStack(alignment: .leading, spacing: 0) {
-                        Text("Einstellungen")
-                            .font(Klar.TypeScale.title)
-                            .foregroundStyle(Klar.text)
-                            .padding(.bottom, 16)
-
-                        KlarSectionLabel(text: "Privatsphäre & Sicherheit")
+                        KlarGroupHeader(text: "Privatsphäre & Sicherheit")
                             .padding(.bottom, 8)
 
                         SettingsGroup {
@@ -47,7 +39,7 @@ struct SettingsView: View {
                                 )
                             )
 
-                            SettingsDivider()
+                            KlarRowDivider()
 
                             SettingsPickerRow(
                                 icon: "timer",
@@ -59,7 +51,7 @@ struct SettingsView: View {
                         }
                         .padding(.bottom, 16)
 
-                        KlarSectionLabel(text: "Darstellung")
+                        KlarGroupHeader(text: "Darstellung")
                             .padding(.bottom, 8)
 
                         SettingsGroup {
@@ -73,7 +65,7 @@ struct SettingsView: View {
                         }
                         .padding(.bottom, 16)
 
-                        KlarSectionLabel(text: "Tag")
+                        KlarGroupHeader(text: "Tag")
                             .padding(.bottom, 8)
 
                         // Read-only on purpose. The boundary decides how every derived number is
@@ -88,7 +80,7 @@ struct SettingsView: View {
                         }
                         .padding(.bottom, 16)
 
-                        KlarSectionLabel(text: "Deine Daten")
+                        KlarGroupHeader(text: "Deine Daten")
                             .padding(.bottom, 8)
 
                         SettingsGroup {
@@ -97,7 +89,7 @@ struct SettingsView: View {
                                 title: "Substanzen & Kosten"
                             ) { isManagingSubstances = true }
 
-                            SettingsDivider()
+                            KlarRowDivider()
 
                             SettingsNavigationRow(
                                 icon: "quote.opening",
@@ -105,7 +97,7 @@ struct SettingsView: View {
                                 subtitle: whySubtitle
                             ) { isEditingWhy = true }
 
-                            SettingsDivider()
+                            KlarRowDivider()
 
                             SettingsNavigationRow(
                                 icon: "person.crop.circle",
@@ -113,7 +105,7 @@ struct SettingsView: View {
                                 subtitle: settings.supportContactName ?? "Für den Ein-Tap-Anruf im SOS"
                             ) { isEditingContact = true }
 
-                            SettingsDivider()
+                            KlarRowDivider()
 
                             SettingsToggleRow(
                                 icon: "bell",
@@ -125,7 +117,7 @@ struct SettingsView: View {
                                 )
                             )
 
-                            SettingsDivider()
+                            KlarRowDivider()
 
                             SettingsNavigationRow(
                                 icon: "square.and.arrow.down",
@@ -148,17 +140,19 @@ struct SettingsView: View {
                         .clipShape(RoundedRectangle(cornerRadius: Klar.Radius.md, style: .continuous))
                     }
                     .padding(.horizontal, 18)
-                    .padding(.top, 14)
+                    .padding(.top, Klar.Space.x2)
                     .padding(.bottom, 24)
-                }
-                .scrollIndicators(.hidden)
             }
+            .scrollIndicators(.hidden)
+            .background(Klar.bgSubtle)
+            // The title was a `Text` in the content while an empty inline bar sat above it — the
+            // screen had a navigation bar and used none of it. One title, in the bar.
+            .navigationTitle("Einstellungen")
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Fertig") { dismiss() }
                 }
             }
-            .navigationBarTitleDisplayMode(.inline)
         }
         .sheet(isPresented: $isEditingWhy) { WhyNoteSheet() }
         .sheet(isPresented: $isEditingContact) { SupportContactSheet() }
@@ -206,27 +200,16 @@ struct SettingsView: View {
 
 // MARK: - Rows
 
+/// Rows in one card, hairlines between them. This used to carry its own copy of the card chrome
+/// — surface, radius, border — which meant `KlarCard` and this had to be kept in sync by hand.
+/// It is now the same `KlarCard`, just without the padding, because the rows pad themselves.
 struct SettingsGroup<Content: View>: View {
     @ViewBuilder var content: Content
 
     var body: some View {
-        VStack(spacing: 0) {
+        KlarCard(padding: 0) {
             content
         }
-        .background(Klar.surface)
-        .clipShape(RoundedRectangle(cornerRadius: Klar.Radius.lg, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: Klar.Radius.lg, style: .continuous)
-                .strokeBorder(Klar.border, lineWidth: 1)
-        }
-    }
-}
-
-struct SettingsDivider: View {
-    var body: some View {
-        Rectangle()
-            .fill(Klar.borderSubtle)
-            .frame(height: 1)
     }
 }
 

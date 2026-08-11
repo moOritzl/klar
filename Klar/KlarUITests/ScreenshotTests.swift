@@ -50,12 +50,12 @@ final class ScreenshotTests: XCTestCase {
         app.buttons["App öffnen"].tap()
 
         // B2 · Heute (leerer Tag)
-        XCTAssertTrue(app.staticTexts["Heute"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Übersicht"].waitForExistence(timeout: 5))
         capture(app, "B2-Heute-leer")
 
         // C1 · Substanz wählen
         app.buttons["Eintrag erfassen"].tap()
-        XCTAssertTrue(app.staticTexts["Eintrag"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Neuer Eintrag"].waitForExistence(timeout: 5))
         capture(app, "C1-Substanz-waehlen")
 
         // C2 · Gespeichert
@@ -135,7 +135,7 @@ final class ScreenshotTests: XCTestCase {
         app.navigationBars.buttons.firstMatch.tap()
 
         // I1 · Einstellungen
-        app.tabBars.buttons["Heute"].tap()
+        app.tabBars.buttons["Übersicht"].tap()
         app.buttons["Einstellungen"].tap()
         XCTAssertTrue(app.staticTexts["Einstellungen"].waitForExistence(timeout: 5))
         capture(app, "I1-Einstellungen")

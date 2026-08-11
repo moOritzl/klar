@@ -20,16 +20,6 @@ struct SubstitutionActionsView: View {
             Klar.bgSubtle.ignoresSafeArea()
 
             VStack(alignment: .leading, spacing: 0) {
-                Text("Ersatzhandlungen")
-                    .font(Klar.TypeScale.title)
-                    .foregroundStyle(Klar.text)
-                    .padding(.bottom, 4)
-
-                Text("Erhoben im Onboarding, genutzt im Craving-SOS.")
-                    .font(Klar.TypeScale.bodySmall)
-                    .foregroundStyle(Klar.textTertiary)
-                    .padding(.bottom, 18)
-
                 // A plain List, because reordering (the grip handle in the draft) is what
                 // `.onMove` gives us for free — and order is meaningful: the first action is the
                 // one the SOS screen leads with.
@@ -71,9 +61,10 @@ struct SubstitutionActionsView: View {
                 .scrollContentBackground(.hidden)
                 .environment(\.editMode, .constant(.active))
             }
-            .padding(.top, 8)
+            .padding(.top, Klar.Space.x2)
         }
-        .navigationBarTitleDisplayMode(.inline)
+        .navigationTitle("Ersatzhandlungen")
+        .navigationSubtitle("Erhoben im Onboarding, genutzt im Craving-SOS.")
         .alert("Alternative hinzufügen", isPresented: $isAdding) {
             TextField("z. B. Jonas anrufen", text: $newText)
             Button("Abbrechen", role: .cancel) { newText = "" }

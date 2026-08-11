@@ -16,7 +16,6 @@ struct TodayView: View {
     @Query private var plans: [Plan]
     @Query private var substances: [Substance]
 
-    @State private var isEntrySheetPresented = false
     @State private var isSettingsPresented = false
     @State private var planBeingEdited: Plan?
     @State private var entryBeingEdited: Entry?
@@ -31,110 +30,24 @@ struct TodayView: View {
     /// case that actually occurs (phone put down at 04:50, picked up at 07:00); an app left open
     /// across the boundary keeps the value it had, and no timer runs to prevent that.
     @State private var today = Date()
-    private var todaysEntries: [Entry] { store.entries(onLogicalDayOf: today) }
+    /// Newest first — the opposite of `entries(onLogicalDay:)`, which the day detail keeps.
+    ///
+    /// The two lists answer different questions. The day detail is a record read end to end, so
+    /// it runs forwards: morning coffee, the cigarette at work, the drinks that evening. This
+    /// list is the thing you just tapped, checked against what the app now shows, so the entry
+    /// you are looking for is the last one made — and on a heavy day it would otherwise be the
+    /// one furthest down.
+    private var todaysEntries: [Entry] {
+        store.entries(onLogicalDayOf: today).sorted { $0.timestamp > $1.timestamp }
+    }
     private var activePlan: Plan? { store.activePlans().first }
     private var quotaSubstances: [SubstanceQuota] {
         store.quotaSubstances()
     }
 
     var body: some View {
-        ZStack(alignment: .bottomTrailing) {
-            Klar.bgSubtle.ignoresSafeArea()
-
-            ScrollView {
-                VStack(alignment: .leading, spacing: 0) {
-                    header
-                        .padding(.bottom, 16)
-
-                    // B3 · Only on the 1st. The quota resets, and the card says so — the number
-                    // and nothing else.
-                    if KlarDate.isFirstOfMonth(today), !quotaSubstances.isEmpty {
-                        NewMonthCard(
-                            quotas: quotaSubstances.map { (name: $0.substance.name, limit: $0.quota.limit ?? 0) }
-                        )
-                        .padding(.bottom, 14)
-                    }
-
-                    // One substance keeps the original large card; several share one combined
-                    // card — every limit visible at a glance, tightest first.
-                    if quotaSubstances.count == 1, let single = quotaSubstances.first {
-                        QuotaCard(
-                            substance: single.substance,
-                            quota: single.quota,
-                            daysSinceLast: store.stats(for: single.substance).daysSinceLastOccasion
-                        )
-                        .padding(.bottom, 12)
-                    } else if quotaSubstances.count > 1 {
-                        MultiQuotaCard(quotas: quotaSubstances)
-                            .padding(.bottom, 12)
-                    }
-
-                    if let activePlan {
-                        PlanSummaryCard(plan: activePlan) {
-                            planBeingEdited = activePlan
-                        }
-                        .padding(.bottom, 18)
-                    } else if !substances.isEmpty {
-                        // No plan yet: point at where one gets built, without nagging.
-                        Button {
-                            selectedTab = .plans
-                        } label: {
-                            KlarCard {
-                                Text("Noch kein Plan.")
-                                    .font(Klar.TypeScale.headline)
-                                    .foregroundStyle(Klar.text)
-                                    .padding(.bottom, 4)
-                                Text("Ein Plan entsteht aus deinen Mustern.")
-                                    .font(Klar.TypeScale.bodySmall)
-                                    .foregroundStyle(Klar.textTertiary)
-                            }
-                        }
-                        .buttonStyle(.plain)
-                        .padding(.bottom, 18)
-                    }
-
-                    if todaysEntries.isEmpty {
-                        // B2 · The empty day. No "Noch nichts geloggt!" — an entry-free day is
-                        // the calm baseline, not a gap to be filled.
-                        Text("Ein ruhiger Tag.")
-                            .font(Klar.TypeScale.bodySmall)
-                            .foregroundStyle(Klar.textTertiary)
-                            .opacity(0.75)
-                            .frame(maxWidth: .infinity)
-                            .padding(.top, 40)
-                    } else {
-                        KlarSectionLabel(text: "Heute erfasst")
-                            .accessibilityIdentifier("today.loggedSection")
-                            .padding(.bottom, 10)
-
-                        VStack(spacing: 10) {
-                            ForEach(todaysEntries) { entry in
-                                Button {
-                                    entryBeingEdited = entry
-                                } label: {
-                                    EntryRow(entry: entry)
-                                }
-                                .buttonStyle(.plain)
-                            }
-                        }
-                    }
-                }
-                .padding(.horizontal, 16)
-                .padding(.top, Klar.Space.x4)
-                .padding(.bottom, 100) // clear the FAB
-            }
-            // Heute keeps its own layout rather than KlarScreen — it has a FAB and content that
-            // grows with every entry — so it has to opt into the bounce fix by hand. Without
-            // this an empty day rubber-bands with nothing to scroll.
-            .scrollBounceBehavior(.basedOnSize)
-            .scrollIndicators(.hidden)
-
-            addButton
-                .padding(.trailing, 18)
-                .padding(.bottom, 18)
-        }
-        .sheet(isPresented: $isEntrySheetPresented) {
-            EntrySheetView()
+        NavigationStack {
+            todayScroll
         }
         .sheet(isPresented: $isSettingsPresented) {
             SettingsView()
@@ -151,47 +64,162 @@ struct TodayView: View {
         }
     }
 
-    // MARK: - Pieces
+    private var todayScroll: some View {
+        Group {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 0) {
+                    // B3 · Only on the 1st. The quota resets, and the card says so — the number
+                    // and nothing else.
+                    if KlarDate.isFirstOfMonth(today), !quotaSubstances.isEmpty {
+                        NewMonthCard(
+                            quotas: quotaSubstances.map { (name: $0.substance.name, limit: $0.quota.limit ?? 0) }
+                        )
+                        .padding(.bottom, 14)
+                    }
 
-    private var header: some View {
-        HStack(alignment: .firstTextBaseline) {
-            Text("Heute")
-                .font(Klar.TypeScale.display(30))
-                .foregroundStyle(Klar.text)
-            Spacer()
-            // The logical day, not the wall clock: between midnight and 05:00 those disagree, and
-            // this line labels the entries listed below it. The hint appears only in that window,
-            // because only there does the date contradict the phone.
-            VStack(alignment: .trailing, spacing: 1) {
-                Text(KlarDate.logicalDayLabel(now: today))
-                    .font(Klar.TypeScale.bodySmall)
-                    .foregroundStyle(Klar.textTertiary)
-                if KlarDate.isBeforeCutoff(today) {
-                    Text("bis 5 Uhr")
-                        .font(Klar.TypeScale.caption)
+                    // One substance keeps the original large card; several share one combined
+                    // card — every limit visible at a glance, tightest first.
+                    if quotaSubstances.count == 1, let single = quotaSubstances.first {
+                        QuotaCard(
+                            substance: single.substance,
+                            quota: single.quota,
+                            daysSinceLast: store.stats(for: single.substance).daysSinceLastOccasion,
+                            month: today
+                        )
+                        .padding(.bottom, 12)
+                    } else if quotaSubstances.count > 1 {
+                        MultiQuotaCard(quotas: quotaSubstances, month: today)
+                            .padding(.bottom, 12)
+                    }
+
+                    if let activePlan {
+                        PlanSummaryCard(plan: activePlan) {
+                            planBeingEdited = activePlan
+                        }
+                        .padding(.bottom, 18)
+                    } else if !substances.isEmpty {
+                        // No plan yet: point at where one gets built, without nagging.
+                        Button {
+                            selectedTab = .plans
+                        } label: {
+                            KlarCard {
+                                HStack(alignment: .top, spacing: 10) {
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text("Noch kein Plan.")
+                                            .font(Klar.TypeScale.headline)
+                                            .foregroundStyle(Klar.text)
+                                        Text("Ein Plan entsteht aus deinen Mustern.")
+                                            .font(Klar.TypeScale.bodySmall)
+                                            .foregroundStyle(Klar.textTertiary)
+                                    }
+                                    Spacer(minLength: 0)
+                                    KlarDisclosureChevron()
+                                        .padding(.top, 3)
+                                }
+                            }
+                        }
+                        .klarRowButtonStyle()
+                        .padding(.bottom, 18)
+                    }
+
+                    if todaysEntries.isEmpty {
+                        // B2 · The empty day. No "Noch nichts geloggt!" — an entry-free day is
+                        // the calm baseline, not a gap to be filled.
+                        VStack(spacing: 6) {
+                            Text("Ein ruhiger Tag.")
+                            // There is no entry list to label here, so the date would be
+                            // decoration — except between midnight and 05:00, where it changes
+                            // what the next tap will do. Same rule as everywhere else: the hint
+                            // appears only where the shown day contradicts the phone.
+                            if KlarDate.isBeforeCutoff(today) {
+                                Text(dayLabel)
+                            }
+                        }
+                        .font(Klar.TypeScale.bodySmall)
                         .foregroundStyle(Klar.textTertiary)
+                        .opacity(0.75)
+                        .frame(maxWidth: .infinity)
+                        .padding(.top, 40)
+                    } else {
+                        KlarGroupHeader(text: "Heute erfasst") {
+                            Text(dayLabel)
+                                .font(Klar.TypeScale.bodySmall)
+                                .foregroundStyle(Klar.textTertiary)
+                        }
+                        .accessibilityIdentifier("today.loggedSection")
+                        .padding(.bottom, 10)
+
+                        VStack(spacing: 10) {
+                            ForEach(todaysEntries) { entry in
+                                Button {
+                                    entryBeingEdited = entry
+                                } label: {
+                                    EntryRow(entry: entry)
+                                }
+                                .klarRowButtonStyle()
+                                // The only way to delete an entry used to be to open it first.
+                                // A long press is where iOS puts this, and it keeps the
+                                // destructive action one deliberate step away from a tap.
+                                .contextMenu {
+                                    Button {
+                                        entryBeingEdited = entry
+                                    } label: {
+                                        Label("Bearbeiten", systemImage: "pencil")
+                                    }
+                                    Button(role: .destructive) {
+                                        store.deleteEntry(entry)
+                                    } label: {
+                                        Label("Löschen", systemImage: "trash")
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                .padding(.horizontal, 16)
+                .padding(.top, Klar.Space.x4)
+                // No longer 100pt to clear a floating button. The bottom accessory takes part in
+                // the safe area, so iOS insets the scroll content for it and the last entry is
+                // reachable without a hand-tuned gap.
+                .padding(.bottom, Klar.Space.x6)
+            }
+            // Same two reasons as `KlarScreen`: the background belongs to the scroll view so the
+            // content travels under the bar, and the default bounce stays so a quiet day can
+            // still be dragged — that drag is what collapses the title.
+            .background(Klar.bgSubtle)
+            // Not „Heute". The screen leads with a *monthly* quota and carries a standing plan
+            // underneath it, and only the third block is actually about today — so a title that
+            // promised one day forced the quota card to correct it („Diesen Monat") just to be
+            // read right. A scope-neutral title lets the three blocks name their own timeframe,
+            // which is why Health's tab is „Übersicht" and not „Heute" either.
+            .navigationTitle("Übersicht")
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        isSettingsPresented = true
+                    } label: {
+                        Image(systemName: "gearshape")
+                    }
+                    .accessibilityLabel("Einstellungen")
                 }
             }
-            .accessibilityElement(children: .combine)
-            KlarIconButton(systemImage: "gearshape", accessibilityLabel: "Einstellungen") {
-                isSettingsPresented = true
-            }
         }
     }
 
-    private var addButton: some View {
-        Button {
-            isEntrySheetPresented = true
-        } label: {
-            Image(systemName: "plus")
-                .font(.system(size: 22, weight: .semibold))
-                .foregroundStyle(.white)
-                .frame(width: 52, height: 52)
-                .background(Klar.accent, in: Circle())
-                .klarShadow(Klar.Shadow.md)
-        }
-        .accessibilityLabel("Eintrag erfassen")
+    // MARK: - Pieces
+
+    /// The logical day, not the wall clock: between midnight and 05:00 those disagree, and this
+    /// line labels the entries listed under it, so it has to follow them. The „bis 5 Uhr" hint
+    /// appears only inside that window, because only there does the date contradict the phone.
+    ///
+    /// It sits on the „Heute erfasst" header rather than on the screen, because that is what it
+    /// labels — the screen also carries a monthly quota and a standing plan, and neither of those
+    /// is dated today.
+    private var dayLabel: String {
+        let day = KlarDate.logicalDayLabel(now: today)
+        return KlarDate.isBeforeCutoff(today) ? "\(day) · bis 5 Uhr" : day
     }
+
 }
 
 // MARK: - Quota card
@@ -202,6 +230,9 @@ struct QuotaCard: View {
     let substance: Substance
     let quota: QuotaResult
     let daysSinceLast: Int?
+    /// Named, not "diesen Monat". A month name is unmistakably a month, so the card no longer
+    /// has to talk its way out of the screen title it sits under.
+    var month: Date = Date()
 
     var body: some View {
         KlarCard {
@@ -210,14 +241,12 @@ struct QuotaCard: View {
                     .fill(Klar.substanceColor(substance.colorIndex))
                     .frame(width: 8, height: 8)
                 Text(substance.name)
-                    .font(Klar.TypeScale.caption.weight(.semibold))
-                    .foregroundStyle(Klar.textTertiary)
+                    .font(Klar.TypeScale.bodySmall.weight(.semibold))
+                    .foregroundStyle(Klar.textSecondary)
             }
-            .padding(.bottom, 6)
+            .padding(.bottom, 8)
 
-            Text(headline)
-                .font(Klar.TypeScale.headline)
-                .foregroundStyle(Klar.text)
+            QuotaCount(quota: quota)
 
             if let limit = quota.limit, let remaining = quota.remaining {
                 KlarQuotaBar(limit: limit, remaining: remaining)
@@ -229,18 +258,11 @@ struct QuotaCard: View {
             Text(subline)
                 .font(Klar.TypeScale.bodySmall)
                 .foregroundStyle(Klar.textTertiary)
+        } header: {
+            KlarSectionLabel(text: "\(KlarDate.monthName(month))")
         }
-    }
-
-    private var headline: String {
-        guard let limit = quota.limit, let remaining = quota.remaining else {
-            return "Nur beobachten"
-        }
-        // Over the limit we state the fact and stop. No red, no exclamation, no appeal.
-        if remaining <= 0 {
-            return "\(quota.occasions) von \(limit) diesen Monat"
-        }
-        return "Noch \(remaining) von \(limit) diesen Monat"
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(substance.name), \(QuotaCount.spokenText(for: quota)) im \(KlarDate.monthName(month)). \(subline)")
     }
 
     private var subline: String {
@@ -259,21 +281,29 @@ struct QuotaCard: View {
 
 /// B1 with several limits: one calm card, one row per substance, tightest remaining on top.
 /// Same drain-not-fill bar as the single card — just every budget visible at a glance.
+///
+/// Laid out like a grouped-list section rather than a box of stacked text: a label row, a
+/// hairline across the full card, then one separated row per substance. The count is the
+/// biggest thing in each row, because it is the only thing on this screen anyone actually
+/// comes to read.
 struct MultiQuotaCard: View {
     let quotas: [SubstanceQuota]
+    var month: Date = Date()
 
     var body: some View {
-        KlarCard {
-            Text("Diesen Monat")
-                .font(Klar.TypeScale.headline)
-                .foregroundStyle(Klar.text)
-                .padding(.bottom, 14)
-
-            VStack(alignment: .leading, spacing: 16) {
-                ForEach(quotas) { pair in
+        KlarCard(padding: 0) {
+            VStack(alignment: .leading, spacing: 0) {
+                ForEach(Array(quotas.enumerated()), id: \.element.id) { index, pair in
+                    if index > 0 {
+                        KlarRowDivider(inset: 18)
+                    }
                     MultiQuotaRow(substance: pair.substance, quota: pair.quota)
+                        .padding(.horizontal, 18)
+                        .padding(.vertical, 14)
                 }
             }
+        } header: {
+            KlarSectionLabel(text: "\(KlarDate.monthName(month))")
         }
     }
 }
@@ -283,30 +313,67 @@ struct MultiQuotaRow: View {
     let quota: QuotaResult
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 7) {
+        VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 8) {
                 Circle()
                     .fill(Klar.substanceColor(substance.colorIndex))
                     .frame(width: 8, height: 8)
                 Text(substance.name)
                     .font(Klar.TypeScale.bodySmall.weight(.semibold))
-                    .foregroundStyle(Klar.text)
-                Spacer()
-                Text(countText)
-                    .font(Klar.TypeScale.bodySmall)
                     .foregroundStyle(Klar.textSecondary)
             }
+
+            QuotaCount(quota: quota)
 
             if let limit = quota.limit, let remaining = quota.remaining {
                 KlarQuotaBar(limit: limit, remaining: remaining)
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(substance.name), \(QuotaCount.spokenText(for: quota))")
+    }
+}
+
+/// „Noch **4** von 6" — the count carried by the numeral, the words kept small around it.
+///
+/// The wording is unchanged and still comes from the same two rules: over the limit it drops
+/// the „Noch" and states the plain fact, and there is no red and no exclamation anywhere in it.
+/// Only the weighting is new, and it is the Health „**1.313** Schritte" treatment: one number
+/// big enough to read without looking, its unit small enough to stay out of the way.
+struct QuotaCount: View {
+    let quota: QuotaResult
+
+    var body: some View {
+        if let limit = quota.limit, let remaining = quota.remaining {
+            HStack(alignment: .firstTextBaseline, spacing: 5) {
+                if remaining > 0 {
+                    Text("Noch")
+                        .font(Klar.TypeScale.bodySmall)
+                        .foregroundStyle(Klar.textSecondary)
+                }
+                Text("\(remaining > 0 ? remaining : quota.occasions)")
+                    .font(Klar.TypeScale.numeral)
+                    .foregroundStyle(Klar.text)
+                    .contentTransition(.numericText())
+                Text("von \(limit)")
+                    .font(Klar.TypeScale.bodySmall)
+                    .foregroundStyle(Klar.textSecondary)
+            }
+            .animation(.snappy, value: remaining)
+        } else {
+            Text("Nur beobachten")
+                .font(Klar.TypeScale.headline)
+                .foregroundStyle(Klar.text)
+        }
     }
 
-    private var countText: String {
-        guard let limit = quota.limit, let remaining = quota.remaining else { return "" }
-        // Same wording rule as the single card: over the limit, state the fact and stop.
+    /// VoiceOver reads the row as one sentence; the visual split into three `Text`s would
+    /// otherwise come out as three separate stops.
+    static func spokenText(for quota: QuotaResult) -> String {
+        guard let limit = quota.limit, let remaining = quota.remaining else {
+            return "Nur beobachten"
+        }
         if remaining <= 0 {
             return "\(quota.occasions) von \(limit)"
         }
@@ -419,6 +486,8 @@ struct EntryRow: View {
                 if let tag = entry.contextTags?.first {
                     KlarChip(text: tag.name)
                 }
+
+                KlarDisclosureChevron()
             }
         }
     }
