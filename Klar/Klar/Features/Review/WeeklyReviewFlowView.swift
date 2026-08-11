@@ -17,6 +17,7 @@ struct WeeklyReviewFlowView: View {
     @State private var step = 0
     @State private var decision: ReviewPlanDecision = .keep
     @State private var isEditingPlan = false
+    @State private var didFinish = false
 
     private var store: KlarStore { KlarStore(context: modelContext) }
     private var summary: WeeklyReviewSummary {
@@ -50,6 +51,10 @@ struct WeeklyReviewFlowView: View {
             .padding(.bottom, 30)
         }
         .animation(.easeInOut(duration: 0.2), value: step)
+        // Advancing a step is a selection; finishing the review is the one moment in the app
+        // that has actually concluded something.
+        .sensoryFeedback(.selection, trigger: step)
+        .sensoryFeedback(.success, trigger: didFinish)
         .sheet(isPresented: $isEditingPlan) {
             if let plan = store.activePlans().first {
                 PlanEditorView(existingPlan: plan)
@@ -61,6 +66,7 @@ struct WeeklyReviewFlowView: View {
         applyDecision()
         store.recordReviewDecision(weekStart: weekStart, decision: decision)
         settings.lastReviewedWeekStart = weekStart
+        didFinish = true
         dismiss()
     }
 
@@ -323,14 +329,9 @@ struct ArchivedReviewView: View {
     var body: some View {
         let summary = WeeklyReviewSummary.build(weekStart: weekStart, store: store)
 
-        ZStack {
-            Klar.bgSubtle.ignoresSafeArea()
-
+        NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
-                    KlarScreenHeader(title: KlarDate.weekRange(weekStart)) { dismiss() }
-                        .padding(.bottom, 18)
-
                     VStack(spacing: 12) {
                         KlarCard(padding: 16) {
                             HStack {
@@ -384,10 +385,17 @@ struct ArchivedReviewView: View {
                     }
                 }
                 .padding(.horizontal, 16)
-                .padding(.top, 20)
+                .padding(.top, Klar.Space.x2)
                 .padding(.bottom, 24)
             }
             .scrollIndicators(.hidden)
+            .background(Klar.bgSubtle)
+            .navigationTitle(KlarDate.weekRange(weekStart))
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Fertig") { dismiss() }
+                }
+            }
         }
     }
 }

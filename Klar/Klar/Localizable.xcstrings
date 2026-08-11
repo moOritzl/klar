@@ -52,6 +52,26 @@
     "%@ archivieren" : {
 
     },
+    "%@, %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@, %2$@"
+          }
+        }
+      }
+    },
+    "%@, %@ im %@. %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@, %2$@ im %3$@. %4$@"
+          }
+        }
+      }
+    },
     "%lld" : {
 
     },
@@ -145,6 +165,9 @@
     "Auto-Sperre" : {
 
     },
+    "Bearbeiten" : {
+
+    },
     "Benachrichtigungen" : {
 
     },
@@ -155,9 +178,6 @@
 
     },
     "Bestehende Einträge bleiben erhalten. Die Substanz verschwindet nur aus der Auswahl." : {
-
-    },
-    "bis 5 Uhr" : {
 
     },
     "Bist du sicher? Das kann nicht rückgängig gemacht werden." : {
@@ -230,9 +250,6 @@
 
     },
     "Diese Woche" : {
-
-    },
-    "Diesen Monat" : {
 
     },
     "Dieses Gefühl geht vorbei. Du hast einen Plan." : {
@@ -411,9 +428,6 @@
     "Hat dein Plan geholfen?" : {
 
     },
-    "Heute" : {
-
-    },
     "Heute erfasst" : {
 
     },
@@ -518,10 +532,16 @@
     "Neue Alternative" : {
 
     },
+    "Neuer Eintrag" : {
+
+    },
     "Neuer Monat" : {
 
     },
     "Neuer Plan" : {
+
+    },
+    "Noch" : {
 
     },
     "Noch %lld von %lld diesen Monat" : {
@@ -568,6 +588,9 @@
 
     },
     "Notruf hilft, ohne die Polizei zu rufen. Sag ehrlich, was konsumiert wurde. Das entscheidet über die richtige Behandlung." : {
+
+    },
+    "Nur beobachten" : {
 
     },
     "Ø Abstand" : {
@@ -696,6 +719,9 @@
     "Tippen genügt. Details kannst du später ergänzen." : {
 
     },
+    "Übersicht" : {
+
+    },
     "Überspringbar" : {
 
     },
@@ -718,6 +744,9 @@
 
     },
     "Vier Sekunden ein, vier halten, vier aus, vier halten." : {
+
+    },
+    "von %lld" : {
 
     },
     "Vor Ort" : {
@@ -830,9 +859,6 @@
 
     },
     "Zu wenig Einträge für einen Verlauf. Ab zwei Wochen mit Einträgen zeigt sich hier eine Linie." : {
-
-    },
-    "Zurück" : {
 
     }
   },

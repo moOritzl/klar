@@ -49,8 +49,15 @@ enum Klar {
     // MARK: - Semantic aliases
 
     static let bg = adaptive(light: 0xFFFFFF, dark: 0x0E1719)
-    static let bgSubtle = adaptive(light: 0xF7FAFA, dark: 0x15272B)
-    static let bgSunken = adaptive(light: 0xF4F6F6, dark: 0x0E1719)
+    /// The page behind the cards, i.e. iOS's `systemGroupedBackground`.
+    ///
+    /// It was one step lighter (`#F7FAFA` / `#15272B`) back when every card was outlined and the
+    /// page only had to *not* be white. With the border gone the fill contrast is the entire
+    /// separation, and in dark the old pair measured 1.15:1 — the cards dissolved. These values
+    /// give 1.34:1 in dark and land within a hair of Apple's own `#F2F2F7` in light. For
+    /// reference, Apple's dark grouped pair (`#000000` on `#1C1C1E`) is 1.23:1, so this is the
+    /// more separated of the two.
+    static let bgSubtle = adaptive(light: 0xF4F6F6, dark: 0x0E1719)
     /// The inverse surfaces are the app's emphasis block: in light they are the darkest thing on
     /// a near-white page. Mirroring that literally in dark mode (a near-black card on a dark page)
     /// measured 1.15:1 and read as the *quietest* element, inverting the role. So in dark they
@@ -108,9 +115,10 @@ enum Klar {
 
     // MARK: - Type scale (tokens/typography.css)
     //
-    // `--font-ui` is the system font (SF Pro) and `--font-display` is an editorial
-    // serif. On iOS we get both for free via `Font.system(design:)`, so no font files
-    // are bundled.
+    // `--font-ui` is the system font (SF Pro). `--font-display` was an editorial serif, and it
+    // is the one token deliberately *not* ported faithfully any more: a serif headline is a
+    // web-magazine signal, and on iOS every first-party app leads with SF Pro. The display
+    // register survives as a size/weight step rather than a typeface switch.
 
     enum TypeScale {
         // UI register
@@ -121,9 +129,10 @@ enum Klar {
         static let caption = Font.system(size: 12, weight: .medium)
         static let numeral = Font.system(size: 28, weight: .semibold)
 
-        // Display register (serif)
-        static func display(_ size: CGFloat, weight: Font.Weight = .bold) -> Font {
-            .system(size: size, weight: weight, design: .serif)
+        // Display register. SF Pro carries more visual weight than the serif did at the same
+        // size, so this steps down to `.semibold` where the serif used `.bold`.
+        static func display(_ size: CGFloat, weight: Font.Weight = .semibold) -> Font {
+            .system(size: size, weight: weight, design: .default)
         }
 
         static let displaySm = display(24)

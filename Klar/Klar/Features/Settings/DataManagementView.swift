@@ -26,7 +26,7 @@ struct DataManagementView: View {
 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 0) {
-                        KlarSectionLabel(text: "Export")
+                        KlarGroupHeader(text: "Export")
                             .padding(.bottom, 8)
 
                         SettingsGroup {
@@ -37,7 +37,7 @@ struct DataManagementView: View {
                         }
                         .padding(.bottom, 20)
 
-                        KlarSectionLabel(text: "Import")
+                        KlarGroupHeader(text: "Import")
                             .padding(.bottom, 8)
 
                         SettingsGroup {
@@ -49,7 +49,7 @@ struct DataManagementView: View {
                         }
                         .padding(.bottom, 20)
 
-                        KlarSectionLabel(text: "Löschen")
+                        KlarGroupHeader(text: "Löschen")
                             .padding(.bottom, 8)
 
                         Button {

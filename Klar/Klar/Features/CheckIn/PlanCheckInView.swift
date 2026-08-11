@@ -17,6 +17,8 @@ struct PlanCheckInView: View {
 
     @State private var isReflecting = false
     @State private var isEditingPlan = false
+    /// The same tick for all three answers. Which one was chosen is not the phone's opinion.
+    @State private var answerCount = 0
 
     private var store: KlarStore { KlarStore(context: modelContext) }
 
@@ -41,6 +43,7 @@ struct PlanCheckInView: View {
                 VStack(spacing: 10) {
                     KlarPrimaryButton(title: "Ja, hat geholfen") {
                         store.recordCheckIn(plan: plan, entry: entry, outcome: .helped)
+                        answerCount += 1
                         dismiss()
                     }
 
@@ -48,11 +51,13 @@ struct PlanCheckInView: View {
                         // "Nein" doesn't just get recorded — it opens the Problem-Solving flow,
                         // because an unhelpful plan is a plan that needs reworking.
                         store.recordCheckIn(plan: plan, entry: entry, outcome: .notHelped)
+                        answerCount += 1
                         isReflecting = true
                     }
 
                     Button("Plan anpassen") {
                         store.recordCheckIn(plan: plan, entry: entry, outcome: .adjusted)
+                        answerCount += 1
                         isEditingPlan = true
                     }
                     .font(.system(size: 15, weight: .semibold))
@@ -68,6 +73,7 @@ struct PlanCheckInView: View {
             .padding(22)
         }
         .presentationBackground(.clear)
+        .sensoryFeedback(.selection, trigger: answerCount)
         .fullScreenCover(isPresented: $isReflecting) {
             ReflectionView(plan: plan, entry: entry) { dismiss() }
         }

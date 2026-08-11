@@ -22,37 +22,45 @@ struct HistoryView: View {
     @State private var isAdvancing = true
 
     var body: some View {
-        KlarScreen {
-            KlarScreenBanner(title: title) {
-                KlarSegmentedControl(
-                    options: [
-                        (Section.calendar, "Kalender"),
-                        (Section.trends, "Trends"),
-                        (Section.review, "Rückblick")
-                    ],
-                    selection: Binding(get: { section }, set: { select($0) })
-                )
-            }
-        } content: {
-            sectionContent
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .id(section)
-                .transition(.asymmetric(
-                    insertion: .move(edge: isAdvancing ? .trailing : .leading).combined(with: .opacity),
-                    removal: .move(edge: isAdvancing ? .leading : .trailing).combined(with: .opacity)
-                ))
-        }
-        // Swiping anywhere the content does not claim — which on a short month is most of the
-        // screen — moves between the three sections. The segments stay because a bare gesture is
-        // undiscoverable and unreachable with VoiceOver; this is the shortcut, not the only way.
-        .contentShape(Rectangle())
-        .gesture(
-            DragGesture(minimumDistance: 30)
-                .onEnded { value in
-                    guard abs(value.translation.width) > abs(value.translation.height) else { return }
-                    shiftSection(value.translation.width < 0 ? 1 : -1)
+        NavigationStack {
+            KlarScreen(title: title) {
+                VStack(alignment: .leading, spacing: 0) {
+                    KlarSegmentedControl(
+                        options: [
+                            (Section.calendar, "Kalender"),
+                            (Section.trends, "Trends"),
+                            (Section.review, "Rückblick")
+                        ],
+                        selection: Binding(get: { section }, set: { select($0) })
+                    )
+                    .padding(.bottom, Klar.Space.x5)
+
+                    sectionContent
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .id(section)
+                        .transition(.asymmetric(
+                            insertion: .move(edge: isAdvancing ? .trailing : .leading).combined(with: .opacity),
+                            removal: .move(edge: isAdvancing ? .leading : .trailing).combined(with: .opacity)
+                        ))
                 }
-        )
+            }
+            // Swiping anywhere the content does not claim — which on a short month is most of the
+            // screen — moves between the three sections. The segments stay because a bare gesture
+            // is undiscoverable and unreachable with VoiceOver; this is the shortcut, not the only
+            // way.
+            //
+            // `simultaneousGesture`, not `gesture`: the direction test only runs in `onEnded`, so
+            // an exclusive gesture claims every drag — including vertical ones — for the whole
+            // time the finger is down, and the scroll view never sees them. The page simply did
+            // not scroll. It also sits inside the `NavigationStack` so it cannot cover the bar.
+            .simultaneousGesture(
+                DragGesture(minimumDistance: 30)
+                    .onEnded { value in
+                        guard abs(value.translation.width) > abs(value.translation.height) else { return }
+                        shiftSection(value.translation.width < 0 ? 1 : -1)
+                    }
+            )
+        }
     }
 
     @ViewBuilder
@@ -199,16 +207,11 @@ struct CalendarSectionView: View {
 
                 dayGrid
             }
-            // Horizontal-only, and higher priority than the section swipe this card sits inside:
-            // a drag that starts on the calendar means "another month", not "another section".
-            // A mostly-vertical drag belongs to the scroll view, and the day cells keep their taps.
-            .highPriorityGesture(
-                DragGesture(minimumDistance: 24)
-                    .onEnded { value in
-                        guard abs(value.translation.width) > abs(value.translation.height) else { return }
-                        shiftMonth(value.translation.width < 0 ? 1 : -1)
-                    }
-            )
+            // No swipe-to-change-month. The card used to claim horizontal drags with a
+            // `highPriorityGesture`, which meant three gesture recognisers were arguing over the
+            // same card — the month swipe, the section swipe around it, and the scroll view —
+            // and the day cells had to win a race just to register a tap. The chevrons in
+            // `monthHeader` are the way to move between months; they always were.
 
             legend
                 .padding(.top, 14)
@@ -257,7 +260,10 @@ struct CalendarSectionView: View {
 
     private var weekdayHeader: some View {
         HStack(spacing: 2) {
-            ForEach(["M", "D", "M", "D", "F", "S", "S"], id: \.self) { day in
+            // Keyed by position, not by the letter: Montag/Mittwoch both give "M", as do
+            // Dienstag/Donnerstag and Samstag/Sonntag. `id: \.self` collapsed those into three
+            // duplicate IDs, which SwiftUI reports as undefined behaviour at runtime.
+            ForEach(Array(["M", "D", "M", "D", "F", "S", "S"].enumerated()), id: \.offset) { _, day in
                 Text(day)
                     .font(Klar.TypeScale.caption)
                     .foregroundStyle(Klar.textTertiary)
@@ -401,15 +407,10 @@ struct DayDetailView: View {
     }
 
     var body: some View {
-        ZStack {
-            Klar.bgSubtle.ignoresSafeArea()
-
+        NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
-                    KlarScreenHeader(title: KlarDate.longWeekdayDate(day)) { dismiss() }
-                        .padding(.bottom, 16)
-
-                    KlarSectionLabel(text: entries.count == 1 ? "1 Eintrag" : "\(entries.count) Einträge")
+                    KlarGroupHeader(text: entries.count == 1 ? "1 Eintrag" : "\(entries.count) Einträge")
                         .padding(.bottom, 10)
 
                     VStack(spacing: 10) {
@@ -424,10 +425,17 @@ struct DayDetailView: View {
                     .padding(.top, 12)
                 }
                 .padding(.horizontal, 16)
-                .padding(.top, 20)
+                .padding(.top, Klar.Space.x2)
                 .padding(.bottom, 24)
             }
             .scrollIndicators(.hidden)
+            .background(Klar.bgSubtle)
+            .navigationTitle(KlarDate.longWeekdayDate(day))
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Fertig") { dismiss() }
+                }
+            }
         }
         .sheet(item: $entryBeingEdited) { entry in
             EntryDetailSheet(entry: entry)

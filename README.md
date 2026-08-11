@@ -4,8 +4,8 @@ An iOS app for people who want to cut down on their substance use without quitti
 No account, no server, no analytics — the data never leaves the phone.
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/rendered/heute-dark.png">
-  <img src="docs/screenshots/rendered/heute-light.png" width="700" alt="Close-up of the Heute screen: a monthly quota card showing Alkohol with four of six remaining and Nikotin with six of ten, above an if-then plan reading WENN der Tag ist vorbei und ich komme heim, DANN zuerst 15 Minuten rausgehen">
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/rendered/uebersicht-dark.png">
+  <img src="docs/screenshots/rendered/uebersicht-light.png" width="700" alt="Close-up of the Übersicht screen: a card headed AUGUST showing Alkohol with four of six remaining and Nikotin with six of ten, each as a large numeral above a bar that drains rather than fills, and below it the active if-then plan — WENN der Tag ist vorbei und ich komme heim, DANN zuerst 15 Minuten rausgehen, committed to on 18 May">
 </picture>
 
 German UI, German market first. Not shipped: no App Store release and no external

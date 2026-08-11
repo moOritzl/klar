@@ -341,7 +341,7 @@ struct ReviewArchiveSectionView: View {
                                         .foregroundStyle(Klar.textTertiary)
                                 }
                             }
-                            .buttonStyle(.plain)
+                            .klarRowButtonStyle()
                         }
                     }
                 }

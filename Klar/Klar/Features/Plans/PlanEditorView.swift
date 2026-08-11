@@ -41,14 +41,9 @@ struct PlanEditorView: View {
     }
 
     var body: some View {
-        ZStack {
-            Klar.bgSubtle.ignoresSafeArea()
-
+        NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
-                    header
-                        .padding(.bottom, 18)
-
                     KlarSectionLabel(text: "Wenn … (Situation aus deinen Tags)")
                         .padding(.bottom, 8)
 
@@ -108,12 +103,8 @@ struct PlanEditorView: View {
                                     .padding(.vertical, 12)
                                     .background(Klar.surface)
                                     .clipShape(RoundedRectangle(cornerRadius: Klar.Radius.md, style: .continuous))
-                                    .overlay {
-                                        RoundedRectangle(cornerRadius: Klar.Radius.md, style: .continuous)
-                                            .strokeBorder(Klar.border, lineWidth: 1)
-                                    }
                             }
-                            .buttonStyle(.plain)
+                            .klarRowButtonStyle(cornerRadius: Klar.Radius.md)
                         }
                     }
                     .padding(.bottom, 20)
@@ -155,10 +146,22 @@ struct PlanEditorView: View {
                     }
                 }
                 .padding(.horizontal, 16)
-                .padding(.top, 20)
+                .padding(.top, Klar.Space.x2)
                 .padding(.bottom, 30)
             }
             .scrollIndicators(.hidden)
+            // Background on the scroll view rather than a `ZStack` sibling, so the content
+            // travels under the bar and iOS can apply the scroll-edge effect.
+            .background(Klar.bgSubtle)
+            .navigationTitle(existingPlan == nil ? "Neuer Plan" : "Plan anpassen")
+            // „Abbrechen", not „Fertig": nothing here is written until „Plan festlegen", so
+            // leaving discards. The hand-built ✕ in a tinted circle that used to sit here said
+            // the same thing in a dialect only this screen spoke.
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Abbrechen") { dismiss() }
+                }
+            }
         }
         .scrollDismissesKeyboard(.interactively)
         .alert("Schon 3 aktive Pläne", isPresented: $limitReached) {
@@ -171,26 +174,6 @@ struct PlanEditorView: View {
         }
     }
 
-    private var header: some View {
-        HStack(spacing: 10) {
-            Button {
-                dismiss()
-            } label: {
-                Image(systemName: "xmark")
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(Klar.textSecondary)
-                    .frame(width: 30, height: 30)
-                    .background(Klar.surfaceTint, in: Circle())
-            }
-            .accessibilityLabel("Schließen")
-
-            Text(existingPlan == nil ? "Neuer Plan" : "Plan anpassen")
-                .font(Klar.TypeScale.title)
-                .foregroundStyle(Klar.text)
-
-            Spacer()
-        }
-    }
 
     /// An edited plan is a *new version* with a fresh commitment date — that's the point of
     /// versioning it rather than mutating it in place.

@@ -2,24 +2,84 @@ import SwiftUI
 
 // MARK: - Card
 
-/// The surface + 1px border + radius-lg block that carries almost every group of
-/// content in the design.
-struct KlarCard<Content: View>: View {
-    var padding: CGFloat = 18
-    @ViewBuilder var content: Content
+/// The surface + radius-lg block that carries almost every group of content in the design.
+///
+/// It used to carry a 1px border as well. That was the CSS design file speaking: on the web a
+/// card is outlined, on iOS it is a *fill* on a slightly darker page and never outlined. The
+/// border was the single loudest "this was not built for iOS" signal in the app, so it is gone
+/// and the separation now comes from `Klar.surface` sitting on `Klar.bgSubtle`.
+///
+/// The optional header slot is the Health/`insetGrouped` pattern: a label row, then a hairline
+/// that runs the *full* width of the card while the content below stays inset.
+struct KlarCard<Header: View, Content: View>: View {
+    private let padding: CGFloat
+    private let hasHeader: Bool
+    private let header: Header
+    private let content: Content
+
+    init(
+        padding: CGFloat = 18,
+        @ViewBuilder content: () -> Content,
+        @ViewBuilder header: () -> Header
+    ) {
+        self.init(padding: padding, hasHeader: true, content: content, header: header)
+    }
+
+    fileprivate init(
+        padding: CGFloat,
+        hasHeader: Bool,
+        @ViewBuilder content: () -> Content,
+        @ViewBuilder header: () -> Header
+    ) {
+        self.padding = padding
+        self.hasHeader = hasHeader
+        self.header = header()
+        self.content = content()
+    }
+
+    /// The header keeps its own inset rather than inheriting `padding`, because a grouped card
+    /// sets `padding: 0` so its rows can pad themselves — and a header flush against the card
+    /// edge looks like a rendering fault.
+    private var headerInset: CGFloat { max(padding, 18) }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            content
+            if hasHeader {
+                header
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, headerInset)
+                    .padding(.top, 14)
+                    .padding(.bottom, 11)
+                KlarRowDivider()
+            }
+
+            VStack(alignment: .leading, spacing: 0) {
+                content
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(padding)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(padding)
         .background(Klar.surface)
         .clipShape(RoundedRectangle(cornerRadius: Klar.Radius.lg, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: Klar.Radius.lg, style: .continuous)
-                .strokeBorder(Klar.border, lineWidth: 1)
-        }
+    }
+}
+
+extension KlarCard where Header == EmptyView {
+    init(padding: CGFloat = 18, @ViewBuilder content: () -> Content) {
+        self.init(padding: padding, hasHeader: false, content: content, header: { EmptyView() })
+    }
+}
+
+/// The hairline between rows of a grouped card. Full width under a card header, inset to the
+/// content edge between sibling rows — the `List` separator convention.
+struct KlarRowDivider: View {
+    var inset: CGFloat = 0
+
+    var body: some View {
+        Rectangle()
+            .fill(Klar.borderSubtle)
+            .frame(height: 1)
+            .padding(.leading, inset)
     }
 }
 
@@ -87,6 +147,32 @@ struct KlarSecondaryButton: View {
     }
 }
 
+/// The action that lives *inside* a card: a tinted capsule sized to its own content, not to the
+/// screen. iOS reserves the full-width filled button for the one primary action of a sheet, and
+/// uses this lighter form everywhere else — Health's "Fragebogen ausfüllen" and "Überprüfen".
+struct KlarInlineButton: View {
+    let title: LocalizedStringKey
+    var systemImage: String?
+    var tint: Color = Klar.accentStrong
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 6) {
+                if let systemImage {
+                    Image(systemName: systemImage)
+                        .font(.system(size: 13, weight: .semibold))
+                }
+                Text(title)
+                    .font(.system(size: 15, weight: .semibold))
+            }
+        }
+        .buttonStyle(.bordered)
+        .buttonBorderShape(.capsule)
+        .tint(tint)
+    }
+}
+
 /// Tinted pill with no border — "Fertig" / "Schließen" on the entry sheets.
 struct KlarQuietButton: View {
     let title: LocalizedStringKey
@@ -128,6 +214,33 @@ struct KlarDashedButton: View {
                     .strokeBorder(Klar.borderStrong, style: StrokeStyle(lineWidth: 1, dash: [4, 4]))
             )
         }
+    }
+}
+
+/// Press feedback for anything where a whole card or row is the tap target.
+///
+/// `.buttonStyle(.plain)` was used for those, and it renders no press state at all — the card
+/// simply sits there while the sheet appears, which is what made the app feel like a picture of
+/// an app. iOS list rows *lighten*; they do not scale, so neither does this.
+struct KlarRowButtonStyle: ButtonStyle {
+    var cornerRadius: CGFloat = Klar.Radius.lg
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .overlay {
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .fill(Klar.text.opacity(configuration.isPressed ? 0.06 : 0))
+            }
+            .animation(.easeOut(duration: 0.12), value: configuration.isPressed)
+    }
+}
+
+extension View {
+    /// The tap target is the whole card, so the shape has to be too — otherwise only the text
+    /// inside it is hittable.
+    func klarRowButtonStyle(cornerRadius: CGFloat = Klar.Radius.lg) -> some View {
+        buttonStyle(KlarRowButtonStyle(cornerRadius: cornerRadius))
+            .contentShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
     }
 }
 
@@ -294,7 +407,8 @@ struct KlarShareBar: View {
 
 // MARK: - Text helpers
 
-/// The uppercase tracking-wide eyebrow used above nearly every group.
+/// The uppercase tracking-wide eyebrow. Kept for labels *inside* a card, which is exactly where
+/// iOS still uses this register — see Health's "SEELISCHES WOHLBEFINDEN" card header.
 struct KlarSectionLabel: View {
     let text: LocalizedStringKey
     var color: Color = Klar.textTertiary
@@ -307,37 +421,98 @@ struct KlarSectionLabel: View {
     }
 }
 
-/// Screen title + optional back chevron, matching the design's custom header
-/// (the design has no UIKit navigation bar anywhere).
-struct KlarScreenHeader<Trailing: View>: View {
-    let title: String
-    var onBack: (() -> Void)?
+/// The header *above* a card, with an optional tinted text action on the right — Health's
+/// "Angepinnt" / "Bearbeiten" pair.
+///
+/// The two registers are not interchangeable. Uppercase micro-grey inside a card reads as a
+/// caption for the thing it sits on; outside a card it reads as a page that never quite starts.
+/// So: sentence case, near body size, full text colour.
+struct KlarGroupHeader<Trailing: View>: View {
+    let text: LocalizedStringKey
     @ViewBuilder var trailing: Trailing
 
     var body: some View {
-        HStack(spacing: 10) {
-            if let onBack {
-                Button(action: onBack) {
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(Klar.textSecondary)
-                        .frame(width: 30, height: 30)
-                        .background(Klar.surfaceTint, in: Circle())
-                }
-                .accessibilityLabel("Zurück")
-            }
-            Text(title)
-                .font(Klar.TypeScale.title)
+        HStack(alignment: .firstTextBaseline) {
+            Text(text)
+                .font(.system(size: 20, weight: .semibold))
                 .foregroundStyle(Klar.text)
-            Spacer(minLength: 0)
+            Spacer(minLength: 8)
             trailing
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+extension KlarGroupHeader where Trailing == EmptyView {
+    init(text: LocalizedStringKey) {
+        self.init(text: text, trailing: { EmptyView() })
+    }
+}
+
+/// The trailing action of a `KlarGroupHeader`. Plain tinted text, no chrome — iOS's
+/// "Bearbeiten" affordance.
+struct KlarHeaderAction: View {
+    let title: LocalizedStringKey
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Text(title)
+                .font(.system(size: 15, weight: .regular))
+                .foregroundStyle(Klar.link)
         }
     }
 }
 
-extension KlarScreenHeader where Trailing == EmptyView {
-    init(title: String, onBack: (() -> Void)? = nil) {
-        self.init(title: title, onBack: onBack, trailing: { EmptyView() })
+// `KlarScreenHeader` lived here: a title and a chevron in a tinted circle, drawn into the content
+// because "the design has no UIKit navigation bar anywhere". Every screen that used it now has a
+// real one, so it has no callers left. Deleted rather than kept around — a second way to draw a
+// header is exactly how the app ended up with two header languages in one flow.
+
+/// The persistent "log an entry" bar above the tab bar.
+///
+/// Replaces a floating circular `+` in the bottom-right corner. That was a Material Design
+/// pattern — iOS has no such control anywhere, and it paid for its prominence by covering the
+/// last row of whatever was underneath it. The accessory sits *beside* the content instead of on
+/// top of it: iOS reserves the space, so nothing is ever hidden behind it.
+///
+/// Because it belongs to the `TabView` rather than to one screen, logging is now reachable from
+/// all four tabs instead of only from Übersicht — which suits an app whose whole premise is that
+/// the entry is the cheap part.
+struct KlarLogEntryAccessory: View {
+    @Environment(\.tabViewBottomAccessoryPlacement) private var placement
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 8) {
+                Image(systemName: "plus.circle.fill")
+                    .font(.system(size: 19, weight: .semibold))
+                Text("Eintrag erfassen")
+                    .font(.system(size: 16, weight: .semibold))
+            }
+            .foregroundStyle(Klar.accentStrong)
+            .frame(maxWidth: .infinity)
+            // Expanded is the state the bar takes over once the tab bar has shrunk away, so it
+            // has the whole strip to itself and can afford the taller target.
+            .padding(.vertical, placement == .expanded ? 14 : 8)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+/// The trailing chevron that says "this opens something".
+///
+/// Used sparingly and on purpose: iOS puts one on every row that leads somewhere and on no row
+/// that does not, which is what makes a list readable without touching it. A card that carries
+/// this and does nothing is worse than a card with no chevron at all.
+struct KlarDisclosureChevron: View {
+    var body: some View {
+        Image(systemName: "chevron.right")
+            .font(.system(size: 13, weight: .semibold))
+            .foregroundStyle(Klar.textTertiary)
+            .accessibilityHidden(true)
     }
 }
 
@@ -388,6 +563,9 @@ struct KlarStepper: View {
                 }
             }
         }
+        // The system `Stepper` ticks on every increment; a hand-built one that stays silent
+        // reads as unresponsive next to it.
+        .sensoryFeedback(.selection, trigger: value)
     }
 
     private func stepButton(

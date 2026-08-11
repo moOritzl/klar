@@ -11,9 +11,7 @@ struct HelpView: View {
 
     var body: some View {
         NavigationStack {
-            KlarScreen {
-                KlarScreenBanner(title: "Hilfe")
-            } content: {
+            KlarScreen(title: "Hilfe") {
                 VStack(alignment: .leading, spacing: 0) {
                     sosButton
                         .padding(.bottom, 16)
@@ -24,7 +22,7 @@ struct HelpView: View {
                         } label: {
                             emergencyRow
                         }
-                        .buttonStyle(.plain)
+                        .klarRowButtonStyle()
                         .accessibilityIdentifier("help.emergency")
 
                         NavigationLink {
@@ -36,7 +34,7 @@ struct HelpView: View {
                                 subtitle: "Suchtberatung · Hotlines · anonym"
                             )
                         }
-                        .buttonStyle(.plain)
+                        .klarRowButtonStyle()
                         .accessibilityIdentifier("help.counseling")
 
                         NavigationLink {
@@ -48,7 +46,7 @@ struct HelpView: View {
                                 subtitle: "Nachschlagewerk, kein Startpunkt"
                             )
                         }
-                        .buttonStyle(.plain)
+                        .klarRowButtonStyle()
                         .accessibilityIdentifier("help.riskInfo")
                     }
                 }
@@ -135,18 +133,12 @@ struct HelpView: View {
                     .foregroundStyle(Klar.textTertiary)
             }
             Spacer()
-            Image(systemName: "chevron.right")
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(Klar.textTertiary)
+            KlarDisclosureChevron()
         }
         .padding(16)
         .frame(maxWidth: .infinity)
         .background(Klar.surface)
         .clipShape(RoundedRectangle(cornerRadius: Klar.Radius.lg, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: Klar.Radius.lg, style: .continuous)
-                .strokeBorder(Klar.border, lineWidth: 1)
-        }
     }
 }
 
@@ -162,11 +154,6 @@ struct EmergencyView: View {
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
-                    Text("Notfall")
-                        .font(Klar.TypeScale.title)
-                        .foregroundStyle(Klar.text)
-                        .padding(.bottom, 16)
-
                     Button {
                         call(EmergencyContent.emergencyNumber)
                     } label: {
@@ -188,7 +175,7 @@ struct EmergencyView: View {
                     .buttonStyle(.plain)
                     .padding(.bottom, 18)
 
-                    KlarSectionLabel(text: "Warnzeichen erkennen")
+                    KlarGroupHeader(text: "Warnzeichen erkennen")
                         .padding(.bottom, 8)
 
                     KlarCard(padding: 16) {
@@ -208,7 +195,7 @@ struct EmergencyView: View {
                     }
                     .padding(.bottom, 16)
 
-                    KlarSectionLabel(text: "Erste-Hilfe-Schritte")
+                    KlarGroupHeader(text: "Erste-Hilfe-Schritte")
                         .padding(.bottom, 8)
 
                     KlarCard(padding: 16) {
@@ -240,7 +227,7 @@ struct EmergencyView: View {
             }
             .scrollIndicators(.hidden)
         }
-        .navigationBarTitleDisplayMode(.inline)
+        .navigationTitle("Notfall")
     }
 
     private func call(_ number: String) {
@@ -260,12 +247,7 @@ struct CounselingView: View {
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
-                    Text("Beratung")
-                        .font(Klar.TypeScale.title)
-                        .foregroundStyle(Klar.text)
-                        .padding(.bottom, 16)
-
-                    KlarSectionLabel(text: "Bundesweit · anonym")
+                    KlarGroupHeader(text: "Bundesweit · anonym")
                         .padding(.bottom, 8)
 
                     VStack(spacing: 10) {
@@ -275,7 +257,7 @@ struct CounselingView: View {
                     }
                     .padding(.bottom, 18)
 
-                    KlarSectionLabel(text: "Vor Ort")
+                    KlarGroupHeader(text: "Vor Ort")
                         .padding(.bottom, 8)
 
                     Button {
@@ -299,7 +281,7 @@ struct CounselingView: View {
                             }
                         }
                     }
-                    .buttonStyle(.plain)
+                    .klarRowButtonStyle()
                     .padding(.bottom, 16)
 
                     Text("Der Weg zu Menschen ist immer einen Tap entfernt.")
@@ -314,7 +296,7 @@ struct CounselingView: View {
             }
             .scrollIndicators(.hidden)
         }
-        .navigationBarTitleDisplayMode(.inline)
+        .navigationTitle("Beratung")
     }
 
     private func offerCard(_ offer: CounselingOffer) -> some View {
@@ -372,16 +354,6 @@ struct RiskInfoListView: View {
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
-                    Text("Risiko-Infos")
-                        .font(Klar.TypeScale.title)
-                        .foregroundStyle(Klar.text)
-                        .padding(.bottom, 4)
-
-                    Text("Gefahrenvermeidung mit Quellen. Keine Dosisempfehlungen, keine Wirkoptimierung.")
-                        .font(Klar.TypeScale.bodySmall)
-                        .foregroundStyle(Klar.textTertiary)
-                        .padding(.bottom, 18)
-
                     VStack(spacing: 10) {
                         ForEach(RiskInfoLibrary.entries) { info in
                             NavigationLink {
@@ -399,7 +371,7 @@ struct RiskInfoListView: View {
                                     }
                                 }
                             }
-                            .buttonStyle(.plain)
+                            .klarRowButtonStyle()
                         }
                     }
                 }
@@ -409,7 +381,8 @@ struct RiskInfoListView: View {
             }
             .scrollIndicators(.hidden)
         }
-        .navigationBarTitleDisplayMode(.inline)
+        .navigationTitle("Risiko-Infos")
+        .navigationSubtitle("Gefahrenvermeidung mit Quellen. Keine Dosisempfehlungen, keine Wirkoptimierung.")
     }
 }
 
@@ -422,11 +395,6 @@ struct RiskInfoDetailView: View {
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
-                    Text(info.substanceName)
-                        .font(Klar.TypeScale.title)
-                        .foregroundStyle(Klar.text)
-                        .padding(.bottom, 16)
-
                     KlarCard(padding: 16) {
                         KlarSectionLabel(text: "Gefahren")
                             .padding(.bottom, 8)
@@ -480,6 +448,6 @@ struct RiskInfoDetailView: View {
             }
             .scrollIndicators(.hidden)
         }
-        .navigationBarTitleDisplayMode(.inline)
+        .navigationTitle(info.substanceName)
     }
 }
