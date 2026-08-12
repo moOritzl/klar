@@ -1,7 +1,10 @@
 /* Klar — Color tokens
    Mirrors the Klar design system (claude.ai/design), which derives the palette
    from the pitch deck and the app's KlarTheme.swift. Deep teal ink plus a
-   single emerald accent, kept deliberately narrow. */
+   single emerald accent, kept deliberately narrow.
+
+   Light is the default. Dark follows the system, and can be forced either way
+   with [data-theme="dark"] / [data-theme="light"] on any ancestor. */
 
 :root {
   /* ---- Base palette ---- */
@@ -30,10 +33,27 @@
   --red-600: #C0392B;
   --red-100: #FBECEA;
 
-  /* ---- Semantic aliases ---- */
+  /* ---- Dark-scheme base ----
+     The same teal family read from the other end. The two inverse values are
+     more saturated than anything on the light ramp on purpose: see
+     --color-bg-inverse below. */
+  --teal-990: #0E1719; /* dark page */
+  --teal-880: #1B3238; /* dark card surface */
+  --teal-860: #1F4048; /* dark hairline */
+  --teal-840: #24565F; /* dark raised surface — iOS elevates by lightening */
+  --teal-inverse:      #2C7A82;
+  --teal-inverse-deep: #24686F;
+  --emerald-950: #123B37;
+  --cyan-400: #40B4C4;
+  --red-400: #E8705F;
+  --red-950: #3A1C18;
+
+  /* ---- Semantic aliases (light) ---- */
   --color-bg: var(--white);
-  --color-bg-subtle: var(--teal-25);
-  --color-bg-sunken: var(--gray-25);
+  /* The page behind the cards — iOS's systemGroupedBackground. One step down
+     from --teal-25 since cards lost their border: the fill contrast is now the
+     entire separation, and the lighter pair measured 1.15:1 in dark. */
+  --color-bg-subtle: var(--gray-25);
   --color-bg-inverse: var(--teal-900);
   --color-bg-inverse-deep: var(--teal-950);
 
@@ -63,4 +83,82 @@
   --color-danger-tint: var(--red-100);
 
   --color-focus-ring: var(--emerald-500);
+
+  /* Modal scrim. The one place transparency is allowed outside the iOS
+     chrome layer, per the system's sheet spec. */
+  --color-scrim: rgba(21, 39, 43, 0.55);  /* teal-950 */
+}
+
+/* ---- Themes ----
+   One rule per semantic token, same names in both schemes, so a component never
+   branches on theme. Only the aliases move; the base palette does not.
+
+   The inverse surfaces are the one role that does not mirror. In light they are
+   the darkest thing on a near-white page — the emphasis block. Repeating those
+   values in dark put a near-black card on a dark page (1.15:1) and made the
+   most emphatic element the quietest one, so in dark they step *out* of the
+   page instead of down into it. */
+
+/* Forced light — its own block because the scheme is set on <html>, and any
+   subtree that redeclares the scheme must not inherit the dark values. */
+[data-theme="light"] {
+  --color-bg: var(--white);
+  --color-bg-subtle: var(--gray-25);
+  --color-bg-inverse: var(--teal-900);
+  --color-bg-inverse-deep: var(--teal-950);
+
+  --color-surface: var(--white);
+  --color-surface-raised: var(--white);
+  --color-surface-tint: var(--teal-50);
+
+  --color-border: var(--teal-200);
+  --color-border-subtle: var(--teal-100);
+  --color-border-strong: var(--teal-300);
+
+  --color-text: var(--teal-950);
+  --color-text-secondary: var(--teal-600);
+  --color-text-tertiary: var(--teal-500);
+
+  --color-accent: var(--emerald-500);
+  --color-accent-strong: var(--emerald-700);
+  --color-accent-tint: var(--emerald-100);
+
+  --color-link: var(--cyan-600);
+  --color-link-hover: var(--emerald-700);
+
+  --color-danger: var(--red-600);
+  --color-danger-tint: var(--red-100);
+
+  --color-scrim: rgba(21, 39, 43, 0.55);
+}
+
+[data-theme="dark"] {
+  --color-bg: var(--teal-990);
+  --color-bg-subtle: var(--teal-990);
+  --color-bg-inverse: var(--teal-inverse);
+  --color-bg-inverse-deep: var(--teal-inverse-deep);
+
+  --color-surface: var(--teal-880);
+  --color-surface-raised: var(--teal-840);
+  --color-surface-tint: var(--teal-800);
+
+  --color-border: var(--teal-700);
+  --color-border-subtle: var(--teal-860);
+  --color-border-strong: var(--teal-600);
+
+  --color-text: var(--teal-50);
+  --color-text-secondary: var(--teal-300);
+  --color-text-tertiary: var(--teal-400);
+
+  --color-accent: var(--emerald-500);
+  --color-accent-strong: var(--emerald-500);
+  --color-accent-tint: var(--emerald-950);
+
+  --color-link: var(--cyan-400);
+  --color-link-hover: var(--emerald-500);
+
+  --color-danger: var(--red-400);
+  --color-danger-tint: var(--red-950);
+
+  --color-scrim: rgba(6, 12, 13, 0.7);  /* below teal-990: the page is already dark */
 }
