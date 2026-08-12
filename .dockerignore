@@ -1,4 +1,5 @@
-# Only web/ ships. Everything else is source, docs or the iOS app.
+# Only the site and the server config ship.
 *
 !web/
+!deploy/
 web/assets/img/
