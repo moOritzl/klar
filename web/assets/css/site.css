@@ -831,7 +831,15 @@ html[lang='en'] [data-de] {
     padding: 28px;
   }
 
+  /* flex-basis:100% forces the form onto its own line. Without it, basis 0%
+     plus min-width 0 means it always "fits" beside the heading, so the flex
+     algorithm never wraps and squeezes it to whatever is left over. Between
+     roughly 405px and this breakpoint the heading still fits alongside, which
+     left the form 10px wide and the field spilling off the right edge. It
+     showed on a Pro Max and not on a 402pt phone, where the heading needs the
+     whole line anyway. */
   .cta-band .signup {
+    flex-basis: 100%;
     min-width: 0;
     max-width: none;
   }
