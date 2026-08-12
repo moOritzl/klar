@@ -1,0 +1,4 @@
+# Only web/ ships. Everything else is source, docs or the iOS app.
+*
+!web/
+web/assets/img/
