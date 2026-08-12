@@ -1,253 +1,344 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Klar — iOS-App zur Reduktion von Substanzkonsum</title>
-<meta name="description" content="Klar ist eine iOS-App für Menschen, die ihren Substanzkonsum reduzieren wollen, ohne dafür aufhören zu müssen. Alles bleibt auf dem Gerät: kein Konto, kein Server.">
+<title>Klar. Ehrlich mitschreiben, ohne aufhören zu müssen.</title>
+<meta name="description" content="Klar ist eine iOS-App, mit der du deinen Konsum siehst, verstehst und verringerst. Kein Konto, kein Server: alles bleibt auf dem Gerät.">
 <meta name="color-scheme" content="light dark">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="assets/css/site.css">
+<script>
+  /* Paint in the right scheme and language on the first frame. Inline and tiny
+     on purpose — a stylesheet cannot read localStorage, and a deferred script
+     would let the page flash the wrong theme. Everything else is in site.js. */
+  (function () {
+    var el = document.documentElement;
+    /* Gates the scroll reveal. Without JS the class never lands and the
+       content stays plainly visible. */
+    el.className = el.className ? el.className + ' js' : 'js';
+    try {
+      var theme = localStorage.getItem('klar.site.theme');
+      if (theme !== 'dark' && theme !== 'light') {
+        theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      el.setAttribute('data-theme', theme);
+      var lang = localStorage.getItem('klar.site.lang');
+      if (lang === 'de' || lang === 'en') el.setAttribute('lang', lang);
+    } catch (e) {
+      /* Private mode, or storage disabled. The markup defaults hold. */
+    }
+  })();
+</script>
 </head>
 <body>
-<a class="skip-link" href="#hero">Zum Inhalt springen</a>
+<a class="skip-link" href="#hauptinhalt"><span data-de>Zum Inhalt springen</span><span data-en>Skip to content</span></a>
 
-<header class="site-header">
-  <div class="shell site-header__bar">
-    <a class="wordmark" href="#hero">
-      <svg class="ring" width="20" height="20" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="18" fill="none" stroke="var(--emerald-500)" stroke-width="6" stroke-linecap="round" stroke-dasharray="87.9 25.2" transform="rotate(-50 24 24)"/></svg>
-      <span class="wordmark__text">KLAR</span>
-    </a>
-    <nav class="site-nav" aria-label="Hauptnavigation">
-      <a class="site-nav__link" href="fallstudie.html">Fallstudie</a>
-      <a class="site-nav__link" href="https://github.com/moOritzl/klar">GitHub</a>
-      <div class="lang-switch" role="group" aria-label="Sprache">
-        <button type="button" class="lang-switch__btn" data-lang="de" aria-pressed="true">DE</button>
-        <button type="button" class="lang-switch__btn" data-lang="en" aria-pressed="false">EN</button>
-      </div>
-      <button type="button" class="theme-toggle" data-theme-toggle>Dunkel</button>
-    </nav>
-  </div>
-  <div class="notice" data-lang-notice hidden>
-    <p class="shell notice__text">EN — English version in preparation. This page is currently German only.</p>
+<header class="shell site-header">
+  <a class="wordmark" href="/">
+    <img class="wordmark__mark" src="assets/logo.svg" alt="" width="32" height="32">
+    <span class="wordmark__text">KLAR</span>
+  </a>
+
+  <div class="header__controls">
+    <div class="seg" role="group" aria-label="Farbschema" data-label-de="Farbschema" data-label-en="Colour scheme">
+      <button type="button" class="seg__btn" data-theme-btn="light" aria-pressed="true">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>
+        <span class="seg__label"><span data-de>Hell</span><span data-en>Light</span></span>
+      </button>
+      <button type="button" class="seg__btn" data-theme-btn="dark" aria-pressed="false">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+        <span class="seg__label"><span data-de>Dunkel</span><span data-en>Dark</span></span>
+      </button>
+    </div>
+
+    <div class="seg" role="group" aria-label="Sprache" data-label-de="Sprache" data-label-en="Language">
+      <button type="button" class="seg__btn" data-lang-btn="de" aria-label="Deutsch" aria-pressed="true">DE</button>
+      <button type="button" class="seg__btn" data-lang-btn="en" aria-label="English" aria-pressed="false">EN</button>
+    </div>
   </div>
 </header>
 
-<main>
+<main id="hauptinhalt">
 
-  <section class="shell hero" id="hero">
-    <div class="hero__layout">
-      <div class="hero__main">
-        <h1 class="hero__wordmark" data-reveal>KLAR</h1>
-        <div data-reveal>
-          <p class="hero__lead">Eine iOS-App für Menschen, die ihren Substanzkonsum reduzieren wollen, ohne dafür aufhören zu müssen.</p>
-          <p class="hero__sub">Alles bleibt auf dem Gerät. Kein Konto, kein Server.</p>
+  <section class="shell hero">
+    <div class="hero__copy">
+      <div class="hero__intro">
+        <h1 class="hero__title">
+          <span data-de>Ehrlich mitschreiben, ohne aufhören zu müssen.</span><span data-en>Keep an honest record, without having to quit.</span>
+        </h1>
+        <p class="hero__lead">
+          <span data-de>Konsum sehen, verstehen, verringern. Alles bleibt auf dem Gerät.</span><span data-en>See your use, understand it, bring it down. Everything stays on the device.</span>
+        </p>
+      </div>
+
+      <div class="hero__actions">
+        <div class="hero__cta" data-cta="form">
+          <form class="signup" method="dialog" data-signup novalidate>
+            <label class="field">
+              <span class="visually-hidden"><span data-de>E-Mail-Adresse</span><span data-en>Email address</span></span>
+              <input type="email" placeholder="deine@mail.de" data-ph-de="deine@mail.de" data-ph-en="you@email.com" autocomplete="email" required>
+            </label>
+            <button class="btn" type="submit">
+              <span data-de>Benachrichtigen</span><span data-en>Notify me</span>
+            </button>
+          </form>
+          <p class="cta-note">
+            <span data-de>Klar erscheint für iPhone. Noch kein Download, kein Newsletter, keine Weitergabe.</span><span data-en>Klar is coming to iPhone. No download yet, no newsletter, no sharing.</span>
+          </p>
         </div>
-        <div class="hero__aside" data-reveal>
-          <div class="status-chip">
-            <svg class="ring" width="15" height="15" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="18" fill="none" stroke="var(--emerald-500)" stroke-width="7" stroke-linecap="round" stroke-dasharray="56 57" transform="rotate(-50 24 24)"/></svg>
-            <span>Bald im App Store</span>
+
+        <!-- Shown instead of the form when the waiting list is closed: swap the
+             hidden attribute between this block and [data-cta="form"] above. -->
+        <div class="cta-done" data-cta="github" hidden>
+          <span data-de>Die Warteliste öffnet in Kürze.</span><span data-en>The waiting list opens shortly.</span>
+        </div>
+      </div>
+    </div>
+
+    <figure class="hero__demo">
+      <!-- A rebuild of the app's own Übersicht card, not a picture of it. Every
+           colour is a token the app and this page already share, so the two
+           cannot drift apart. aria-hidden because the caption below carries the
+           meaning: without it, a screen reader would read these numbers as if
+           they were the visitor's own. -->
+      <div class="quota" aria-hidden="true">
+        <p class="quota__month">August</p>
+
+        <div class="quota__row">
+          <p class="quota__name">
+            <span class="quota__dot"></span>
+            <span data-de>Alkohol</span><span data-en>Alcohol</span>
+          </p>
+          <p class="quota__figure">
+            <span data-de>Noch</span><span data-en>Still</span>
+            <b>2</b>
+            <span data-de>von 4</span><span data-en>of 4</span>
+          </p>
+          <div class="quota__pips">
+            <i></i><i></i><i class="is-left"></i><i class="is-left"></i>
           </div>
-          <div class="hero__actions">
-            <a class="btn" href="https://github.com/moOritzl/klar">Auf GitHub verfolgen</a>
-            <a class="link-underline" href="fallstudie.html">Wie Klar gebaut ist</a>
+        </div>
+
+        <div class="quota__row">
+          <p class="quota__name">
+            <span class="quota__dot quota__dot--cyan"></span>
+            <span data-de>Cannabis</span><span data-en>Cannabis</span>
+          </p>
+          <p class="quota__figure">
+            <span data-de>Noch</span><span data-en>Still</span>
+            <b>4</b>
+            <span data-de>von 6</span><span data-en>of 6</span>
+          </p>
+          <div class="quota__pips">
+            <i></i><i></i><i class="is-left"></i><i class="is-left"></i><i class="is-left"></i><i class="is-left"></i>
           </div>
         </div>
       </div>
-      <div class="hero__device" data-reveal>
-        <div class="device">
-          <div class="device__body">
-            <div class="device__screen">
-              <img class="shot__img shot__img--light" src="assets/img/heute-light.webp" width="662" height="1440" decoding="async" alt="Der Startbildschirm von Klar: das Monatsziel für Alkohol mit sechs verbleibenden Anlässen, ein aktiver Wenn-Dann-Plan und der Hinweis „Ein ruhiger Tag.“">
-              <img class="shot__img shot__img--dark" src="assets/img/heute-dark.webp" width="662" height="1440" decoding="async" alt="Der Startbildschirm von Klar: das Monatsziel für Alkohol mit sechs verbleibenden Anlässen, ein aktiver Wenn-Dann-Plan und der Hinweis „Ein ruhiger Tag.“">
-            </div>
-          </div>
+
+      <figcaption class="hero__demo-caption">
+        <span data-de>Sieben Substanzen zum Start: Alkohol, Amphetamin, Cannabis, Ketamin, Kokain, MDMA, Nikotin.</span><span data-en>Seven substances at launch: alcohol, amphetamine, cannabis, ketamine, cocaine, MDMA, nicotine.</span>
+      </figcaption>
+    </figure>
+  </section>
+
+  <section class="shell section" aria-labelledby="ansatz-titel">
+    <h2 class="section__title" id="ansatz-titel" data-reveal>
+      <span data-de>Ein Vorsatz muss da stehen, wo er gebraucht wird.</span><span data-en>An intention has to sit where it is needed.</span>
+    </h2>
+
+    <div class="grid-2">
+      <div class="card" data-reveal>
+        <span class="card__badge">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--white)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
+        </span>
+        <h3 class="card__title">
+          <span data-de>Wenn-Dann-Pläne</span><span data-en>If-then plans</span>
+        </h3>
+        <p class="card__quote">
+          <span data-de>Wenn Freitagabend die Runde beginnt, dann bleibe ich beim ersten Getränk.</span><span data-en>If the round starts on Friday night, then I stop after the first drink.</span>
+        </p>
+        <p class="card__meta">
+          <span data-de>Höchstens drei gleichzeitig.</span><span data-en>Three at a time, at most.</span>
+        </p>
+      </div>
+
+      <div class="card" data-reveal>
+        <span class="card__badge card__badge--cyan">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--white)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="4"></circle><path d="m4.93 4.93 4.24 4.24"></path><path d="m14.83 9.17 4.24-4.24"></path><path d="m14.83 14.83 4.24 4.24"></path><path d="m4.93 19.07 4.24-4.24"></path></svg>
+        </span>
+        <h3 class="card__title">
+          <span data-de>Craving-SOS</span><span data-en>Craving SOS</span>
+        </h3>
+        <p class="card__body">
+          <span data-de>Timer, Atemübung, dein „Warum“ im eigenen Wortlaut.</span><span data-en>A timer, a breathing exercise, your reason in your own words.</span>
+        </p>
+        <p class="card__meta">
+          <span data-de>Kein Ratgeber, der dir erklärt, wie du dich fühlen solltest.</span><span data-en>Not a guide telling you how you ought to feel.</span>
+        </p>
+      </div>
+    </div>
+
+    <p class="section__note" data-reveal>
+      <span data-de>Ein Tag endet um 5 Uhr. Ein Eintrag um 2:30 gehört zur Nacht davor.</span><span data-en>A day ends at 05:00. An entry at 02:30 belongs to the night before.</span>
+    </p>
+  </section>
+
+  <section class="shell section" aria-labelledby="privatsphaere-titel">
+    <div class="inverse" data-reveal>
+      <h2 class="inverse__title" id="privatsphaere-titel">
+        <span data-de>Privatsphäre ist die Architektur, keine Einstellung.</span><span data-en>Privacy is the architecture, not a setting.</span>
+      </h2>
+      <p class="inverse__lead">
+        <span data-de>Wer ehrlich dokumentiert, schreibt etwas auf, das anderswo Konsequenzen hätte.</span><span data-en>Recording your use honestly means writing down something that would have consequences elsewhere.</span>
+      </p>
+      <div class="grid-3">
+        <div>
+          <svg class="inverse__icon" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--emerald-500)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="m17 8 5 5"></path><path d="m22 8-5 5"></path></svg>
+          <h3 class="inverse__item-title">
+            <span data-de>Kein Konto</span><span data-en>No account</span>
+          </h3>
+          <p class="inverse__item-body">
+            <span data-de>Nichts, das sich dir zuordnen ließe.</span><span data-en>Nothing that could be traced back to you.</span>
+          </p>
+        </div>
+        <div>
+          <svg class="inverse__icon" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--emerald-500)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.5 19H9a7 7 0 0 1-6.71-9"></path><path d="M8.5 5.2A7 7 0 0 1 15.71 10h1.79a4.5 4.5 0 0 1 3.16 7.7"></path><path d="m2 2 20 20"></path></svg>
+          <h3 class="inverse__item-title">
+            <span data-de>Kein Server</span><span data-en>No server</span>
+          </h3>
+          <p class="inverse__item-body">
+            <span data-de>Keine Cloud, keine Analytics, kein Pfad nach draußen.</span><span data-en>No cloud, no analytics, no path out.</span>
+          </p>
+        </div>
+        <div>
+          <svg class="inverse__icon" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--emerald-500)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+          <h3 class="inverse__item-title">
+            <span data-de>Deine Hand am Schalter</span><span data-en>Your hand on the switch</span>
+          </h3>
+          <p class="inverse__item-body">
+            <span data-de>Face-ID-Sperre, Panik-Verstecken, Export, echtes Löschen.</span><span data-en>Face ID lock, panic hide, export, true deletion.</span>
+          </p>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="section" aria-label="So funktioniert Klar">
-    <div class="shell section__inner">
-      <div class="steps">
+  <section class="shell section" data-section="evidence" aria-labelledby="studienlage-titel">
+    <h2 class="section__title" id="studienlage-titel" data-reveal>
+      <span data-de>Drei Befunde haben die Entscheidungen getragen.</span><span data-en>Three findings decided what Klar does.</span>
+    </h2>
+    <div class="grid-3">
+      <article class="evidence__card" data-reveal>
+        <svg class="evidence__icon" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent-strong)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>
+        <p class="evidence__claim">
+          <span data-de>Nur protokollieren verändert wenig.</span><span data-en>Logging alone changes little.</span>
+        </p>
+        <p class="evidence__body">
+          <span data-de>Also mündet jede Erfassung in eine Rückmeldung.</span><span data-en>So every entry leads to feedback.</span>
+        </p>
+      </article>
+      <article class="evidence__card" data-reveal>
+        <svg class="evidence__icon" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent-strong)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+        <p class="evidence__claim">
+          <span data-de>Vorsätze wirken, wenn sie an eine Situation gebunden sind.</span><span data-en>Intentions work when they are tied to a situation.</span>
+        </p>
+        <p class="evidence__body">
+          <span data-de>Also sind Wenn-Dann-Pläne Kernfunktion, nicht Zusatz.</span><span data-en>So if-then plans are a core feature, not an extra.</span>
+        </p>
+      </article>
+      <article class="evidence__card" data-reveal>
+        <svg class="evidence__icon" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent-strong)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"></polyline><polyline points="16 17 22 17 22 11"></polyline></svg>
+        <p class="evidence__claim">
+          <span data-de>Vergleiche mit anderen können nach hinten losgehen.</span><span data-en>Comparing people to others can backfire.</span>
+        </p>
+        <p class="evidence__body">
+          <span data-de>Also ist die Bezugsgröße dein eigener Verlauf.</span><span data-en>So the reference is your own history.</span>
+        </p>
+      </article>
+    </div>
+    <p class="evidence__limit" data-reveal>
+      <span data-de>Ehrlich zur Grenze: die Evidenz stammt vor allem aus Alkohol- und Tabakstudien. Die Übertragung auf andere Substanzen ist eine Annahme, die Klar prüft, kein Versprechen.</span><span data-en>Honest about the limit: the evidence base is mostly alcohol and tobacco. Transfer to other substances is a hypothesis Klar tests, not a promise it markets.</span>
+    </p>
+  </section>
 
-        <article class="step" data-reveal>
-          <div class="step__label">
-            <svg class="ring" width="17" height="17" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="18" fill="none" stroke="var(--emerald-500)" stroke-width="7" stroke-linecap="round" stroke-dasharray="38 75" transform="rotate(-50 24 24)"/></svg>
-            <span>SCHRITT 01</span>
-          </div>
-          <h2 class="step__title">Erfassen</h2>
-          <p class="step__body">Zwei Taps: Substanz, Menge. Der Zeitpunkt kommt von selbst, der Rest ist optional. Dauert das Erfassen zu lange, wird es unvollständig, und dann trägt es nichts.</p>
-          <figure class="shot device">
-            <div class="device__body">
-              <div class="device__screen">
-                <img class="shot__img shot__img--light" src="assets/img/erfassen-light.webp" width="662" height="1440" loading="lazy" decoding="async" alt="Der Eintrag-Screen von Klar: eine kurze Liste mit Kaffee, Alkohol und Nikotin, darüber der Hinweis „Tippen genügt. Details kannst du später ergänzen.“">
-                <img class="shot__img shot__img--dark" src="assets/img/erfassen-dark.webp" width="662" height="1440" loading="lazy" decoding="async" alt="Der Eintrag-Screen von Klar: eine kurze Liste mit Kaffee, Alkohol und Nikotin, darüber der Hinweis „Tippen genügt. Details kannst du später ergänzen.“">
-              </div>
-            </div>
-          </figure>
-        </article>
-
-        <article class="step" data-reveal>
-          <div class="step__label">
-            <svg class="ring" width="17" height="17" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="18" fill="none" stroke="var(--emerald-500)" stroke-width="7" stroke-linecap="round" stroke-dasharray="64 49" transform="rotate(-50 24 24)"/></svg>
-            <span>SCHRITT 02</span>
-          </div>
-          <h2 class="step__title">Wochenrückblick</h2>
-          <p class="step__body">Einmal pro Woche ein sachlicher Blick zurück: Häufigkeit, Mengen, wiederkehrende Situationen. Bezugsgröße ist der eigene Verlauf, nicht der Durchschnitt anderer.</p>
-          <figure class="shot device">
-            <div class="device__body">
-              <div class="device__screen">
-                <img class="shot__img shot__img--light" src="assets/img/rueckblick-light.webp" width="662" height="1440" loading="lazy" decoding="async" alt="Ein Wochenrückblick in Klar für den 20. bis 26. Juli: acht Einträge, durchschnittliche Dosis je Substanz und die Plan-Bilanz der Woche.">
-                <img class="shot__img shot__img--dark" src="assets/img/rueckblick-dark.webp" width="662" height="1440" loading="lazy" decoding="async" alt="Ein Wochenrückblick in Klar für den 20. bis 26. Juli: acht Einträge, durchschnittliche Dosis je Substanz und die Plan-Bilanz der Woche.">
-              </div>
-            </div>
-          </figure>
-        </article>
-
-        <article class="step" data-reveal>
-          <div class="step__label">
-            <svg class="ring" width="17" height="17" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="18" fill="none" stroke="var(--emerald-500)" stroke-width="7" stroke-linecap="round" stroke-dasharray="88 25" transform="rotate(-50 24 24)"/></svg>
-            <span>SCHRITT 03</span>
-          </div>
-          <h2 class="step__title">Wenn-Dann-Pläne</h2>
-          <p class="step__body">Vorsätze, die an eine Situation gebunden sind: <em>Wenn Freitagabend die Runde beginnt, dann bleibe ich beim ersten Getränk.</em> Pläne in dieser Form gehören zu den am besten untersuchten Werkzeugen der Selbstregulation.</p>
-          <figure class="shot device">
-            <div class="device__body">
-              <div class="device__screen">
-                <img class="shot__img shot__img--light" src="assets/img/plaene-light.webp" width="662" height="1440" loading="lazy" decoding="async" alt="Der Pläne-Screen von Klar mit zwei aktiven Wenn-Dann-Plänen und dem Ziel „Reduktion, max. 6× pro Monat“.">
-                <img class="shot__img shot__img--dark" src="assets/img/plaene-dark.webp" width="662" height="1440" loading="lazy" decoding="async" alt="Der Pläne-Screen von Klar mit zwei aktiven Wenn-Dann-Plänen und dem Ziel „Reduktion, max. 6× pro Monat“.">
-              </div>
-            </div>
-          </figure>
-        </article>
-
-      </div>
+  <section class="shell section" aria-labelledby="warteliste-titel">
+    <div class="cta-band" data-reveal>
+      <h2 class="cta-band__title" id="warteliste-titel">
+        <span data-de>Eine Mail, wenn es losgeht.</span><span data-en>One email, when it goes live.</span>
+      </h2>
+      <form class="signup" method="dialog" data-signup novalidate>
+        <label class="field">
+          <span class="visually-hidden"><span data-de>E-Mail-Adresse</span><span data-en>Email address</span></span>
+          <input type="email" placeholder="deine@mail.de" data-ph-de="deine@mail.de" data-ph-en="you@email.com" autocomplete="email" required>
+        </label>
+        <button class="btn" type="submit">
+          <span data-de>Benachrichtigen</span><span data-en>Notify me</span>
+        </button>
+      </form>
     </div>
   </section>
 
-  <section class="privacy" aria-labelledby="privacy-title">
-    <div class="shell section__inner">
-      <div class="section__head" data-reveal>
-        <h2 class="section__title" id="privacy-title">Privatsphäre ist die Architektur, nicht eine Einstellung</h2>
-        <p class="section__lead">Keine Verarbeitung außerhalb des Geräts, und keine Funktion, die sich nachträglich zu einer Übertragung ausbauen ließe. Wer den eigenen Konsum ehrlich dokumentiert, legt etwas offen, das anderswo Konsequenzen hat.</p>
-      </div>
-      <div class="cards">
-
-        <div class="card" data-reveal>
-          <div class="card__icon">
-            <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="m17 8 5 5"/><path d="m22 8-5 5"/></svg>
-          </div>
-          <h3 class="card__title">Kein Konto</h3>
-          <p class="card__body">Keine Registrierung, keine E-Mail-Adresse. Es existiert kein Konto, das sich zuordnen ließe.</p>
+  <section class="shell help" aria-label="Notruf und Beratung" data-label-de="Notruf und Beratung" data-label-en="Emergency and advice">
+    <div class="help__grid" data-reveal>
+      <div class="help__item">
+        <svg class="help__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-danger)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+        <div>
+          <h3 class="help__title"><a href="tel:112"><span data-de>Notruf 112</span><span data-en>Emergency 112</span></a></h3>
+          <p class="help__detail">
+            <span data-de>Bei akuter Gefahr, rund um die Uhr.</span><span data-en>Acute danger, around the clock.</span>
+          </p>
         </div>
-
-        <div class="card" data-reveal>
-          <div class="card__icon">
-            <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.5 19H9a7 7 0 0 1-6.71-9"/><path d="M8.5 5.2A7 7 0 0 1 15.71 10h1.79a4.5 4.5 0 0 1 3.16 7.7"/><path d="m2 2 20 20"/></svg>
-          </div>
-          <h3 class="card__title">Kein Server</h3>
-          <p class="card__body">Keine Cloud, keine Analytics, keine Drittanbieter-SDKs. Es gibt keinen Netzwerkpfad, über den Einträge das Gerät verlassen könnten.</p>
+      </div>
+      <div class="help__item">
+        <svg class="help__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-tertiary)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+        <div>
+          <h3 class="help__title"><a href="tel:01806313031">Sucht &amp; Drogen Hotline</a></h3>
+          <p class="help__detail">01806 313031</p>
         </div>
-
-        <div class="card" data-reveal>
-          <div class="card__icon">
-            <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M9 9h.01"/><path d="M15 9h.01"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/></svg>
-          </div>
-          <h3 class="card__title">Face-ID-Sperre</h3>
-          <p class="card__body">Optionale Sperre beim Öffnen. Wer das Gerät kurz aus der Hand gibt, gibt die Einträge nicht mit.</p>
+      </div>
+      <div class="help__item">
+        <svg class="help__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-tertiary)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
+        <div>
+          <h3 class="help__title"><a href="https://www.drugcom.de">drugcom.de</a></h3>
+          <p class="help__detail">
+            <span data-de>Information und Selbsttests der BZgA.</span><span data-en>Information and self-tests, BZgA.</span>
+          </p>
         </div>
-
-      </div>
-      <p class="privacy__note" data-reveal>Diese Website folgt demselben Prinzip: keine Cookies, kein Tracking, keine externen Skripte.</p>
-    </div>
-  </section>
-
-  <section class="section" aria-labelledby="evidence-title">
-    <div class="shell section__inner">
-      <div class="section__head" data-reveal>
-        <h2 class="section__title" id="evidence-title">Auf Grundlage der Studienlage entworfen</h2>
-        <p class="section__lead">Der Zuschnitt folgt einem Literatur-Review, nicht einer Feature-Liste. Drei Befunde haben die Entscheidungen getragen.</p>
-      </div>
-      <div class="findings">
-
-        <article class="finding" data-reveal>
-          <div class="finding__kicker">BEFUND</div>
-          <p class="finding__claim">Reines Protokollieren verändert Konsum kaum.</p>
-          <div class="finding__kicker finding__kicker--consequence">KONSEQUENZ</div>
-          <p class="finding__body">Jede Erfassung mündet in eine Rückmeldung. Ein Eintrag ohne Auswertung wäre Buchhaltung.</p>
-        </article>
-
-        <article class="finding" data-reveal>
-          <div class="finding__kicker">BEFUND</div>
-          <p class="finding__claim">Konkrete Wenn-Dann-Pläne gehören zu den robustesten Befunden der Selbstregulationsforschung.</p>
-          <div class="finding__kicker finding__kicker--consequence">KONSEQUENZ</div>
-          <p class="finding__body">Sie sind ein Kernfeature, direkt aus dem Rückblick anlegbar.</p>
-        </article>
-
-        <article class="finding" data-reveal>
-          <div class="finding__kicker">BEFUND</div>
-          <p class="finding__claim">Vergleiche mit dem Durchschnitt anderer können nach hinten losgehen.</p>
-          <div class="finding__kicker finding__kicker--consequence">KONSEQUENZ</div>
-          <p class="finding__body">Klar misst am eigenen Verlauf. Keine Normwerte, keine Rangliste.</p>
-        </article>
-
-      </div>
-      <p class="findings__more" data-reveal><a href="fallstudie.html#studienlage">Die Studienlage im Detail</a></p>
-    </div>
-  </section>
-
-  <section class="section" aria-label="Notfall und Beratung">
-    <div class="shell help" data-reveal>
-      <div class="help__label">Im Notfall und bei Beratungsbedarf</div>
-      <div>
-        <h2 class="help__title">Notruf 112</h2>
-        <p class="help__detail">Bei akuter gesundheitlicher Gefahr. Rund um die Uhr.</p>
-      </div>
-      <div>
-        <h2 class="help__title">Sucht &amp; Drogen Hotline</h2>
-        <p class="help__detail">01806 313031, täglich erreichbar, anonym.</p>
-      </div>
-      <div>
-        <h2 class="help__title"><a href="https://www.drugcom.de">drugcom.de</a></h2>
-        <p class="help__detail">Information und Selbsttests der BZgA.</p>
       </div>
     </div>
   </section>
 
 </main>
 
-<a class="teaser" href="fallstudie.html">
-  <div class="shell teaser__inner" data-reveal>
-    <div>
-      <div class="teaser__kicker">
-        <svg class="ring" width="17" height="17" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="18" fill="none" stroke="var(--emerald-500)" stroke-width="7" stroke-linecap="round" stroke-dasharray="88 25" transform="rotate(-50 24 24)"/></svg>
-        <span>Fallstudie</span>
-      </div>
-      <p class="teaser__title">Wie Klar gebaut ist</p>
-    </div>
-    <div class="teaser__side">
-      <p class="teaser__body">Studienlage, Architektur, Trade-offs, Entwicklungsstand. Die technische Seite des Projekts.</p>
-      <span class="teaser__cta">Zur Fallstudie →</span>
-    </div>
+<footer class="shell site-footer">
+  <div class="site-footer__mark">
+    <img src="assets/logo.svg" alt="" width="18" height="18">
+    <span>KLAR</span>
   </div>
-</a>
-
-<footer class="site-footer">
-  <div class="shell site-footer__inner">
-    <div class="site-footer__mark">
-      <svg class="ring" width="14" height="14" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="18" fill="none" stroke="var(--emerald-500)" stroke-width="7" stroke-linecap="round" stroke-dasharray="88 25" transform="rotate(-50 24 24)"/></svg>
-      <span>KLAR</span>
-    </div>
-    <nav class="site-footer__nav" aria-label="Rechtliches">
-      <a href="https://lenhard.xyz/impressum">Impressum</a>
-      <a href="https://lenhard.xyz/impressum#datenschutz">Datenschutz</a>
-      <a href="fallstudie.html">Fallstudie</a>
-      <a href="https://github.com/moOritzl/klar">GitHub</a>
-    </nav>
-    <div>© 2026 · Keine Cookies, kein Tracking</div>
+  <nav class="site-footer__nav" aria-label="Rechtliches" data-label-de="Rechtliches" data-label-en="Legal">
+    <a href="https://lenhard.xyz/impressum">Impressum</a>
+    <a href="https://lenhard.xyz/impressum#datenschutz">Datenschutz</a>
+  </nav>
+  <div>
+    <span data-de>© 2026 · Keine Cookies, kein Tracking</span><span data-en>© 2026 · No cookies, no tracking</span>
   </div>
 </footer>
+
+<dialog class="sheet" data-sheet aria-labelledby="sheet-title">
+  <h2 class="sheet__title" id="sheet-title">
+    <span data-de>Nichts gespeichert.</span><span data-en>Nothing was stored.</span>
+  </h2>
+  <p class="sheet__body">
+    <span data-de>Die Warteliste ist noch nicht offen. Deine Adresse hat den Browser nicht verlassen, sie liegt auf keinem Server, und du bekommst keine Mail.</span><span data-en>The waiting list is not open yet. Your address never left the browser, it is on no server, and no email is coming.</span>
+  </p>
+  <p class="sheet__body">
+    <span data-de>Das Feld steht hier, um zu sehen, ob es jemand benutzen würde. Wenn die Warteliste wirklich öffnet, steht es auch dabei.</span><span data-en>The field is here to see whether anyone would use it. When the list really opens, it will say so.</span>
+  </p>
+  <button class="btn" type="button" data-sheet-close autofocus>
+    <span data-de>Verstanden</span><span data-en>Understood</span>
+  </button>
+</dialog>
 
 <script src="assets/js/site.js"></script>
 </body>

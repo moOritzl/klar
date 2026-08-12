@@ -1,79 +1,18 @@
+/* Klar — marketing site
+   A 1:1 implementation of "Klar Landing A" from the Klar design system
+   (claude.ai/design). Every value below comes from that file or from the
+   system's own components; the additions are the ones a design canvas does not
+   need and a real page does: responsive breakpoints, focus-visible rings,
+   reduced-motion, and print. Those are marked where they appear.
+
+   Tokens live in tokens/. Nothing here hard-codes a colour. */
+
 @import url('tokens/colors.css');
 @import url('tokens/fonts.css');
 @import url('tokens/typography.css');
 @import url('tokens/spacing.css');
 
-/* ---------------------------------------------------------------------------
-   Page-level theme surface
-   The site follows the visitor's system setting, same as the app does. The
-   header toggle writes data-theme onto <html> and wins in both directions.
---------------------------------------------------------------------------- */
-
-:root {
-  --klar-bg: #FAF8F3;
-  --klar-text: #15272B;
-  --klar-muted: #4A5F64;
-  --klar-faint: #55696E;
-  --klar-line: rgba(21, 39, 43, 0.16);
-  --klar-line-soft: rgba(21, 39, 43, 0.08);
-  --klar-surface: #FFFFFF;
-
-  /* The two dark bands (case-study teaser, footer) stay dark in both themes. */
-  --klar-dbg: #15272B;
-  --klar-dtext: #EDF2F0;
-  --klar-dmuted: #9CB5B2;
-  --klar-dline: rgba(237, 242, 240, 0.18);
-
-  /* Handset frame. Dark body on the warm paper ground; the rim is a shadow. */
-  --device-face: #1D3036;
-  --device-edge: #4C6066;
-  --device-button: #3A4D53;
-  --device-rim: rgba(10, 20, 22, 0.5);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) {
-    --klar-bg: #15272B;
-    --klar-text: #EDF2F0;
-    --klar-muted: #A6BDBA;
-    --klar-faint: #7F9895;
-    --klar-line: rgba(237, 242, 240, 0.18);
-    --klar-line-soft: rgba(237, 242, 240, 0.09);
-    --klar-surface: #1C3236;
-
-    --klar-dbg: #0A1416;
-    --klar-dmuted: #8FB2AE;
-    --klar-dline: rgba(237, 242, 240, 0.16);
-
-    /* On the dark ground the frame needs to be lifted, and the rim becomes a
-       highlight instead of a shadow. */
-    --device-face: #21353B;
-    --device-edge: #5A7076;
-    --device-button: #4A6067;
-    --device-rim: rgba(237, 242, 240, 0.14);
-  }
-}
-
-:root[data-theme='dark'] {
-  --klar-bg: #15272B;
-  --klar-text: #EDF2F0;
-  --klar-muted: #A6BDBA;
-  --klar-faint: #7F9895;
-  --klar-line: rgba(237, 242, 240, 0.18);
-  --klar-line-soft: rgba(237, 242, 240, 0.09);
-  --klar-surface: #1C3236;
-
-  --klar-dbg: #0A1416;
-  --klar-dmuted: #8FB2AE;
-  --klar-dline: rgba(237, 242, 240, 0.16);
-
-  --device-face: #21353B;
-  --device-edge: #5A7076;
-  --device-button: #4A6067;
-  --device-rim: rgba(237, 242, 240, 0.14);
-}
-
-/* --------------------------------------------------------------------------- */
+/* ---- Base ------------------------------------------------------------- */
 
 *,
 *::before,
@@ -81,737 +20,912 @@
   box-sizing: border-box;
 }
 
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
   margin: 0;
-  background: var(--klar-bg);
-  color: var(--klar-text);
+  min-height: 100vh;
+  padding-bottom: 1px; /* contains the footer's bottom margin */
+  background: var(--color-bg-subtle);
+  color: var(--color-text);
   font-family: var(--font-ui);
   -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
+}
+
+/* The UA rule for [hidden] is display:none at element specificity, so any
+   class here that sets display would quietly beat it. It must not. */
+[hidden] {
+  display: none !important;
 }
 
 a {
-  color: inherit;
+  color: var(--color-link);
   text-decoration: none;
 }
 
 a:hover {
-  color: var(--emerald-500);
+  color: var(--color-link-hover);
 }
 
+img {
+  max-width: 100%;
+}
+
+h1,
+h2,
+h3,
+p {
+  text-wrap: pretty;
+}
+
+/* Keyboard focus only — the design draws no ring, but a page you can tab
+   through needs one. Emerald, per --color-focus-ring. */
 :focus-visible {
   outline: 2px solid var(--color-focus-ring);
-  outline-offset: 3px;
+  outline-offset: 2px;
   border-radius: var(--radius-sm);
-}
-
-::selection {
-  background: var(--emerald-500);
-  color: var(--teal-950);
 }
 
 .skip-link {
   position: absolute;
   left: -9999px;
-  top: var(--space-2);
-  background: var(--klar-surface);
-  border: 1px solid var(--klar-line);
-  border-radius: var(--radius-pill);
-  padding: var(--space-2) var(--space-5);
-  font-size: 14px;
-  z-index: 100;
+  top: 0;
+  z-index: 10;
+  padding: 12px 18px;
+  border-radius: 0 0 var(--radius-md) 0;
+  background: var(--color-accent);
+  color: var(--color-accent-contrast);
+  font: var(--text-ui-headline);
 }
 
 .skip-link:focus {
-  left: var(--space-5);
+  left: 0;
+  color: var(--color-accent-contrast);
 }
 
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ---- Language ----------------------------------------------------------
+   Both languages ship in the markup; the lang attribute on <html> decides
+   which one is drawn. German renders with no JS at all. */
+
+[data-en] {
+  display: none;
+}
+
+html[lang='en'] [data-en] {
+  display: inline;
+}
+
+html[lang='en'] [data-de] {
+  display: none;
+}
+
+/* ---- Shell ------------------------------------------------------------ */
+
 .shell {
-  max-width: 1280px;
+  max-width: 1100px;
   margin: 0 auto;
-  padding-inline: clamp(20px, 5vw, 64px);
+  padding-left: 32px;
+  padding-right: 32px;
 }
 
 .section {
-  border-top: 1px solid var(--klar-line-soft);
+  padding-top: 72px;
 }
 
-.section__inner {
-  padding-block: clamp(72px, 9vw, 132px);
-}
-
-.ring {
-  flex: none;
-}
-
-.mono {
-  font-family: var(--font-mono);
-}
-
-.eyebrow {
-  font-family: var(--font-mono);
-  font-size: 11.5px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--klar-faint);
-}
-
-.section__title {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: clamp(30px, 4vw, 50px);
-  line-height: 1.12;
-  margin: 0;
-  text-wrap: balance;
-}
-
-.section__lead {
-  font-size: clamp(16px, 1.3vw, 18px);
-  line-height: 1.7;
-  color: var(--klar-muted);
-  margin: 22px 0 0;
-  text-wrap: pretty;
-}
-
-/* ---- Header ------------------------------------------------------------- */
+/* ---- Header ----------------------------------------------------------- */
 
 .site-header {
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  background: var(--klar-bg);
-  border-bottom: 1px solid var(--klar-line-soft);
-}
-
-.site-header__bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-6);
-  padding-block: var(--space-4);
+  gap: 24px;
+  padding-top: 22px;
+  padding-bottom: 22px;
 }
 
 .wordmark {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  /* The system specifies the lockup gap as 0.45x the mark height. */
+  gap: 14px;
+  color: var(--color-text);
+}
+
+.wordmark:hover {
+  color: var(--color-text);
+}
+
+.wordmark__mark {
+  display: block;
+  width: 32px;
+  height: 32px;
 }
 
 .wordmark__text {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 15px;
-  letter-spacing: 0.34em;
+  font: 700 19px/1 var(--font-ui);
+  letter-spacing: var(--tracking-wordmark);
+  color: var(--color-text);
 }
 
-.site-nav {
+.header__controls {
   display: flex;
   align-items: center;
-  gap: clamp(12px, 2vw, 28px);
+  gap: 10px;
 }
 
-.site-nav__link {
-  font-size: 13px;
-  color: var(--klar-muted);
-  letter-spacing: 0.02em;
-}
-
-.lang-switch {
+/* Segmented pill group — theme and language switches.
+   Drawn as the design system's SegmentedControl, not as an accent-filled pill:
+   a tinted track with the active segment raised on a hairline. The landing file
+   filled the active segment with --color-accent, which made a preference switch
+   the loudest emerald above the fold and left the CTA competing with it. The
+   accent means "this is the action" everywhere else on the page; chrome does
+   not get to borrow it. */
+.seg {
   display: flex;
-  align-items: center;
-  border: 1px solid var(--klar-line);
+  gap: 2px;
+  padding: 4px;
   border-radius: var(--radius-pill);
-  overflow: hidden;
+  background: var(--color-surface-tint);
 }
 
-.lang-switch__btn,
-.theme-toggle {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  cursor: pointer;
+.seg__btn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 13px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
   background: transparent;
-  color: var(--klar-muted);
-  transition: background var(--duration-fast) var(--ease-standard),
-    color var(--duration-fast) var(--ease-standard);
+  color: var(--color-text-tertiary);
+  font: 600 13px/1 var(--font-ui);
+  cursor: pointer;
+  transition: background var(--duration-base) var(--ease-standard),
+    color var(--duration-base) var(--ease-standard),
+    border-color var(--duration-base) var(--ease-standard);
 }
 
-.lang-switch__btn {
-  padding: 6px 11px;
-  border: 0;
+.seg__btn:hover {
+  color: var(--color-text);
 }
 
-.lang-switch__btn[aria-pressed='true'] {
-  background: var(--klar-text);
-  color: var(--klar-bg);
+.seg__btn[aria-pressed='true'] {
+  background: var(--color-surface-raised);
+  border-color: var(--color-border-subtle);
+  color: var(--color-text);
+  box-shadow: var(--shadow-sm);
 }
 
-.theme-toggle {
-  padding: 6px 12px;
-  border: 1px solid var(--klar-line);
-  border-radius: var(--radius-pill);
+.seg__btn svg {
+  flex: 0 0 auto;
 }
 
-/* Below roughly 640px the nav no longer fits beside the wordmark, so it takes
-   a line of its own instead of running off the edge. */
-@media (max-width: 640px) {
-  .site-header__bar {
-    flex-wrap: wrap;
-    row-gap: var(--space-3);
-  }
-
-  .site-nav {
-    width: 100%;
-    gap: var(--space-4);
-  }
-}
-
-.notice {
-  border-top: 1px solid var(--klar-line-soft);
-  background: var(--klar-surface);
-}
-
-.notice__text {
-  font-family: var(--font-mono);
-  font-size: 11.5px;
-  letter-spacing: 0.04em;
-  color: var(--klar-muted);
-  padding-block: 10px;
-  margin: 0;
-}
-
-.notice[hidden] {
-  display: none;
-}
-
-/* ---- Hero --------------------------------------------------------------- */
-
-.hero {
-  padding-top: clamp(64px, 8vw, 112px);
-  padding-bottom: clamp(64px, 8vw, 112px);
-}
-
-.hero__layout {
-  display: grid;
-  gap: clamp(48px, 6vw, 88px);
-}
-
-/* Two columns only once the wordmark still has room to be the largest thing on
-   the page. Below that the handset moves under the call to action. */
-@media (min-width: 900px) {
-  .hero__layout {
-    grid-template-columns: minmax(0, 1.08fr) minmax(260px, 0.92fr);
-    align-items: center;
-  }
-}
-
-.hero__main {
-  display: flex;
-  flex-direction: column;
-  gap: clamp(28px, 3vw, 40px);
-}
-
-.hero__wordmark {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: clamp(64px, 13vw, 168px);
-  line-height: 0.9;
-  letter-spacing: 0.16em;
-  text-indent: 0.16em;
-  margin: 0;
-}
-
-/* Capped so the handset still fits above the fold on a laptop screen —
-   a phone cut off by the section edge looks like a mistake, not a crop. */
-.hero__device {
-  justify-self: center;
-  width: 100%;
-  max-width: 278px;
-}
-
-.hero__lead {
-  font-family: var(--font-display);
-  font-size: clamp(21px, 2.4vw, 30px);
-  line-height: 1.45;
-  margin: 0 0 22px;
-  text-wrap: pretty;
-}
-
-.hero__sub {
-  font-size: 16px;
-  line-height: 1.65;
-  color: var(--klar-muted);
-  margin: 0;
-  max-width: 44ch;
-  text-wrap: pretty;
-}
-
-.hero__aside {
-  display: flex;
-  flex-direction: column;
-  gap: 28px;
-}
-
-.status-chip {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  border: 1px solid var(--klar-line);
-  border-radius: var(--radius-pill);
-  padding: 9px 18px 9px 14px;
-  align-self: start;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  letter-spacing: 0.05em;
-  color: var(--klar-muted);
-}
-
-.hero__actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 18px;
-}
+/* ---- Controls ---------------------------------------------------------
+   Button and Input, ported from the design system's own components
+   (components/core/Button.jsx, components/forms/Input.jsx). */
 
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 44px;
-  padding-inline: var(--space-6);
-  border: 0;
+  gap: 8px;
+  min-height: 46px;
+  padding: 13px 22px;
+  border: 1px solid transparent;
   border-radius: var(--radius-pill);
-  background: var(--emerald-500);
-  color: var(--teal-950);
-  font: var(--text-ui-headline);
+  background: var(--color-accent);
+  color: var(--color-accent-contrast);
+  font: 600 16px/1 var(--font-ui);
+  white-space: nowrap;
   cursor: pointer;
-  transition: background var(--duration-fast) var(--ease-standard);
+  transition: background var(--duration-base) var(--ease-standard),
+    transform var(--duration-fast) var(--ease-standard);
 }
 
 .btn:hover {
+  background: var(--color-accent-strong);
+  color: var(--color-accent-contrast);
+}
+
+/* --color-accent-strong is emerald-500 in dark, i.e. the resting colour.
+   Step the other way so the hover still reads. */
+[data-theme='dark'] .btn:hover {
   background: var(--emerald-600);
-  color: var(--teal-950);
 }
 
-.link-underline {
-  font-size: 15px;
-  color: var(--klar-muted);
-  border-bottom: 1px solid var(--klar-line);
-  padding-bottom: 3px;
+.btn:active {
+  transform: scale(0.97);
 }
 
-/* ---- Steps -------------------------------------------------------------- */
-
-.steps {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(272px, 1fr));
-  gap: clamp(28px, 3.5vw, 56px);
-}
-
-.step {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-6);
-}
-
-.step__label {
+.field {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
-  font-family: var(--font-mono);
-  font-size: 12px;
-  letter-spacing: 0.14em;
-  color: var(--klar-faint);
+  gap: 8px;
+  padding: 11px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  transition: border-color var(--duration-base) var(--ease-standard);
 }
 
-.step__title {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: clamp(22px, 2vw, 28px);
-  line-height: 1.25;
-  margin: 0;
+.field:focus-within {
+  border-color: var(--color-accent);
 }
 
-.step__body {
-  font-size: 15.5px;
-  line-height: 1.7;
-  color: var(--klar-muted);
-  margin: 0;
+.field input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font: var(--text-ui-body);
+  color: var(--color-text);
 }
 
-.step__body em {
-  font-style: italic;
-  color: var(--klar-text);
+.field input::placeholder {
+  color: var(--color-text-tertiary);
 }
 
-/* ---- Device frame ------------------------------------------------------- */
-
-/* The handset is drawn in CSS rather than shipped as a mockup image: it stays
-   sharp at any size, weighs nothing, and picks up the page's own theme.
-   Everything is sized in container query units, so bezel, corner radius and
-   buttons stay in proportion however wide the frame ends up. */
-.device {
-  container-type: inline-size;
-  width: 100%;
+/* Both controls carry the same 46px hint in the design; stretch keeps them
+   the same height once the field's line box makes it the taller of the two. */
+.signup {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
 }
 
-.device__body {
-  position: relative;
-  padding: 2.6cqw;
-  border-radius: 14cqw;
-  background: linear-gradient(
-    152deg,
-    var(--device-edge) 0%,
-    var(--device-face) 34%,
-    var(--device-face) 64%,
-    var(--device-edge) 100%
-  );
-  box-shadow:
-    0 0 0 0.3cqw var(--device-rim),
-    0 3cqw 7cqw -2cqw rgba(10, 20, 22, 0.28),
-    0 12cqw 24cqw -8cqw rgba(10, 20, 22, 0.42);
+.signup > .field {
+  flex: 1;
 }
 
-/* Volume cluster on the left, side button on the right. */
-.device__body::before,
-.device__body::after {
-  content: '';
-  position: absolute;
-  width: 0.65cqw;
-  border-radius: 0.4cqw;
-  background: var(--device-button);
+.cta-note {
+  font: var(--text-ui-body-sm);
+  color: var(--color-text-tertiary);
+  margin: 12px 0 0;
 }
 
-.device__body::before {
-  left: -0.5cqw;
-  top: 26cqw;
-  height: 26cqw;
+.cta-done {
+  font: var(--text-ui-body);
+  color: var(--color-accent-strong);
+  padding: 13px 0;
 }
 
-.device__body::after {
-  right: -0.5cqw;
-  top: 34cqw;
-  height: 17cqw;
-}
+/* ---- Hero -------------------------------------------------------------- */
 
-.device__screen {
-  position: relative;
-  border-radius: 11.4cqw;
-  overflow: hidden;
-  background: var(--klar-surface);
-}
-
-/* Screenshots come in a light and a dark variant. Both ship, and the one that
-   does not match the active theme is removed from the box — display:none also
-   keeps it out of the accessibility tree, so the alt text is never read twice.
-   Eight WebP files weigh under 230 KB in total, so shipping both costs little. */
-.shot__img {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-
-.shot__img--dark {
-  display: none;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) .shot__img--light {
-    display: none;
-  }
-
-  :root:not([data-theme='light']) .shot__img--dark {
-    display: block;
-  }
-}
-
-:root[data-theme='dark'] .shot__img--light {
-  display: none;
-}
-
-:root[data-theme='dark'] .shot__img--dark {
-  display: block;
-}
-
-.shot {
-  /* Bottom-aligned so the three frames line up even when the copy above them
-     runs to different lengths. */
-  margin: auto 0 0;
-}
-
-/* The step frames are cut to a ratio and faded out at the bottom rather than
-   shown whole. Every one of these screens carries its content in the upper
-   half, so the lower half was empty pixels either way, and the fade says "the
-   screen goes on" instead of "the image ends". It is a mask on the element,
-   so it works over any background.
-
-   The hero handset is deliberately exempt: there the whole device is the
-   picture. */
-.steps .shot {
-  aspect-ratio: 9 / 13;
-  overflow: hidden;
-  -webkit-mask-image: linear-gradient(to bottom, #000 76%, transparent 100%);
-  mask-image: linear-gradient(to bottom, #000 76%, transparent 100%);
-}
-
-/* Once the grid collapses to a single column the section would otherwise run
-   to roughly seven screenfuls, so the crop gets tighter. */
-@media (max-width: 640px) {
-  .steps .shot {
-    aspect-ratio: 9 / 10;
-  }
-}
-
-/* ---- Privacy ------------------------------------------------------------ */
-
-.privacy {
-  background: var(--klar-surface);
-  border-top: 1px solid var(--klar-line-soft);
-  border-bottom: 1px solid var(--klar-line-soft);
-}
-
-.section__head {
-  max-width: 56ch;
-  margin-bottom: clamp(48px, 6vw, 80px);
-}
-
-.cards {
+.hero {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: var(--space-4);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 480px);
+  gap: 40px;
+  align-items: center;
+  padding-top: 40px;
+}
+
+/* One grid item on desktop so the copy centres against the shot as a block.
+   It dissolves at the mobile breakpoint, see below. */
+.hero__copy {
+  min-width: 0;
+}
+
+.hero__title {
+  /* The 38px floor put this on three lines at 402pt and pushed the product
+     shot off the first screen. 30px holds two lines on the narrowest phones
+     and the clamp reaches the design's 56px well before tablet width. */
+  font: 700 clamp(30px, 5.6vw, 56px) / 1.04 var(--font-ui);
+  letter-spacing: var(--tracking-display-xl);
+  margin: 0 0 20px;
+}
+
+.hero__lead {
+  font: 400 20px/1.5 var(--font-ui);
+  color: var(--color-text-secondary);
+  margin: 0 0 36px;
+  max-width: 26em;
+}
+
+.hero__cta {
+  max-width: 460px;
+}
+
+.hero__note {
+  font: var(--text-ui-body-sm);
+  color: var(--color-text-tertiary);
+  margin: 24px 0 0;
+}
+
+/* ---- Hero demo -----------------------------------------------------------
+   The app's Übersicht card, rebuilt in markup rather than photographed. Every
+   value was measured off the shipped screen and every one of them turned out
+   to be a token this page already carries:
+
+     card #FFFFFF   --color-surface        month  #5C7078  --color-text-tertiary
+     rule #E6F2F0   --color-border-subtle  figure #15272B  --color-text
+     mark #02C39A   --color-accent         label  #44585E  --color-text-secondary
+     rest #BFD8D4   --color-border-strong  dots   --teal-700 / --cyan-600
+
+   Proportions follow the screen too: the app insets row content by 5% of the
+   card, and the marks are 6.2:1 pills with a gap a quarter of their height.
+   Nothing here is invented; it is the same system drawing itself. */
+
+.hero__demo {
+  margin: 0;
+}
+
+/* Names what the app actually covers. The page never said it anywhere else,
+   and a visitor who uses something other than alcohol had no way to tell
+   whether this was built for them. */
+.hero__demo-caption {
+  font: var(--text-ui-body-sm);
+  color: var(--color-text-tertiary);
+  margin-top: 16px;
+  text-wrap: pretty;
+}
+
+.quota {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding-bottom: 28px;
+}
+
+.quota__month {
+  margin: 0;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--color-border-subtle);
+  font: var(--text-ui-caption);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--color-text-tertiary);
+}
+
+.quota__row {
+  padding: 22px 24px 0;
+}
+
+/* The hairline belongs between rows, inset to the content, never around the
+   card. That is the system's RowDivider rule. */
+.quota__row + .quota__row {
+  margin-top: 22px;
+  border-top: 1px solid var(--color-border-subtle);
+  padding-top: 22px;
+}
+
+.quota__name {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 10px;
+  font: var(--text-ui-headline);
+  color: var(--color-text);
+}
+
+.quota__dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--teal-700);
+  flex: 0 0 auto;
+}
+
+.quota__dot--cyan {
+  background: var(--cyan-600);
+}
+
+.quota__figure {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  margin: 0 0 14px;
+  font: var(--text-ui-body);
+  color: var(--color-text-secondary);
+}
+
+.quota__figure b {
+  font: var(--text-ui-numeral);
+  color: var(--color-text);
+}
+
+/* Marks share the row equally, so six and ten both reach the same edges. */
+.quota__pips {
+  display: flex;
+  gap: 8px;
+}
+
+.quota__pips i {
+  flex: 1;
+  height: 10px;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--color-border-strong);
+}
+
+/* Filled means still available, which is why four of six are lit at "Noch 4". */
+.quota__pips i.is-left {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+/* ---- Section headings -------------------------------------------------- */
+
+.section__title {
+  font: var(--text-display-md);
+  letter-spacing: var(--tracking-display-md);
+  margin: 0 0 40px;
+  max-width: 20em;
+}
+
+.section__note {
+  font: var(--text-ui-body-sm);
+  color: var(--color-text-tertiary);
+  margin: 20px 0 0;
+}
+
+/* ---- Feature cards ----------------------------------------------------- */
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
 }
 
 .card {
-  /* One step off the section's surface, so the cards read as objects on it
-     rather than dissolving into it. */
-  background: var(--klar-bg);
-  border: 1px solid var(--klar-line-soft);
+  background: var(--color-surface);
   border-radius: var(--radius-lg);
-  padding: clamp(24px, 3vw, 34px);
+  padding: 32px;
 }
 
-.card__icon {
-  width: 44px;
-  height: 44px;
-  border-radius: var(--radius-pill);
-  background: var(--emerald-500);
+/* The system's one recurring decoration: a solid circle badge holding a
+   white-stroke icon. */
+.card__badge {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 22px;
-  color: var(--teal-950);
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  margin-bottom: 20px;
+}
+
+.card__badge--cyan {
+  background: var(--cyan-600);
 }
 
 .card__title {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 19px;
-  margin: 0 0 var(--space-3);
+  font: var(--text-display-sm);
+  letter-spacing: var(--tracking-display-sm);
+  margin: 0 0 12px;
+}
+
+.card__quote {
+  font: var(--text-ui-body);
+  font-style: italic;
+  color: var(--color-text);
+  margin: 0 0 10px;
 }
 
 .card__body {
-  font-size: 14.5px;
-  line-height: 1.65;
-  color: var(--klar-muted);
+  font: var(--text-ui-body);
+  color: var(--color-text-secondary);
+  margin: 0 0 10px;
+}
+
+.card__meta {
+  font: var(--text-ui-body-sm);
+  color: var(--color-text-secondary);
   margin: 0;
 }
 
-.privacy__note {
-  font-family: var(--font-mono);
-  font-size: 12.5px;
-  line-height: 1.8;
-  color: var(--klar-faint);
-  margin: 28px 0 0;
-  max-width: 74ch;
+/* ---- Privacy block (inverse) ------------------------------------------- */
+
+.inverse {
+  background: var(--color-bg-inverse);
+  border-radius: var(--radius-lg);
+  padding: 48px;
 }
 
-/* ---- Evidence ----------------------------------------------------------- */
-
-.findings {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
-  gap: clamp(28px, 4vw, 64px);
+.inverse__title {
+  font: var(--text-display-md);
+  letter-spacing: var(--tracking-display-md);
+  color: var(--white);
+  margin: 0 0 12px;
+  max-width: 20em;
 }
 
-.finding {
-  border-top: 1px solid var(--klar-line);
-  padding-top: 26px;
+.inverse__lead {
+  font: 400 17px/1.55 var(--font-ui);
+  color: var(--teal-100);
+  margin: 0 0 40px;
+  max-width: 34em;
 }
 
-.finding__kicker {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.14em;
-  color: var(--klar-faint);
+.inverse .grid-3 {
+  gap: 32px;
+}
+
+.inverse__icon {
+  display: block;
   margin-bottom: 14px;
 }
 
-.finding__kicker--consequence {
-  color: var(--emerald-600);
-  margin-bottom: var(--space-3);
-}
-
-.finding__claim {
-  font-family: var(--font-display);
-  font-size: 19px;
-  line-height: 1.5;
-  margin: 0 0 22px;
-}
-
-.finding__body {
-  font-size: 15.5px;
-  line-height: 1.7;
-  color: var(--klar-muted);
-  margin: 0;
-}
-
-.findings__more {
-  margin: clamp(36px, 4vw, 52px) 0 0;
-}
-
-.findings__more a {
-  font-size: 15px;
-  color: var(--klar-text);
-  border-bottom: 1px solid var(--klar-line);
-  padding-bottom: 3px;
-}
-
-/* ---- Help band ---------------------------------------------------------- */
-
-.help {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: clamp(20px, 3vw, 48px);
-  align-items: start;
-  padding-block: clamp(40px, 5vw, 56px);
-}
-
-.help__label {
-  font-family: var(--font-mono);
-  font-size: 11.5px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--klar-faint);
-  padding-top: var(--space-1);
-}
-
-.help__title {
-  font-size: 16px;
-  font-weight: 600;
+.inverse__item-title {
+  font: var(--text-ui-headline);
+  color: var(--white);
   margin: 0 0 6px;
 }
 
-.help__detail {
-  font-size: 13.5px;
-  line-height: 1.6;
-  color: var(--klar-muted);
+.inverse__item-body {
+  font: var(--text-ui-body-sm);
+  color: var(--teal-100);
   margin: 0;
 }
 
-/* ---- Case-study teaser + footer ----------------------------------------- */
+/* ---- Evidence ---------------------------------------------------------- */
 
-.teaser {
+.evidence__card {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+}
+
+.evidence__icon {
   display: block;
-  background: var(--klar-dbg);
-  color: var(--klar-dtext);
+  margin-bottom: 18px;
 }
 
-.teaser:hover {
-  color: var(--klar-dtext);
+.evidence__claim {
+  font: var(--text-ui-headline);
+  margin: 0 0 8px;
 }
 
-.teaser__inner {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: clamp(24px, 4vw, 56px);
-  align-items: end;
-  padding-block: clamp(56px, 7vw, 104px);
-}
-
-.teaser__kicker {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  margin-bottom: var(--space-6);
-  font-family: var(--font-mono);
-  font-size: 11.5px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--emerald-500);
-}
-
-.teaser__title {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: clamp(30px, 4.6vw, 58px);
-  line-height: 1.08;
+.evidence__body {
+  font: var(--text-ui-body-sm);
+  color: var(--color-text-secondary);
   margin: 0;
 }
 
-.teaser__side {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
+.evidence__limit {
+  font: var(--text-ui-body-sm);
+  color: var(--color-text-tertiary);
+  margin: 24px 0 0;
+  max-width: 46em;
 }
 
-.teaser__body {
-  font-size: 15.5px;
-  line-height: 1.7;
-  color: var(--klar-dmuted);
-  margin: 0;
-  max-width: 44ch;
-}
+/* ---- Closing CTA band --------------------------------------------------- */
 
-.teaser__cta {
-  font-family: var(--font-mono);
-  font-size: 13px;
-  letter-spacing: 0.06em;
-  border-bottom: 1px solid var(--klar-dline);
-  padding-bottom: var(--space-2);
-  align-self: start;
-}
-
-.site-footer {
-  background: var(--klar-dbg);
-  color: var(--klar-dtext);
-  border-top: 1px solid var(--klar-dline);
-}
-
-.site-footer__inner {
+.cta-band {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-5);
-  padding-block: var(--space-8);
-  font-family: var(--font-mono);
-  font-size: 12px;
-  color: var(--klar-dmuted);
+  gap: 32px;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: 40px 48px;
+}
+
+.cta-band__title {
+  font: var(--text-display-sm);
+  letter-spacing: var(--tracking-display-sm);
+  margin: 0;
+}
+
+.cta-band .signup {
+  flex: 1;
+  min-width: 340px;
+  max-width: 460px;
+}
+
+/* In the band the confirmation replaces a form that was vertically centred,
+   so it carries no leading of its own. */
+.cta-band .cta-done {
+  padding: 0;
+}
+
+/* ---- Help -------------------------------------------------------------- */
+
+.help {
+  padding-top: 64px;
+}
+
+.help__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 32px;
+  border-top: 1px solid var(--color-border);
+  padding-top: 32px;
+}
+
+.help__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.help__icon {
+  flex: 0 0 auto;
+  margin-top: 2px;
+}
+
+.help__title {
+  font: var(--text-ui-headline);
+  margin: 0 0 2px;
+}
+
+.help__title a {
+  color: var(--color-text);
+}
+
+.help__title a:hover {
+  color: var(--color-link-hover);
+}
+
+.help__detail {
+  font: var(--text-ui-body-sm);
+  color: var(--color-text-tertiary);
+  margin: 0;
+}
+
+/* ---- Footer ------------------------------------------------------------ */
+
+.site-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding-top: 48px;
+  padding-bottom: 56px;
+  font: var(--text-ui-body-sm);
+  color: var(--color-text-tertiary);
 }
 
 .site-footer__mark {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
-  letter-spacing: 0.24em;
-  color: var(--klar-dtext);
+  gap: 10px;
+}
+
+.site-footer__mark img {
+  display: block;
+  width: 18px;
+  height: 18px;
+}
+
+.site-footer__mark span {
+  font: 700 13px/1 var(--font-ui);
+  letter-spacing: var(--tracking-wordmark);
+  color: var(--color-text-secondary);
 }
 
 .site-footer__nav {
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-6);
+  gap: 22px;
 }
 
-/* ---- Reveal on scroll --------------------------------------------------- */
+/* ---- Responsive --------------------------------------------------------
+   Not in the design file — that canvas is one desktop width. The breakpoints
+   only collapse the grids and tighten the gutter; no value above changes. */
 
-/* Hiding is gated on the .js class, which the script sets as its first
-   statement. Without JS, or if the script throws before that point, the page
-   renders fully rather than invisibly. */
+@media (max-width: 960px) {
+  /* Single column, and the product shot moves up between the copy and the
+     form. Stacked in source order it landed behind six text elements, i.e.
+     entirely below the fold on a phone — the one asset that shows what this
+     is was the last thing anyone saw. display:contents dissolves the copy
+     wrapper so its two halves become grid items and the shot can sit between
+     them. The div carries no semantics, so nothing is lost with it. */
+  .hero {
+    grid-template-columns: minmax(0, 1fr);
+    /* Tightened from 32px: it buys the last pixels that put the whole CTA
+       above the fold on a 780px screen. */
+    row-gap: 24px;
+  }
+
+  .hero__copy {
+    display: contents;
+  }
+
+  .hero__intro {
+    order: 1;
+  }
+
+  .hero__demo {
+    order: 2;
+    max-width: 420px;
+    margin-inline: auto;
+    width: 100%;
+  }
+
+  .hero__actions {
+    order: 3;
+  }
+
+  /* row-gap now carries this space. */
+  .hero__lead {
+    margin-bottom: 0;
+  }
+
+  .grid-3,
+  .inverse .grid-3,
+  .help__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .inverse {
+    padding: 40px;
+  }
+
+  .cta-band {
+    padding: 32px;
+  }
+}
+
+@media (max-width: 680px) {
+  .shell {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .section,
+  .help {
+    padding-top: 56px;
+  }
+
+  .grid-2,
+  .grid-3,
+  .inverse .grid-3,
+  .help__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* The header wrapped to two rows here and ate 126px of a 780px screen
+     before the page had said anything. Dropping the theme labels to icons
+     puts it back on one row; the words stay in the accessibility tree. */
+  .site-header {
+    gap: 12px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+
+  .seg__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .seg__btn {
+    gap: 0;
+    padding: 8px 12px;
+  }
+
+  .hero__lead {
+    font-size: 18px;
+  }
+
+  .card,
+  .inverse {
+    padding: 28px;
+  }
+
+  .cta-band {
+    padding: 28px;
+  }
+
+  .cta-band .signup {
+    min-width: 0;
+    max-width: none;
+  }
+
+  /* The pair no longer fits on one line at this width. */
+  .signup {
+    flex-wrap: wrap;
+  }
+
+  .signup > .field {
+    flex-basis: 100%;
+  }
+
+  .signup > .btn {
+    width: 100%;
+  }
+}
+
+/* ---- Sheet -------------------------------------------------------------
+   The modal that answers the signup. Follows the system's Sheet: surface
+   fill, --radius-lg, --shadow-lg (a genuinely floating surface, the one case
+   shadows are allowed), and a semi-transparent teal scrim. */
+
+.sheet {
+  width: min(420px, calc(100vw - 40px));
+  padding: 32px;
+  border: none;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Custom properties only reach ::backdrop in newer engines, so the literal
+   repeats as the var() fallback rather than leaving the scrim to the UA. */
+.sheet::backdrop {
+  background: var(--color-scrim, rgba(21, 39, 43, 0.55));
+}
+
+.sheet__title {
+  font: var(--text-display-sm);
+  letter-spacing: var(--tracking-display-sm);
+  margin: 0 0 12px;
+}
+
+.sheet__body {
+  font: var(--text-ui-body);
+  color: var(--color-text-secondary);
+  margin: 0 0 16px;
+}
+
+.sheet .btn {
+  margin-top: 8px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .sheet[open] {
+    animation: sheet-in var(--duration-base) var(--ease-out);
+  }
+
+  .sheet[open]::backdrop {
+    animation: scrim-in var(--duration-base) var(--ease-out);
+  }
+}
+
+@keyframes sheet-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@keyframes scrim-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* ---- Scroll reveal -----------------------------------------------------
+   The design system's motion budget is the whole spec here: a fade and a
+   gentle rise on the system's own easing and longest duration, once per
+   element, never replayed on the way back up. No parallax, no scale, no
+   ambient loop — this is a low-arousal product and the motion has to stay
+   beneath notice.
+
+   Gated on .js, which the inline head script sets before first paint. Without
+   JS nothing below is ever applied and the page renders plainly visible. */
+
 .js [data-reveal] {
   opacity: 0;
-  transform: translateY(14px);
-  transition: opacity 520ms var(--ease-standard), transform 520ms var(--ease-standard);
+  transform: translateY(12px);
+  transition: opacity var(--duration-slow) var(--ease-out),
+    transform var(--duration-slow) var(--ease-out);
+  transition-delay: var(--reveal-delay, 0ms);
 }
 
 .js [data-reveal].is-visible {
@@ -819,10 +933,51 @@ a:hover {
   transform: none;
 }
 
+/* Cards in a row arrive a beat apart, enough to read as one movement rather
+   than a grid snapping into place at once. */
+.grid-2 > [data-reveal]:nth-child(2),
+.grid-3 > [data-reveal]:nth-child(2) {
+  --reveal-delay: 70ms;
+}
+
+.grid-3 > [data-reveal]:nth-child(3) {
+  --reveal-delay: 140ms;
+}
+
+/* ---- Motion ------------------------------------------------------------ */
+
 @media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .btn:active {
+    transform: none;
+  }
+
+  /* Not a faster reveal — no reveal. The content is simply there, whether or
+     not the observer ever gets round to it. */
   .js [data-reveal] {
     opacity: 1;
     transform: none;
     transition: none;
+  }
+}
+
+/* ---- Print ------------------------------------------------------------- */
+
+@media print {
+  .header__controls,
+  .signup,
+  .skip-link {
+    display: none;
+  }
+
+  body {
+    background: var(--white);
   }
 }
