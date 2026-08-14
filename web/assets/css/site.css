@@ -12,6 +12,26 @@
 @import url('tokens/typography.css');
 @import url('tokens/spacing.css');
 
+/* ---- Page rhythm -------------------------------------------------------
+   The design canvas is one desktop width, so every gap on it is a single
+   number. On a real 1440px screen those numbers put six full-width bands
+   within 72px of one another while 340px of margin sat empty either side:
+   the page read as one dense column rather than as separate sections, and
+   the only thing with room to breathe was the part with nothing in it.
+
+   So the vertical rhythm and the padding inside each surface scale with the
+   viewport instead. Every clamp bottoms out at exactly the value it replaces
+   and only starts growing past ~1100px, so nothing at tablet width or below
+   moves and the mobile tuning in the breakpoints still holds. */
+
+:root {
+  --rhythm-section: clamp(72px, 8vw, 132px);  /* band to band */
+  --rhythm-heading: clamp(40px, 4vw, 56px);   /* section title to its content */
+  --rhythm-grid: clamp(24px, 2.4vw, 32px);    /* card to card */
+  --pad-card: clamp(32px, 3vw, 44px);         /* inside a small surface */
+  --pad-block: clamp(48px, 4.6vw, 72px);      /* inside a large surface */
+}
+
 /* ---- Base ------------------------------------------------------------- */
 
 *,
@@ -122,7 +142,7 @@ html[lang='en'] [data-de] {
 }
 
 .section {
-  padding-top: 72px;
+  padding-top: var(--rhythm-section);
 }
 
 /* ---- Header ----------------------------------------------------------- */
@@ -306,10 +326,16 @@ html[lang='en'] [data-de] {
 
 .hero {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 480px);
-  gap: 40px;
+  /* The trench between copy and shot widens with the viewport, but the shot
+     gives up the width rather than the headline: at 480px the copy column
+     falls to 516px, which is the exact pixel at which "Ehrlich mitschreiben,
+     ohne aufhören zu müssen." breaks from three lines to four. 440px keeps
+     the headline on three lines all the way up, and the card loses nothing
+     but a few pixels of pill. */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 440px);
+  gap: clamp(40px, 3.6vw, 64px);
   align-items: center;
-  padding-top: 40px;
+  padding-top: clamp(40px, 4.5vw, 84px);
 }
 
 /* One grid item on desktop so the copy centres against the shot as a block.
@@ -324,13 +350,13 @@ html[lang='en'] [data-de] {
      and the clamp reaches the design's 56px well before tablet width. */
   font: 700 clamp(30px, 5.6vw, 56px) / 1.04 var(--font-ui);
   letter-spacing: var(--tracking-display-xl);
-  margin: 0 0 20px;
+  margin: 0 0 clamp(20px, 2vw, 28px);
 }
 
 .hero__lead {
   font: 400 20px/1.5 var(--font-ui);
   color: var(--color-text-secondary);
-  margin: 0 0 36px;
+  margin: 0 0 clamp(36px, 3.6vw, 48px);
   max-width: 26em;
 }
 
@@ -459,7 +485,7 @@ html[lang='en'] [data-de] {
 .section__title {
   font: var(--text-display-md);
   letter-spacing: var(--tracking-display-md);
-  margin: 0 0 40px;
+  margin: 0 0 var(--rhythm-heading);
   max-width: 20em;
 }
 
@@ -474,19 +500,19 @@ html[lang='en'] [data-de] {
 .grid-2 {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 24px;
+  gap: var(--rhythm-grid);
 }
 
 .grid-3 {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 24px;
+  gap: var(--rhythm-grid);
 }
 
 .card {
   background: var(--color-surface);
   border-radius: var(--radius-lg);
-  padding: 32px;
+  padding: var(--pad-card);
 }
 
 /* The system's one recurring decoration: a solid circle badge holding a
@@ -536,7 +562,7 @@ html[lang='en'] [data-de] {
 .inverse {
   background: var(--color-bg-inverse);
   border-radius: var(--radius-lg);
-  padding: 48px;
+  padding: var(--pad-block);
 }
 
 .inverse__title {
@@ -550,12 +576,12 @@ html[lang='en'] [data-de] {
 .inverse__lead {
   font: 400 17px/1.55 var(--font-ui);
   color: var(--teal-100);
-  margin: 0 0 40px;
+  margin: 0 0 var(--rhythm-heading);
   max-width: 34em;
 }
 
 .inverse .grid-3 {
-  gap: 32px;
+  gap: clamp(32px, 3.2vw, 44px);
 }
 
 .inverse__icon {
@@ -580,7 +606,7 @@ html[lang='en'] [data-de] {
 .evidence__card {
   background: var(--color-surface);
   border-radius: var(--radius-lg);
-  padding: 28px;
+  padding: clamp(28px, 2.6vw, 40px);
 }
 
 .evidence__icon {
@@ -613,10 +639,10 @@ html[lang='en'] [data-de] {
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 32px;
+  gap: clamp(32px, 3.2vw, 44px);
   background: var(--color-surface);
   border-radius: var(--radius-lg);
-  padding: 40px 48px;
+  padding: clamp(40px, 3.6vw, 56px) var(--pad-block);
 }
 
 .cta-band__title {
@@ -640,15 +666,15 @@ html[lang='en'] [data-de] {
 /* ---- Help -------------------------------------------------------------- */
 
 .help {
-  padding-top: 64px;
+  padding-top: clamp(64px, 7vw, 112px);
 }
 
 .help__grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 32px;
+  gap: clamp(32px, 3.2vw, 44px);
   border-top: 1px solid var(--color-border);
-  padding-top: 32px;
+  padding-top: clamp(32px, 3.2vw, 44px);
 }
 
 .help__item {
@@ -689,8 +715,8 @@ html[lang='en'] [data-de] {
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  padding-top: 48px;
-  padding-bottom: 56px;
+  padding-top: clamp(48px, 5vw, 80px);
+  padding-bottom: clamp(56px, 5vw, 80px);
   font: var(--text-ui-body-sm);
   color: var(--color-text-tertiary);
 }
