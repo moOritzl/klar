@@ -6,7 +6,39 @@
 <title>Klar. Ehrlich mitschreiben, ohne aufhören zu müssen.</title>
 <meta name="description" content="Klar ist eine iOS-App, mit der du deinen Konsum siehst, verstehst und verringerst. Kein Konto, kein Server: alles bleibt auf dem Gerät.">
 <meta name="color-scheme" content="light dark">
-<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#F4F6F6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0E1719" media="(prefers-color-scheme: dark)">
+<link rel="canonical" href="https://klar.lenhard.xyz/">
+
+<!-- Icons. The SVG alone was the whole set, and it is the one format Safari
+     will not draw in a tab: it falls back to /favicon.ico, which did not
+     exist, so the page had no icon anywhere in the Apple stack. The .ico
+     carries native 16/32/48 renders rather than one downscaled raster, and
+     the paths are root-absolute because a relative href resolves against the
+     current path, not the site root. -->
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="icon" href="/assets/favicon-192.png" type="image/png" sizes="192x192">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+<!-- Link preview. WhatsApp, Signal, iMessage and Slack all read Open Graph
+     and none of them run JavaScript, so this block is static German — the
+     markup's own default language — and every URL is absolute. A relative
+     og:image is the usual reason a shared link arrives as bare text. -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Klar">
+<meta property="og:url" content="https://klar.lenhard.xyz/">
+<meta property="og:title" content="Ehrlich mitschreiben, ohne aufhören zu müssen.">
+<meta property="og:description" content="Klar ist eine iOS-App, mit der du deinen Konsum siehst, verstehst und verringerst. Kein Konto, kein Server: alles bleibt auf dem Gerät.">
+<meta property="og:image" content="https://klar.lenhard.xyz/assets/og-image.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Klar — ehrlich mitschreiben, ohne aufhören zu müssen. Kein Konto, kein Server, kein Tracking.">
+<meta property="og:locale" content="de_DE">
+<meta property="og:locale:alternate" content="en_US">
+<meta name="twitter:card" content="summary_large_image">
+
 <link rel="stylesheet" href="assets/css/site.css">
 <script>
   /* Paint in the right scheme and language on the first frame. Inline and tiny

@@ -12,7 +12,10 @@ FROM nginx:1.27-alpine
 COPY deploy/nginx.conf            /etc/nginx/conf.d/default.conf
 COPY deploy/security-headers.inc  /etc/nginx/conf.d/security-headers.inc
 
-COPY web/index.html               /usr/share/nginx/html/index.html
-COPY web/assets                   /usr/share/nginx/html/assets
+# web/ is copied whole rather than file by file: favicons live at the site
+# root because browsers probe /favicon.ico and /apple-touch-icon.png by path,
+# and an explicit list quietly drops every root file added after it was
+# written. .dockerignore already keeps the unshipped screenshots out.
+COPY web/                         /usr/share/nginx/html/
 
 EXPOSE 80
