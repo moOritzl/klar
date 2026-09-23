@@ -184,14 +184,11 @@ struct GoalAndPlanStep: View {
                         KlarCard {
                             KlarSectionLabel(text: "Kontingent")
                                 .padding(.bottom, 8)
-                            Text(
-                                remaining > 0
-                                    ? "Noch \(remaining) von \(limit) diesen Monat"
-                                    : "\(limit - remaining) von \(limit) diesen Monat"
-                            )
-                            .font(Klar.TypeScale.headline)
-                            .foregroundStyle(Klar.text)
-                            .padding(.bottom, 10)
+                            let reading = QuotaReading(limit: limit, remaining: remaining)
+                            Text("\(reading.text) diesen Monat")
+                                .font(Klar.TypeScale.headline)
+                                .foregroundStyle(Klar.text)
+                                .padding(.bottom, 10)
 
                             KlarQuotaBar(limit: limit, remaining: remaining)
                         }

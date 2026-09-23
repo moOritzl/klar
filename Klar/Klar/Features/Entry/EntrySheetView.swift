@@ -160,6 +160,7 @@ struct EntrySheetView: View {
         NavigationStack {
             VStack(alignment: .leading, spacing: 0) {
                 KlarCard {
+                    // Same words as the quota card: the count, then the limit it runs against.
                     Text("Eintrag \(occasions) von max. \(limit) diesen Monat.")
                         .font(Klar.TypeScale.body)
                         .foregroundStyle(Klar.text)

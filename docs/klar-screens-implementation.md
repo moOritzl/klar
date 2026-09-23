@@ -71,7 +71,7 @@ IDs below still say Today/Heute; only what the user reads changed.
 
 | Screen | State | Wiring |
 |---|---|---|
-| **B1** Heute (gefüllt) | ✅ | `KlarStore.quotaSubstances()` lists **every** active reduction limit, tightest remaining first. One substance → the large quota card (with the substance named); several → one combined `MultiQuotaCard` with a row + bar per substance. The bar **drains** rather than fills — filled segments are what *remains*. The count is a `QuotaCount`: small „Noch", the number at 28pt with `contentTransition(.numericText())` so it rolls when an entry lands, small „von N". Same wording as before, different weighting. |
+| **B1** Heute (gefüllt) | ✅ | `KlarStore.quotaSubstances()` lists **every** active reduction limit, tightest remaining first. One substance → the large quota card (with the substance named); several → one combined `MultiQuotaCard` with a row + bar per substance. The bar **drains** rather than fills — filled segments are what *remains* — and past the limit it simply stays empty. The count is a `QuotaCount`: the month's real count at 28pt with `contentTransition(.numericText())` so it rolls when an entry lands, then small „von max. N" (`KlarCore.QuotaReading`). It keeps counting past the limit, so it never changes meaning and the month's real number is always on screen. The weekly review, VoiceOver and the C3 notice use the same reading. |
 | **B2** Heute (leerer Tag) | ✅ | "Ein ruhiger Tag." No "Noch nichts geloggt!" — an entry-free day is the calm baseline, not a gap. Asserted in `testOnboardingThenLogFirstEntry`. |
 | **B3** Monatserster | ✅ | The dark "Neuer Monat" card renders when `KlarDate.isFirstOfMonth()` — "Kontingent: N." for one limit, "Kontingente: Alkohol 4 · Nikotin 10." for several. |
 
