@@ -238,8 +238,6 @@ Die Hero-Zeile „Ehrlich mitschreiben, ohne aufhören zu müssen." bleibt, eben
 | Folgerung 2 (statt „Also sind Wenn-Dann-Pläne Kernfunktion, nicht Zusatz.") | Also holt Klar die Morgen danach zurück auf den Bildschirm. | So Klar puts those mornings back on screen. |
 | Grenz-Hinweis | Ehrlich zur Grenze: Die Evidenz stammt vor allem aus Alkohol- und Tabakstudien mit Menschen, die weniger konsumieren wollten. Die Übertragung auf andere Substanzen und auf dich ist eine Annahme, die Klar prüft, kein Versprechen. | Honest about the limit: the evidence comes mostly from alcohol and tobacco studies of people who wanted to cut down. Transfer to other substances, and to you, is a hypothesis Klar tests, not a promise it markets. |
 
-Unabhängig von v3 ist die nachgebaute Übersicht-Karte schon heute veraltet. Sie zeigt „Noch 2 von 4" und „Noch 4 von 6". Seit der Umstellung auf das Hochzählen (`KlarCore.QuotaReading`) müsste dort „2 von max. 4" und „2 von max. 6" stehen.
-
 ---
 
 ## Literaturverzeichnis

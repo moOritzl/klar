@@ -474,7 +474,8 @@ html[lang='en'] [data-de] {
   border: 1.5px solid var(--color-border-strong);
 }
 
-/* Filled means still available, which is why four of six are lit at "Noch 4". */
+/* Filled means still available: with two of six used, four are still lit.
+   The numeral beside them counts up, as in the app (KlarCore.QuotaReading). */
 .quota__pips i.is-left {
   background: var(--color-accent);
   border-color: var(--color-accent);
