@@ -224,8 +224,9 @@ struct TodayView: View {
 
 // MARK: - Quota card
 
-/// The design's core inversion: the headline counts what *remains*, and the bar drains rather
-/// than fills. "Noch 2 von 4" is a budget, not a scorecard.
+/// The headline is the month's real count, „2 von max. 4", so the one number people come for is
+/// always on screen. The bar is the budget and drains rather than fills: filled segments are
+/// what *remains*, and past the limit it simply stays empty. No switch in meaning, no red.
 struct QuotaCard: View {
     let substance: Substance
     let quota: QuotaResult
@@ -335,32 +336,27 @@ struct MultiQuotaRow: View {
     }
 }
 
-/// „Noch **4** von 6" — the count carried by the numeral, the words kept small around it.
+/// „**4** von max. 6" — the count carried by the numeral, the words kept small around it.
 ///
-/// The wording is unchanged and still comes from the same two rules: over the limit it drops
-/// the „Noch" and states the plain fact, and there is no red and no exclamation anywhere in it.
-/// Only the weighting is new, and it is the Health „**1.313** Schritte" treatment: one number
-/// big enough to read without looking, its unit small enough to stay out of the way.
+/// The numeral is always the month's real count (`QuotaReading`) and keeps counting past the
+/// limit, so it never changes meaning. The weighting is the Health „**1.313** Schritte"
+/// treatment: one number big enough to read without looking, its unit small enough to stay out
+/// of the way.
 struct QuotaCount: View {
     let quota: QuotaResult
 
     var body: some View {
-        if let limit = quota.limit, let remaining = quota.remaining {
+        if let reading = Self.reading(for: quota) {
             HStack(alignment: .firstTextBaseline, spacing: 5) {
-                if remaining > 0 {
-                    Text("Noch")
-                        .font(Klar.TypeScale.bodySmall)
-                        .foregroundStyle(Klar.textSecondary)
-                }
-                Text("\(remaining > 0 ? remaining : quota.occasions)")
+                Text("\(reading.count)")
                     .font(Klar.TypeScale.numeral)
                     .foregroundStyle(Klar.text)
                     .contentTransition(.numericText())
-                Text("von \(limit)")
+                Text("von max. \(reading.limit)")
                     .font(Klar.TypeScale.bodySmall)
                     .foregroundStyle(Klar.textSecondary)
             }
-            .animation(.snappy, value: remaining)
+            .animation(.snappy, value: reading)
         } else {
             Text("Nur beobachten")
                 .font(Klar.TypeScale.headline)
@@ -368,16 +364,15 @@ struct QuotaCount: View {
         }
     }
 
-    /// VoiceOver reads the row as one sentence; the visual split into three `Text`s would
-    /// otherwise come out as three separate stops.
+    static func reading(for quota: QuotaResult) -> QuotaReading? {
+        guard let limit = quota.limit, let remaining = quota.remaining else { return nil }
+        return QuotaReading(limit: limit, remaining: remaining)
+    }
+
+    /// VoiceOver reads the row as one sentence; the visual split into two `Text`s would
+    /// otherwise come out as separate stops.
     static func spokenText(for quota: QuotaResult) -> String {
-        guard let limit = quota.limit, let remaining = quota.remaining else {
-            return "Nur beobachten"
-        }
-        if remaining <= 0 {
-            return "\(quota.occasions) von \(limit)"
-        }
-        return "Noch \(remaining) von \(limit)"
+        reading(for: quota)?.text ?? "Nur beobachten"
     }
 }
 

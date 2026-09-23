@@ -13,7 +13,7 @@ halves of a pair show identical data.
 | `01-checkin.png` | Plan check-in (D1) | Fires on launch, for the one entry the dataset leaves unanswered |
 | `02-uebersicht.png` | Übersicht (B1) | Combined quota card headed with the month — two live limits, tightest first, each led by its numeral — plus the active plan and the day's entries |
 | `03-rueckblick-1.png` | Weekly review 1/3 (F1) | "Was war." — the week's counts and the direction against the previous week |
-| `04-rueckblick-2.png` | Weekly review 2/3 (F2) | July landing exactly on its limit: "6 von 6", bar fully drained |
+| `04-rueckblick-2.png` | Weekly review 2/3 (F2) | July landing exactly on its limit: "6 von max. 6", bar fully drained |
 | `05-rueckblick-3.png` | Weekly review 3/3 (F3) | The decision the review always ends in |
 | `06-kalender.png` | Verlauf · Kalender (E1) | A full month: 72 entries, 10 entry-free days |
 | `07-tagesdetail.png` | Tagesdetail (E2) | One day end to end — work coffee, a stress cigarette, three drinks alone, and the note that goes with them |

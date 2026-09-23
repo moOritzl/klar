@@ -52,6 +52,9 @@
     "%@ archivieren" : {
 
     },
+    "%@ diesen Monat" : {
+
+    },
     "%@, %@" : {
       "localizations" : {
         "de" : {
@@ -103,16 +106,6 @@
     },
     "%lld Einträge" : {
 
-    },
-    "%lld von %lld diesen Monat" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$lld von %2$lld diesen Monat"
-          }
-        }
-      }
     },
     "€" : {
 
@@ -541,19 +534,6 @@
     "Neuer Plan" : {
 
     },
-    "Noch" : {
-
-    },
-    "Noch %lld von %lld diesen Monat" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Noch %1$lld von %2$lld diesen Monat"
-          }
-        }
-      }
-    },
     "Noch kein „Warum“ hinterlegt. Du kannst es in den Einstellungen ergänzen. Es steht dann genau hier." : {
 
     },
@@ -746,7 +726,7 @@
     "Vier Sekunden ein, vier halten, vier aus, vier halten." : {
 
     },
-    "von %lld" : {
+    "von max. %lld" : {
 
     },
     "Vor Ort" : {
