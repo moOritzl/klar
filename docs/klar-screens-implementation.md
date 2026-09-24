@@ -3,8 +3,9 @@
 Implements `Klar App Draft.dc.html` from the Claude Design project *Klar iOS App Design*
 (`3914b56a-7154-4644-ab7e-6585381fe30f`). All 33 drafted screens are built.
 
-**Status:** builds clean; 30 unit tests + 5 UI tests pass; every screen below has been driven
-end-to-end in the simulator (`KlarUITests/ScreenshotTests`).
+**Status:** builds clean; 40 KlarCore tests + 54 app unit tests + 7 UI tests (8 runs —
+`testLaunch` covers light and dark) pass; every screen below has been driven end-to-end in the
+simulator (`KlarUITests/ScreenshotTests`).
 
 ---
 
@@ -14,7 +15,7 @@ end-to-end in the simulator (`KlarUITests/ScreenshotTests`).
 |---|---|---|
 | Design tokens | [KlarTheme.swift](../Klar/Klar/DesignSystem/KlarTheme.swift) | 1:1 port of `tokens/{colors,typography,spacing}.css`. Names mirror the CSS custom properties, so one token change in the design maps to one change here. Each semantic alias resolves per trait collection, which is how dark mode stays one line per token. |
 | Shared components | [KlarComponents.swift](../Klar/Klar/DesignSystem/KlarComponents.swift) | Card, buttons, chips, segmented control, quota bar, step dots, flow layout. |
-| Screen scaffold | [KlarScreen.swift](../Klar/Klar/DesignSystem/KlarScreen.swift) | Background, padding, `navigationTitle`/`navigationSubtitle`, and `scrollBounceBehavior(.basedOnSize)`. Used by Verlauf, Pläne and Hilfe. The `NavigationStack` comes from the caller — three of the four tabs already had one for their own links. Heute keeps its own layout (FAB + growing content) and opts into the bounce fix by hand. |
+| Screen scaffold | [KlarScreen.swift](../Klar/Klar/DesignSystem/KlarScreen.swift) | Background, padding, `navigationTitle`/`navigationSubtitle`, and `scrollBounceBehavior(.basedOnSize)`. Used by Verlauf, Grenzen and Hilfe. The `NavigationStack` comes from the caller — three of the four tabs already had one for their own links. Heute keeps its own layout (FAB + growing content) and opts into the bounce fix by hand. |
 | Settings (device) | [AppSettings.swift](../Klar/Klar/App/AppSettings.swift) | UserDefaults. Deliberately **not** SwiftData — device prefs must not land in the data export. |
 | Data access | [KlarStore.swift](../Klar/Klar/App/KlarStore.swift) | The single write path, and the bridge to `KlarCore`'s pure calculators. |
 | Dates | [KlarDate.swift](../Klar/Klar/App/KlarDate.swift) | **05:00 logical-day boundary.** An entry at 02:30 belongs to the night before. Every "today"/"this month" question goes through here. Normalizing is *not* idempotent — a normalized day is 00:00, which is before the cutoff — so a value that already is a logical day must never be fed back in: `entries(onLogicalDayOf:)` takes wall-clock instants, `entries(onLogicalDay:)` takes normalized days. |
@@ -62,16 +63,17 @@ Nothing is written to the store until the final step. Abandoning halfway leaves 
 
 ### B · Übersicht — [TodayView.swift](../Klar/Klar/Features/Today/TodayView.swift)
 
-**The screen is no longer called „Heute".** It leads with a *monthly* quota, carries a standing
-plan under it, and only the third block is about today — so a title promising one day forced the
-quota card to correct it („Diesen Monat") just to be read right. The title is scope-neutral, each
-block names its own timeframe (`AUGUST` on the card, `Di., 11. Aug.` on the „Heute erfasst"
-header), and nothing has to talk its way out of its container. The file, the type and the screen
-IDs below still say Today/Heute; only what the user reads changed.
+**The screen is no longer called „Heute".** It leads with a *monthly* quota, carries the „Der
+Morgen danach" patterns card under it (`MorningPatternsCard`, absent until some substance has
+three answered mornings), and only the third block is about today — so a title promising one day
+forced the quota card to correct it („Diesen Monat") just to be read right. The title is
+scope-neutral, each block names its own timeframe (`AUGUST` on the card, `Di., 11. Aug.` on the
+„Heute erfasst" header), and nothing has to talk its way out of its container. The file, the type
+and the screen IDs below still say Today/Heute; only what the user reads changed.
 
 | Screen | State | Wiring |
 |---|---|---|
-| **B1** Heute (gefüllt) | ✅ | `KlarStore.quotaSubstances()` lists **every** active reduction limit, tightest remaining first. One substance → the large quota card (with the substance named); several → one combined `MultiQuotaCard` with a row + bar per substance. The bar **drains** rather than fills — filled segments are what *remains* — and past the limit it simply stays empty. The count is a `QuotaCount`: the month's real count at 28pt with `contentTransition(.numericText())` so it rolls when an entry lands, then small „von max. N" (`KlarCore.QuotaReading`). It keeps counting past the limit, so it never changes meaning and the month's real number is always on screen. The weekly review, VoiceOver and the C3 notice use the same reading. |
+| **B1** Heute (gefüllt) | ✅ | `KlarStore.quotaSubstances()` lists **every** active reduction limit, tightest remaining first. One substance → the large quota card (with the substance named); several → one combined `MultiQuotaCard` with a row + bar per substance. The bar **drains** rather than fills — filled segments are what *remains* — and past the limit it simply stays empty. The count is a `QuotaCount`: the month's real count at 28pt with `contentTransition(.numericText())` so it rolls when an entry lands, then small „von max. N" (`KlarCore.QuotaReading`). It keeps counting past the limit, so it never changes meaning and the month's real number is always on screen. VoiceOver and the C3 notice use the same reading. |
 | **B2** Heute (leerer Tag) | ✅ | "Ein ruhiger Tag." No "Noch nichts geloggt!" — an entry-free day is the calm baseline, not a gap. Asserted in `testOnboardingThenLogFirstEntry`. |
 | **B3** Monatserster | ✅ | The dark "Neuer Monat" card renders when `KlarDate.isFirstOfMonth()` — "Kontingent: N." for one limit, "Kontingente: Alkohol 4 · Nikotin 10." for several. |
 
@@ -141,12 +143,20 @@ express.
 
 Mood is stored as `Int` (1 / 0 / −1) so the scale can widen later without a migration.
 
-### D · Plan-Check-in — [PlanCheckInView.swift](../Klar/Klar/Features/CheckIn/PlanCheckInView.swift)
+### D · Der Morgen danach — [MorningAfterCardView.swift](../Klar/Klar/Features/MorningAfter/MorningAfterCardView.swift)
 
 | Screen | State | Wiring |
 |---|---|---|
-| **D1** Eine Frage | ✅ | Surfaced by `MainTabView` on foregrounding, from `KlarStore.pendingCheckIn()` → `PlanService.pendingCheckIns`. Fires only for an entry whose logical day is **strictly before today** — a day later, reflection is evaluation, not confrontation. |
-| **D2** Reflexion bei "Nein" | ✅ | Three questions. Answers 1–2 append to the entry's `note` (visible again in the day detail); **answer 3 pre-fills the plan editor**, so the reflection ends in a changed plan rather than in a feeling. |
+| **D1** Die Karte | ✅ | Presented by `MainTabView` (in [RootView.swift](../Klar/Klar/App/RootView.swift)) on launch and again on every return to foreground, from `KlarStore.dueMorningAfterDay()` → `MorningAfterService.dueDayKey`. Due is only ever the **newest** logical day before today that has an entry of an asking substance and no record yet — an older, still-unanswered day is never surfaced once a newer one exists. It expires 48 h after the day ends (05:00 the next calendar day). Three optional three-way questions (Körper, Reue, Nochmal so) plus an optional note, one tap per answer, tapping the selected option again clears it. „Fertig" saves and dismisses; „Überspringen" and swiping the sheet away both call `KlarStore.skipMorningAfter`, which ends that day for good — none of the three ever bring it back. |
+| **D2** Kurz nachdenken | ✅ | [MorningReflectionView.swift](../Klar/Klar/Features/MorningAfter/MorningReflectionView.swift), reached only when „Bereust du etwas von gestern?" is answered „ja". Three optional questions (Auslöser, was hätte geholfen, was nächstes Mal anders); saving calls `KlarStore.recordReflection`. The third answer is stored as that day's `nextTime` and comes back as „Nächstes Mal: …" wherever this substance's pattern is shown. It ends in a note, not a plan — nothing asks later whether it worked. |
+
+Both places that read a pattern back — the Übersicht card and the entry sheet's own line
+(`EntrySheetView.morningPatternLine`) — go through
+[MorningPatternText.swift](../Klar/Klar/App/MorningPatternText.swift): plain counts, no adjective,
+no score (P7, P8). A pattern needs at least three answered mornings for that substance
+(`MorningAfterService.pattern`, newest 5 counted); the entry sheet narrows further, to the first
+selected context tag that has a pattern of its own, and falls back to the substance-wide line when
+none does.
 
 ### E · Verlauf — [HistoryView.swift](../Klar/Klar/Features/History/HistoryView.swift) · [TrendsSectionView.swift](../Klar/Klar/Features/History/TrendsSectionView.swift)
 
@@ -154,45 +164,22 @@ Mood is stored as `Int` (1 / 0 / −1) so the scale can widen later without a mi
 |---|---|---|
 | **E1** Monatskalender | ✅ | Dots per logged logical day; month navigation (future months disabled); "Einträge" / "Eintragsfrei" tiles. |
 | **E2** Tagesdetail | ✅ | Tap any past day. Entries editable + deletable; "Eintrag nachtragen" back-fills at noon of that day. |
-| **E3** Trends | ✅ | Swift Charts line of Ø dose per week; Ø gap; context distribution. When one context clears 50 %, the card offers to **build a plan for exactly that tag** — the bridge into Modul C. |
-| **E4** Rückblick-Archiv | ✅ | Past weeks, newest first, opening a read-only version of F1/F2. |
+| **E3** Trends | ✅ | Swift Charts line of Ø dose per week; Ø gap; context distribution. |
 
-> **Deviation.** The draft's segmented control has two segments (Kalender / Rückblick) but ships a
-> third screen, Trends (E3), with no entry point drawn. A third segment is the smallest change that
-> makes every designed screen reachable.
+> **Deviation.** The draft's segmented control has two segments (Kalender / Rückblick). The weekly
+> review is gone (concept v3), so „Rückblick" never shipped and Trends (E3) takes its place as the
+> second segment instead — the smallest change that makes every remaining designed screen
+> reachable.
 
-### F · Weekly Review — [WeeklyReviewFlowView.swift](../Klar/Klar/Features/Review/WeeklyReviewFlowView.swift)
-
-| Screen | State | Wiring |
-|---|---|---|
-| **F1** Was war | ✅ | Purely descriptive. Numbers from [WeeklyReviewSummary.swift](../Klar/Klar/App/WeeklyReviewSummary.swift). |
-| **F2** Ziel & Plan | ✅ | Quota + plan tally. The plan balance appears **only here**, never on Heute. |
-| **F3** Eine Frage nach vorn | ✅ | Behalten / anpassen / pausieren. "Pausieren" **actually pauses the plans** — a review that changed nothing would be theatre. |
-
-Triggered on launch when the previous week is over and unreviewed *and* the user has entries — a
-review of nothing is noise, not feedback. This feedback layer is not optional: logging without it is
-behaviourally inert (Konzept § 2.1).
-
-### G · Pläne — [PlansView.swift](../Klar/Klar/Features/Plans/PlansView.swift) · [PlanEditorView.swift](../Klar/Klar/Features/Plans/PlanEditorView.swift) · [GoalsView.swift](../Klar/Klar/Features/Plans/GoalsView.swift) · [SubstitutionActionsView.swift](../Klar/Klar/Features/Plans/SubstitutionActionsView.swift)
+### G · Grenzen — [LimitsView.swift](../Klar/Klar/Features/Limits/LimitsView.swift)
 
 | Screen | State | Wiring |
 |---|---|---|
-| **G1** Pläne (aktiv) | ✅ | Per-plan check-in tally. 3-active-plan cap enforced in `PlanService`, surfaced as an alert. |
-| **G2** Pläne (leer) | ✅ | The suggestion card appears only once the user's **own entries** show a dominant context tag (≥ 3 tagged entries). A plan needs knowledge of one's own patterns, so it can't arrive on day 1. |
-| **G3** Plan-Editor | ✅ | Editing **versions** the plan (archives the old one, `supersededBy` → new, fresh commitment date) rather than mutating it. |
-| **G4** Ziele | ✅ | Limit / type / pause. Every change versions the goal — editing a goal must never retroactively rewrite whether a past month was met. |
-| **G5** Ersatzhandlungen | ✅ | Reorder + delete. Same data source as the SOS; order matters (the SOS leads with the first). |
+| **G** Grenzen | ✅ | One `GoalCard` per active substance ([GoalCards.swift](../Klar/Klar/Features/Limits/GoalCards.swift)): limit stepper / Reduktion / Abstinenz / Beobachten, „Ziel pausieren", then a „Morgen danach fragen" toggle (`Substance.asksMorningAfter`, written through `KlarStore.setAsksMorningAfter`) — on by default for every substance except Nikotin, which starts off (`SubstanceCatalog.asksMorningAfterByDefault`). Below the cards: „Substanzen verwalten" (rename, cost basis, archive) and „Ersatzhandlungen" ([SubstitutionActionsView.swift](../Klar/Klar/Features/Limits/SubstitutionActionsView.swift), reorder + delete, same data source as the Craving-SOS — order matters, the SOS leads with the first). |
 
-> **Additions.** (1) The draft draws G4 and G5 with no entry point; they're linked from the bottom of
-> the Pläne tab, which is where the concept says goals belong ("Ziele leben hier, nicht in den
-> Settings"). (2) The draft's "WENN" row shows only tag chips, but the model — and the resulting
-> "Wenn …, dann …" sentence — also needs a situation *phrase*. Picking a tag pre-fills it from a
-> template ([PlanTemplates](../Klar/Klar/Features/Plans/PlanEditorView.swift)); the field stays editable.
-> (3) Both phrases are typed standalone ("Auf einer Party"), so wherever they're read back as one
-> sentence — the plan card, the Check-in, the Plan-Bilanz — they run through
-> [PlanSentence.fragment](../Packages/KlarCore/Sources/KlarCore/PlanSentence.swift), which lowercases
-> the leading word unless it was deliberately capitalised ("AA-Meeting", "U-Bahn"). The Heute-Karte
-> keeps the raw text: it labels the halves WENN / DANN instead of composing them.
+Every change to a goal **versions** it (archives the old `GoalPeriod`, opens a new one from today)
+rather than mutating it in place — editing a goal must never retroactively rewrite whether a past
+month was met.
 
 ### H · Hilfe — [HelpView.swift](../Klar/Klar/Features/Help/HelpView.swift) · [CravingSOSView.swift](../Klar/Klar/Features/Help/CravingSOSView.swift) · [HelpContent.swift](../Klar/Klar/Features/Help/HelpContent.swift)
 
@@ -207,8 +194,9 @@ behaviourally inert (Konzept § 2.1).
 ### I · Einstellungen — [SettingsView.swift](../Klar/Klar/Features/Settings/SettingsView.swift)
 
 ✅ Reached from the gear on Heute, never a tab. Face ID lock (refuses to switch on when the device
-can't honour it), auto-lock delay, substances & costs, "Warum", Vertrauensperson,
-notifications, export/delete.
+can't honour it), auto-lock delay, appearance, the 05:00 day-boundary rule (stated, not a
+setting), substances & costs, "Warum", Vertrauensperson, data (export/delete). No notifications
+row — the app sends none.
 
 ### J · System-Screens
 
@@ -241,12 +229,12 @@ and attributed to BZgA / drugcom / mindzone / Saferparty. **They have not been r
 clinician or lawyer.** For a 17+ German-market app making public-health claims, they should be,
 before submission.
 
-### 3.3 Notifications are minimal
+### 3.3 No notifications
 
-Only a weekly-review reminder (Monday 10:00) is scheduled. Copy is **generic by contract** — no
-notification text may ever name a substance, a dose, or an entry
-([NotificationScheduler](../Klar/Klar/Features/Settings/NotificationScheduler.swift)). Not built: a
-plan-check-in nudge, quota-reset notice. Both are currently surfaced in-app on launch instead.
+Klar schedules none. The weekly-review reminder and the plan-check-in nudge both went with the
+screens that needed them (concept v3, § 1); „Der Morgen danach" is P9's "no push interruption"
+applied to the new core loop, too — it only ever appears in-app, on launch or on returning to the
+foreground, never as a notification.
 
 ### 3.4 Not built, because the draft doesn't draw them
 
@@ -264,9 +252,9 @@ account.
 
 ### 3.6 Strings are inline German
 
-There is no localization catalog work — `Localizable.xcstrings` is essentially untouched (and had an
-uncommitted modification before this change). German-only is the stated MVP scope; if EN is ever in
-scope, the inline literals are the migration cost.
+`Localizable.xcstrings` tracks exactly what's extracted from source — no stale keys, no missing
+ones — but it holds only the German source strings, no other locale. German-only is the stated
+MVP scope; if EN is ever in scope, translating that catalog is the migration cost.
 
 ---
 

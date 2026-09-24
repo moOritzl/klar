@@ -4,56 +4,21 @@
     "" : {
 
     },
-    "—" : {
-
-    },
-    "„%@“" : {
-
-    },
-    "„%@“ archivieren?" : {
-
-    },
-    "„%@“ entfernen" : {
-
-    },
-    "„Wenn %@, dann %@.“" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "„Wenn %1$@, dann %2$@.“"
-          }
-        }
-      }
-    },
-    "„Wenn %@, dann %@“" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "„Wenn %1$@, dann %2$@“"
-          }
-        }
-      }
-    },
     "%@" : {
 
-    },
-    "%@ %@" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@ %2$@"
-          }
-        }
-      }
     },
     "%@ archivieren" : {
 
     },
-    "%@ diesen Monat" : {
-
+    "%@ · %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ · %2$@"
+          }
+        }
+      }
     },
     "%@, %@" : {
       "localizations" : {
@@ -78,36 +43,13 @@
     "%lld" : {
 
     },
-    "%lld · " : {
-
-    },
     "%lld %%" : {
 
-    },
-    "%lld %% deiner %@-Einträge tragen den Tag „%@“. Plan dafür bauen?" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$lld %% deiner %2$@-Einträge tragen den Tag „%3$@“. Plan dafür bauen?"
-          }
-        }
-      }
-    },
-    "%lld %% deiner Einträge tragen den Tag „%@“. Möchtest du dafür einen Plan?" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$lld %% deiner Einträge tragen den Tag „%2$@“. Möchtest du dafür einen Plan?"
-          }
-        }
-      }
     },
     "%lld Einträge" : {
 
     },
-    "€" : {
+    "%lld · " : {
 
     },
     "1 Eintrag" : {
@@ -161,13 +103,13 @@
     "Bearbeiten" : {
 
     },
-    "Benachrichtigungen" : {
-
-    },
     "Beratung" : {
 
     },
     "Beratungsstellen in deiner Stadt. Offiziell gepflegt, laufend aktuell." : {
+
+    },
+    "Bereust du etwas von gestern?" : {
 
     },
     "Bestehende Einträge bleiben erhalten. Die Substanz verschwindet nur aus der Auswahl." : {
@@ -183,12 +125,6 @@
 
     },
     "Craving-SOS. Ein Tap. Die App führt dich." : {
-
-    },
-    "DANN" : {
-
-    },
-    "Dann … (Handlung: Vorlage, frei editierbar)" : {
 
     },
     "Darstellung" : {
@@ -209,21 +145,6 @@
     "Dein „Warum“" : {
 
     },
-    "Dein Archiv." : {
-
-    },
-    "Dein Plan" : {
-
-    },
-    "Dein Plan für „%@“" : {
-
-    },
-    "Dein Plan für nächste Woche." : {
-
-    },
-    "Dein Wochenrückblick ist da." : {
-
-    },
     "Deine Daten" : {
 
     },
@@ -236,6 +157,9 @@
     "Der Export enthält deine Einträge, Ziele, Pläne und Notizen. Er enthält keine Gerätedaten: Face-ID-Einstellung und Vertrauensperson bleiben auf diesem Gerät." : {
 
     },
+    "Der Morgen danach" : {
+
+    },
     "Der Weg zu Menschen ist immer einen Tap entfernt." : {
 
     },
@@ -245,28 +169,19 @@
     "Diese Woche" : {
 
     },
-    "Dieses Gefühl geht vorbei. Du hast einen Plan." : {
+    "Dieses Gefühl geht vorbei." : {
 
     },
     "Dosis (optional)" : {
 
     },
-    "Eigene hinzufügen" : {
-
-    },
     "Eigene Substanz" : {
 
     },
+    "Eigene hinzufügen" : {
+
+    },
     "Ein Eintrag um 2 Uhr zählt zum Vortag." : {
-
-    },
-    "Ein guter Plan braucht Kenntnis der eigenen Muster. Er entsteht, wenn deine Einträge etwas zeigen." : {
-
-    },
-    "Ein Plan entsteht aus deinen Mustern." : {
-
-    },
-    "Ein ruhiger Tag." : {
 
     },
     "Ein Tag läuft von 5 Uhr bis 5 Uhr" : {
@@ -275,10 +190,10 @@
     "Ein Tap. Die App führt dich." : {
 
     },
-    "Eine eintragsfreie Woche." : {
+    "Ein ruhiger Tag." : {
 
     },
-    "Eine Frage nach vorn." : {
+    "Eine kurze Karte am Morgen nach einem Tag mit Einträgen" : {
 
     },
     "Einheit" : {
@@ -315,6 +230,9 @@
     "Eintrag nachtragen" : {
 
     },
+    "Eintragsfrei" : {
+
+    },
     "Einträge" : {
 
     },
@@ -322,9 +240,6 @@
 
     },
     "Einträge, Ziele, Pläne und Notizen werden entfernt. Das lässt sich nicht rückgängig machen." : {
-
-    },
-    "Eintragsfrei" : {
 
     },
     "Endgültig löschen" : {
@@ -388,13 +303,13 @@
     "Export" : {
 
     },
+    "Face ID Sperre" : {
+
+    },
     "Face ID einrichten" : {
 
     },
     "Face ID nicht verfügbar" : {
-
-    },
-    "Face ID Sperre" : {
 
     },
     "Fertig" : {
@@ -406,19 +321,13 @@
     "Gefahrenvermeidung mit Quellen. Keine Dosisempfehlungen, keine Wirkoptimierung." : {
 
     },
-    "Generische Texte, nie Substanznamen" : {
-
-    },
     "Genutzt im Craving-SOS" : {
 
     },
     "Gespeichert." : {
 
     },
-    "Handlung beschreiben …" : {
-
-    },
-    "Hat dein Plan geholfen?" : {
+    "Grenzen" : {
 
     },
     "Heute erfasst" : {
@@ -444,13 +353,13 @@
         }
       }
     },
-    "Ja, hat geholfen" : {
-
-    },
     "JSON importieren" : {
 
     },
     "JSON teilen" : {
+
+    },
+    "KLAR" : {
 
     },
     "Kein Account. Keine Registrierung. Kein Server. Nichts, was kompromittiert werden könnte. Deine Ehrlichkeit gehört nur dir." : {
@@ -459,13 +368,7 @@
     "Kein Limit gesetzt." : {
 
     },
-    "Kein Vergleich, keine Norm. Nur, was dein Plan diese Woche getan hat." : {
-
-    },
     "Kein Ziel am Tag 1 nötig. „Nur beobachten“ ist Stufe 1." : {
-
-    },
-    "KLAR" : {
 
     },
     "Klar – Debug" : {
@@ -477,10 +380,10 @@
     "Kontextverteilung" : {
 
     },
-    "Kontingent" : {
+    "Kosten je %@" : {
 
     },
-    "Kosten je %@" : {
+    "Kurz drüber nachdenken" : {
 
     },
     "Kurz nachdenken" : {
@@ -489,19 +392,10 @@
     "Limit / Monat" : {
 
     },
-    "Limit anpassen, Zieltyp wechseln" : {
-
-    },
     "Local-first. Kein Account, kein Server, nichts zu kompromittieren." : {
 
     },
     "Löschen" : {
-
-    },
-    "Max. 3 aktive Pläne." : {
-
-    },
-    "Max. 3 aktive Pläne. Pausiere einen bestehenden Plan, um Platz zu schaffen." : {
 
     },
     "Mit Face ID entsperren" : {
@@ -510,16 +404,13 @@
     "Mit Face ID sichern" : {
 
     },
+    "Morgen danach fragen" : {
+
+    },
     "Nachschlagewerk, kein Startpunkt" : {
 
     },
-    "Nächster Monat" : {
-
-    },
     "Name" : {
-
-    },
-    "Nein" : {
 
     },
     "Neue Alternative" : {
@@ -531,25 +422,13 @@
     "Neuer Monat" : {
 
     },
-    "Neuer Plan" : {
-
-    },
     "Noch kein „Warum“ hinterlegt. Du kannst es in den Einstellungen ergänzen. Es steht dann genau hier." : {
-
-    },
-    "Noch kein aktiver Plan. Die Bilanz erscheint, sobald einer läuft." : {
-
-    },
-    "Noch kein Plan." : {
-
-    },
-    "Noch keine abgeschlossene Woche. Der erste Rückblick kommt, sobald eine Woche mit Einträgen vorbei ist." : {
 
     },
     "Noch keine Ersatzhandlungen hinterlegt. Du kannst sie unter Pläne → Ersatzhandlungen ergänzen." : {
 
     },
-    "Noch keine Kontext-Tags erfasst. Sie sind optional und der Rohstoff für deine Pläne." : {
+    "Noch keine Kontext-Tags erfasst. Sie sind optional." : {
 
     },
     "Noch keine Substanz ausgewählt." : {
@@ -564,6 +443,12 @@
     "Notfallsymptome" : {
 
     },
+    "Notiz (optional)" : {
+
+    },
+    "Notiz hinzufügen" : {
+
+    },
     "Notruf 112 anrufen" : {
 
     },
@@ -573,46 +458,16 @@
     "Nur beobachten" : {
 
     },
-    "Ø Abstand" : {
+    "Nächster Monat" : {
 
     },
-    "Ø Dosis" : {
-
-    },
-    "Ø Dosis %@" : {
-
-    },
-    "Ø Dosis über Zeit" : {
+    "Nächstes Mal: %@" : {
 
     },
     "OK" : {
 
     },
     "Pausiert" : {
-
-    },
-    "Plan anpassen" : {
-
-    },
-    "Plan bearbeiten" : {
-
-    },
-    "Plan festlegen" : {
-
-    },
-    "Plan für „%@“ bauen" : {
-
-    },
-    "Plan pausieren" : {
-
-    },
-    "Plan trotzdem selbst anlegen" : {
-
-    },
-    "Plan-Bilanz der Woche" : {
-
-    },
-    "Pläne" : {
 
     },
     "Privatsphäre & Sicherheit" : {
@@ -630,19 +485,13 @@
     "Risiko-Infos" : {
 
     },
-    "Rückblick abschließen" : {
-
-    },
     "Schließen" : {
-
-    },
-    "Schon 3 aktive Pläne" : {
 
     },
     "Sichern" : {
 
     },
-    "Situation beschreiben …" : {
+    "Speichern" : {
 
     },
     "Später" : {
@@ -699,16 +548,13 @@
     "Tippen genügt. Details kannst du später ergänzen." : {
 
     },
-    "Übersicht" : {
-
-    },
-    "Überspringbar" : {
+    "URGE-SURFING" : {
 
     },
     "Unbekannte Schemaversion: %lld" : {
 
     },
-    "URGE-SURFING" : {
+    "VORBEI" : {
 
     },
     "Verlauf" : {
@@ -726,43 +572,28 @@
     "Vier Sekunden ein, vier halten, vier aus, vier halten." : {
 
     },
-    "von max. %lld" : {
-
-    },
     "Vor Ort" : {
-
-    },
-    "VORBEI" : {
-
-    },
-    "Vorgenommen am" : {
-
-    },
-    "Vorgenommen am %@" : {
 
     },
     "Vorheriger Monat" : {
 
     },
-    "Vorschlag aus deinen Einträgen" : {
+    "Warnzeichen erkennen" : {
 
     },
     "Warnzeichen · Erste Hilfe · 112" : {
 
     },
-    "Warnzeichen erkennen" : {
-
-    },
-    "Was änderst du am Plan?" : {
+    "Was hilft dir im Moment?" : {
 
     },
     "Was hätte geholfen?" : {
 
     },
-    "Was hilft dir im Moment?" : {
+    "Was ist dein Ziel?" : {
 
     },
-    "Was ist dein Ziel?" : {
+    "Was machst du nächstes Mal anders?" : {
 
     },
     "Was möchtest du erfassen?" : {
@@ -774,30 +605,14 @@
     "Was war los?" : {
 
     },
-    "Was war." : {
-
-    },
     "Weiter" : {
 
     },
     "Weitere hinzufügen" : {
 
     },
-    "WENN" : {
+    "Wie geht's dir heute körperlich?" : {
 
-    },
-    "Wenn … (Situation aus deinen Tags)" : {
-
-    },
-    "Wenn %@, dann %@" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Wenn %1$@, dann %2$@"
-          }
-        }
-      }
     },
     "Wird nur auf diesem Gerät gespeichert und nicht exportiert. Im Craving-SOS genügt ein Tap." : {
 
@@ -808,28 +623,13 @@
     "Woche" : {
 
     },
-    "Wochenrückblicke" : {
-
-    },
-    "z. B. Ich will die Wochenenden wieder klar erleben." : {
-
-    },
-    "z. B. Jonas anrufen" : {
+    "Würdest du es wieder so machen?" : {
 
     },
     "Zeitpunkt" : {
 
     },
-    "Ziel" : {
-
-    },
-    "Ziel & Plan." : {
-
-    },
     "Ziel pausieren" : {
-
-    },
-    "Ziele" : {
 
     },
     "Zieltyp wechseln oder fortsetzen." : {
@@ -839,6 +639,48 @@
 
     },
     "Zu wenig Einträge für einen Verlauf. Ab zwei Wochen mit Einträgen zeigt sich hier eine Linie." : {
+
+    },
+    "von max. %lld" : {
+
+    },
+    "z. B. Ich will die Wochenenden wieder klar erleben." : {
+
+    },
+    "z. B. Jonas anrufen" : {
+
+    },
+    "Ø Abstand" : {
+
+    },
+    "Ø Dosis" : {
+
+    },
+    "Ø Dosis über Zeit" : {
+
+    },
+    "Übersicht" : {
+
+    },
+    "Überspringbar" : {
+
+    },
+    "Überspringen" : {
+
+    },
+    "—" : {
+
+    },
+    "„%@“" : {
+
+    },
+    "„%@“ archivieren?" : {
+
+    },
+    "„%@“ entfernen" : {
+
+    },
+    "€" : {
 
     }
   },

@@ -130,4 +130,16 @@ final class ScreenshotTests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Einstellungen"].waitForExistence(timeout: 5))
         capture(app, "I1-Einstellungen")
     }
+
+    @MainActor
+    func testCaptureMorningAfter() throws {
+        let app = XCUIApplication()
+        app.launchArguments = ["--klar-uitest-seed-yesterday"]
+        app.launch()
+
+        XCTAssertTrue(app.staticTexts["morningAfter.header"].waitForExistence(timeout: 10))
+        capture(app, "D-Morgen-danach")
+        app.buttons["ja"].firstMatch.tap()
+        capture(app, "D-Morgen-danach-bereut")
+    }
 }
