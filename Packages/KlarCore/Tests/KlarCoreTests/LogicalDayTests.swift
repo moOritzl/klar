@@ -86,4 +86,32 @@ final class LogicalDayTests: XCTestCase {
             cursor = cursor.addingTimeInterval(15 * 60)
         }
     }
+
+    func testDayKeyFollowsTheFiveAMCutoff() {
+        XCTAssertEqual(LogicalDay.dayKey(for: date(2026, 9, 20, 2, 30, timezoneID: "Europe/Berlin"), timezoneID: "Europe/Berlin"), "2026-09-19")
+        XCTAssertEqual(LogicalDay.dayKey(for: date(2026, 9, 20, 5, 0, timezoneID: "Europe/Berlin"), timezoneID: "Europe/Berlin"), "2026-09-20")
+    }
+
+    /// Keys are compared as strings everywhere, which only works with zero padding.
+    func testDayKeyIsZeroPaddedSoItSortsAsAString() {
+        let key = LogicalDay.dayKey(for: date(2026, 1, 5, 12, 0, timezoneID: "Europe/Berlin"), timezoneID: "Europe/Berlin")
+        XCTAssertEqual(key, "2026-01-05")
+        XCTAssertLessThan("2026-01-05", "2026-01-15")
+    }
+
+    func testDayKeyReadsTheInstantInTheGivenTimezone() {
+        let instant = date(2026, 9, 20, 3, 0, timezoneID: "Europe/Berlin") // 21:00 the day before in New York
+        XCTAssertEqual(LogicalDay.dayKey(for: instant, timezoneID: "Europe/Berlin"), "2026-09-19")
+        XCTAssertEqual(LogicalDay.dayKey(for: instant, timezoneID: "America/New_York"), "2026-09-19")
+        let later = date(2026, 9, 20, 12, 0, timezoneID: "Europe/Berlin") // 06:00 in New York
+        XCTAssertEqual(LogicalDay.dayKey(for: later, timezoneID: "America/New_York"), "2026-09-20")
+    }
+
+    func testEndOfDayKeyIsFiveAMTheNextCalendarDay() {
+        XCTAssertEqual(
+            LogicalDay.end(ofDayKey: "2026-09-19", timezoneID: "Europe/Berlin"),
+            date(2026, 9, 20, 5, 0, timezoneID: "Europe/Berlin")
+        )
+        XCTAssertNil(LogicalDay.end(ofDayKey: "kein Datum", timezoneID: "Europe/Berlin"))
+    }
 }
