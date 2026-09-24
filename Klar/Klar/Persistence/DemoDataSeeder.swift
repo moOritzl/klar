@@ -66,7 +66,9 @@ enum DemoDataSeeder {
         }
 
         // Answer most past alcohol evenings, so Übersicht and the entry sheet have a pattern.
-        // The newest one stays open: that is the card the demo shows on launch.
+        // The newest one is left unanswered on purpose, to exercise the "never asked about an
+        // older day once it's no longer the newest" path — it is ~8 days old here, past the 48 h
+        // expiry, so no card shows on launch. Launch with --klar-uitest-seed-yesterday to see one.
         let alcoholDays = Set(
             try context.fetch(FetchDescriptor<Entry>())
                 .filter { $0.substance?.id == alcohol.id }

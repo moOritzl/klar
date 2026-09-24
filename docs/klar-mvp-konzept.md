@@ -215,7 +215,7 @@ Diese Texte werden eingesetzt, **sobald Modul C gebaut und die Pläne aus der Ap
 
 **„What it does"** (ersetzt den Absatz):
 
-> Entry logging with context tags, a morning-after check-in, per-substance monthly limits that count up, a three-step weekly review, calendar and trend history, behaviour substitution prompts, and a craving SOS screen with attributed content from established organisations.
+> Entry logging with context tags, a morning-after check-in, per-substance monthly limits that count up, calendar and trend history, behaviour substitution prompts, and a craving SOS screen with attributed content from established organisations.
 
 **„Limitations"**, neuer zweiter Satz nach dem ersten:
 

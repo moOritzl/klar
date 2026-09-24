@@ -334,8 +334,8 @@ struct KlarStore {
             }
     }
 
-    /// The single substance surfaces with room for only one quota (weekly review) lead with:
-    /// the one with the tightest remaining allowance.
+    /// The substance a surface with room for only one quota (the Übersicht quota card) leads
+    /// with: the one with the tightest remaining allowance.
     func primaryQuotaSubstance() -> Substance? {
         quotaSubstances().first?.substance
     }

@@ -25,7 +25,7 @@ final class MorningAfterUITests: XCTestCase {
         XCTAssertFalse(relaunched.staticTexts["morningAfter.header"].waitForExistence(timeout: 3))
     }
 
-    /// Swiping the card away counts as a skip.
+    /// Tapping „Überspringen" counts as a skip and the card does not come back.
     @MainActor
     func testSkippingAlsoEndsTheQuestion() throws {
         let app = XCUIApplication()

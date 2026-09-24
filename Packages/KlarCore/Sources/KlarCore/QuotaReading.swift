@@ -17,7 +17,6 @@ public struct QuotaReading: Sendable, Equatable {
         self.count = max(limit - remaining, 0)
     }
 
-    /// The whole reading as one line — the card splits it for weighting, VoiceOver and the
-    /// weekly review use it as is.
+    /// The whole reading as one line — the card splits it for weighting, VoiceOver uses it as is.
     public var text: String { "\(count) von max. \(limit)" }
 }

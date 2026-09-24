@@ -35,7 +35,7 @@ final class DemoDataSeederTests: XCTestCase {
 
         XCTAssertFalse(
             recordedDayKeys.contains(newestAlcoholDay),
-            "the newest alcohol evening must stay open, so it is the card the demo shows on launch"
+            "the newest alcohol evening must stay open, to exercise the never-asked-about-an-older-day path"
         )
     }
 }

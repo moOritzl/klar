@@ -5,7 +5,7 @@ import SwiftData
 /// Boots the app straight into a populated, already-onboarded state.
 ///
 /// Marketing and documentation screenshots need screens that only exist once
-/// there is history behind them — the weekly review spans months, which is not
+/// there is history behind them — weeks of trend data, which is not
 /// something you can tap in by hand. Passing `--klar-demo-seed` wipes the
 /// store, seeds `DemoDataSeeder`'s neutral sample data (Kaffee, Alkohol,
 /// Nikotin) and skips onboarding.

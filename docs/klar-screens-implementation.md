@@ -1,7 +1,9 @@
 # Klar — Screen-by-Screen Implementation
 
 Implements `Klar App Draft.dc.html` from the Claude Design project *Klar iOS App Design*
-(`3914b56a-7154-4644-ab7e-6585381fe30f`). All 33 drafted screens are built.
+(`3914b56a-7154-4644-ab7e-6585381fe30f`). Plan-Check-in (D), the Weekly Review (F), the
+Rückblick-Archiv (E4) and the Pläne screens (G1–G3) were removed in v3 — Der Morgen danach and
+Grenzen below now use those letters instead. Every other drafted screen is built.
 
 **Status:** builds clean; 40 KlarCore tests + 54 app unit tests + 7 UI tests (8 runs —
 `testLaunch` covers light and dark) pass; every screen below has been driven end-to-end in the
@@ -148,7 +150,7 @@ Mood is stored as `Int` (1 / 0 / −1) so the scale can widen later without a mi
 | Screen | State | Wiring |
 |---|---|---|
 | **D1** Die Karte | ✅ | Presented by `MainTabView` (in [RootView.swift](../Klar/Klar/App/RootView.swift)) on launch and again on every return to foreground, from `KlarStore.dueMorningAfterDay()` → `MorningAfterService.dueDayKey`. Due is only ever the **newest** logical day before today that has an entry of an asking substance and no record yet — an older, still-unanswered day is never surfaced once a newer one exists. It expires 48 h after the day ends (05:00 the next calendar day). Three optional three-way questions (Körper, Reue, Nochmal so) plus an optional note, one tap per answer, tapping the selected option again clears it. „Fertig" saves and dismisses; „Überspringen" and swiping the sheet away both call `KlarStore.skipMorningAfter`, which ends that day for good — none of the three ever bring it back. |
-| **D2** Kurz nachdenken | ✅ | [MorningReflectionView.swift](../Klar/Klar/Features/MorningAfter/MorningReflectionView.swift), reached only when „Bereust du etwas von gestern?" is answered „ja". Three optional questions (Auslöser, was hätte geholfen, was nächstes Mal anders); saving calls `KlarStore.recordReflection`. The third answer is stored as that day's `nextTime` and comes back as „Nächstes Mal: …" wherever this substance's pattern is shown. It ends in a note, not a plan — nothing asks later whether it worked. |
+| **D2** Kurz nachdenken | ✅ | [MorningReflectionView.swift](../Klar/Klar/Features/MorningAfter/MorningReflectionView.swift), reached only when „Bereust du etwas von gestern?" is answered „ja". Three optional questions (Auslöser, was hätte geholfen, was nächstes Mal anders); saving calls `KlarStore.recordReflection`. The third answer is stored as that day's `nextTime` and comes back as „Nächstes Mal: …" only on the Übersicht card ([MorningPatternsCard.swift](../Klar/Klar/Features/MorningAfter/MorningPatternsCard.swift)), not in the entry sheet's shorter line. It ends in a note, not a plan — nothing asks later whether it worked. |
 
 Both places that read a pattern back — the Übersicht card and the entry sheet's own line
 (`EntrySheetView.morningPatternLine`) — go through
@@ -168,10 +170,10 @@ records stay and the pattern reappears if the substance is switched back on.
 | **E2** Tagesdetail | ✅ | Tap any past day. Entries editable + deletable; "Eintrag nachtragen" back-fills at noon of that day. |
 | **E3** Trends | ✅ | Swift Charts line of Ø dose per week; Ø gap; context distribution. |
 
-> **Deviation.** The draft's segmented control has two segments (Kalender / Rückblick). The weekly
-> review is gone (concept v3), so „Rückblick" never shipped and Trends (E3) takes its place as the
-> second segment instead — the smallest change that makes every remaining designed screen
-> reachable.
+> **Deviation.** The draft's segmented control has two segments (Kalender / Rückblick). E4
+> Rückblick-Archiv shipped and was removed in v3 along with the weekly review it archived; Trends
+> (E3) takes its place as the second segment instead — the smallest change that makes every
+> remaining designed screen reachable.
 
 ### G · Grenzen — [LimitsView.swift](../Klar/Klar/Features/Limits/LimitsView.swift)
 

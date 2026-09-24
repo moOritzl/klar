@@ -35,16 +35,15 @@ are one tap away in Grenzen.
 
 Alcohol steps down from ~11 occasions a month to 6, and the average per occasion
 from ~4.9 drinks to ~2. Nicotine follows more slowly. The trend chart in E3 shows
-that decline, and the weekly review compares each week only against the user's own
-previous one.
+that decline.
 
 | | |
 |---|---|
-| Entries | 521 across 21 weeks |
+| Entries | 491 across 21 weeks |
 | Day boundary | Club nights run past midnight and stay on the evening they started (05:00 cutoff) |
 | Entry-free days | 6–10 per month, so the calendar has gaps to show |
 | Context tags | The four built-ins plus Feierabend, Stress, Arbeit, Wochenende |
-| Optional fields | 20 entries carry a note, 188 a mood, 124 no context at all |
+| Optional fields | 18 entries carry a note, 152 a mood, 120 no context at all |
 | Der Morgen danach | ~70 % of past alcohol evenings answered, the rest skipped, **the newest left open** |
 | Goals | 6 periods; alcohol is versioned three times |
 
