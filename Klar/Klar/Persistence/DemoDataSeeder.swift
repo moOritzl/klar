@@ -21,7 +21,6 @@ enum DemoDataSeeder {
         let zuhause = tags.first { $0.name == "Zuhause" }
         let allein = tags.first { $0.name == "Allein" }
         let club = tags.first { $0.name == "Club" }
-        let sozial = tags.first { $0.name == "Sozial" }
 
         let periodStart = calendar.date(byAdding: .month, value: -3, to: now)!
 
@@ -30,32 +29,6 @@ enum DemoDataSeeder {
         context.insert(GoalPeriod(substance: alcohol, type: .reduction, monthlyLimit: 10, validFrom: periodStart, validUntil: changeDate))
         context.insert(GoalPeriod(substance: alcohol, type: .reduction, monthlyLimit: 6, validFrom: changeDate, validUntil: nil))
         context.insert(GoalPeriod(substance: coffee, type: .observe, monthlyLimit: nil, validFrom: periodStart, validUntil: nil))
-
-        // Two plans; the party plan has been revised once (superseded predecessor + current version).
-        let originalPartyPlan = Plan(
-            situationTag: sozial,
-            situationText: "Auf einer Party",
-            actionText: "Erst ein Wasser bestellen",
-            committedAt: calendar.date(byAdding: .month, value: -2, to: now)!,
-            status: .archived
-        )
-        context.insert(originalPartyPlan)
-        let revisedPartyPlan = Plan(
-            situationTag: sozial,
-            situationText: "Auf einer Party",
-            actionText: "Alkoholfreies Bier statt Bier",
-            committedAt: calendar.date(byAdding: .weekOfYear, value: -2, to: now)!,
-            status: .active
-        )
-        context.insert(revisedPartyPlan)
-        originalPartyPlan.supersededBy = revisedPartyPlan.id
-
-        context.insert(Plan(
-            situationTag: allein,
-            situationText: "Abends allein zuhause",
-            actionText: "Tee statt Kaffee nach 18 Uhr",
-            status: .active
-        ))
 
         func insertEntry(_ substance: Substance, day: Date, hour: Int, minute: Int = 0, tag: ContextTag?) {
             let timestamp = calendar.date(bySettingHour: hour, minute: minute, second: 0, of: day) ?? day

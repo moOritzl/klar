@@ -9,8 +9,6 @@ enum ModelContainerFactory {
         Entry.self,
         ContextTag.self,
         GoalPeriod.self,
-        Plan.self,
-        PlanCheckIn.self,
         SubstitutionAction.self,
         WhyNote.self
     ])

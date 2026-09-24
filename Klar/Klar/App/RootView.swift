@@ -2,7 +2,7 @@ import SwiftUI
 import SwiftData
 
 enum KlarTab: Hashable {
-    case today, history, plans, help
+    case today, history, limits, help
 }
 
 /// The app shell. Gates, in priority order:
@@ -61,9 +61,6 @@ struct MainTabView: View {
     @Binding var selectedTab: KlarTab
     @Environment(\.modelContext) private var modelContext
 
-    /// The plan check-in (D1) is the one moment the app speaks unprompted. It is presented here,
-    /// on top of the tabs, so it can't be swallowed by whichever tab happens to be showing.
-    @State private var pendingCheckIn: PendingCheckIn?
     /// Lives here rather than in `TodayView` because the button that sets it does too — the
     /// bottom accessory is a property of the `TabView`, not of any one tab.
     @State private var isEntrySheetPresented = false
@@ -75,7 +72,7 @@ struct MainTabView: View {
             // The tab label matches the screen's `navigationTitle`, as it does in every
             // first-party app. The case stays `.today` — the file, the screen IDs (B1–B3) and
             // the docs all still call this the Heute screen; only what the user reads changed.
-            TodayView(selectedTab: $selectedTab)
+            TodayView()
                 .tabItem { Label("Übersicht", systemImage: "house") }
                 .tag(KlarTab.today)
 
@@ -83,9 +80,9 @@ struct MainTabView: View {
                 .tabItem { Label("Verlauf", systemImage: "chart.bar") }
                 .tag(KlarTab.history)
 
-            PlansView()
-                .tabItem { Label("Pläne", systemImage: "checkmark.circle") }
-                .tag(KlarTab.plans)
+            LimitsView()
+                .tabItem { Label("Grenzen", systemImage: "gauge.with.dots.needle.33percent") }
+                .tag(KlarTab.limits)
 
             HelpView()
                 .tabItem { Label("Hilfe", systemImage: "lifepreserver") }
@@ -99,31 +96,10 @@ struct MainTabView: View {
         }
         // No `tabBarMinimizeBehavior`. It was tried and it strands the user: once the bar has
         // minimized, scrolling back to the top does not bring it back on these screens, and three
-        // of the four tabs are simply gone. Trading permanent access to Verlauf, Pläne and Hilfe
+        // of the four tabs are simply gone. Trading permanent access to Verlauf, Grenzen and Hilfe
         // for a bit of scroll polish is not a trade worth making on a four-tab app.
         .sheet(isPresented: $isEntrySheetPresented) {
             EntrySheetView()
         }
-        .sheet(item: $pendingCheckIn) { pending in
-            PlanCheckInView(plan: pending.plan, entry: pending.entry)
-                .presentationBackground(.clear)
-        }
-        .task {
-            await presentDueMoments()
-        }
     }
-
-    /// Runs once per foregrounding.
-    private func presentDueMoments() async {
-        if let pending = store.pendingCheckIn() {
-            pendingCheckIn = PendingCheckIn(plan: pending.plan, entry: pending.entry)
-        }
-    }
-}
-
-/// `sheet(item:)` needs a single Identifiable payload.
-struct PendingCheckIn: Identifiable {
-    let plan: Plan
-    let entry: Entry
-    var id: UUID { entry.id }
 }

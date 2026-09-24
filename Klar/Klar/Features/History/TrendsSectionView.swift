@@ -4,17 +4,12 @@ import Charts
 import KlarCore
 
 /// E3 · Trends je Substanz.
-///
-/// The context distribution is the bridge into Modul C: once "70 % deiner MDMA-Einträge tragen
-/// den Tag ‚Club'" is on screen, the plan practically writes itself — so the card ends by
-/// offering to build exactly that plan.
 struct TrendsSectionView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var substances: [Substance]
     @Query private var entries: [Entry]
 
     @State private var selectedSubstanceID: UUID?
-    @State private var planTagSeed: ContextTag?
 
     private var store: KlarStore { KlarStore(context: modelContext) }
 
@@ -45,18 +40,13 @@ struct TrendsSectionView: View {
                             substance: substance,
                             summary: summary,
                             tags: store.allContextTags()
-                        ) { tag in
-                            planTagSeed = tag
-                        }
+                        )
                     }
                 }
             }
             .padding(.bottom, 24)
         }
         .scrollIndicators(.hidden)
-        .sheet(item: $planTagSeed) { tag in
-            PlanEditorView(existingPlan: nil, prefilledSituationTag: tag)
-        }
     }
 
     private var substanceFilter: some View {
@@ -215,7 +205,6 @@ struct ContextDistributionCard: View {
     let substance: Substance
     let summary: StatsSummary
     let tags: [ContextTag]
-    let onBuildPlan: (ContextTag) -> Void
 
     private var distribution: [(tag: ContextTag, count: Int, share: Double)] {
         let total = summary.contextTagDistribution.values.reduce(0, +)
@@ -226,11 +215,6 @@ struct ContextDistributionCard: View {
                 return (tag, count, Double(count) / Double(total))
             }
             .sorted { $0.2 > $1.2 }
-    }
-
-    private var dominant: (tag: ContextTag, count: Int, share: Double)? {
-        // Only surface a plan suggestion once one context clearly dominates.
-        distribution.first.flatMap { $0.share >= 0.5 ? $0 : nil }
     }
 
     private let barColors: [Color] = [
@@ -246,7 +230,7 @@ struct ContextDistributionCard: View {
                 .padding(.bottom, 14)
 
             if distribution.isEmpty {
-                Text("Noch keine Kontext-Tags erfasst. Sie sind optional und der Rohstoff für deine Pläne.")
+                Text("Noch keine Kontext-Tags erfasst. Sie sind optional.")
                     .font(Klar.TypeScale.bodySmall)
                     .foregroundStyle(Klar.textTertiary)
             } else {
@@ -267,24 +251,6 @@ struct ContextDistributionCard: View {
                         )
                     }
                     .padding(.bottom, index == distribution.count - 1 ? 0 : 12)
-                }
-
-                if let dominant {
-                    Divider()
-                        .overlay(Klar.borderSubtle)
-                        .padding(.top, 14)
-
-                    Button {
-                        onBuildPlan(dominant.tag)
-                    } label: {
-                        Text("\(Int((dominant.share * 100).rounded())) % deiner \(substance.name)-Einträge tragen den Tag „\(dominant.tag.name)“. Plan dafür bauen?")
-                            .font(Klar.TypeScale.bodySmall)
-                            .foregroundStyle(Klar.textSecondary)
-                            .multilineTextAlignment(.leading)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.top, 14)
-                    }
-                    .buttonStyle(.plain)
                 }
             }
         }

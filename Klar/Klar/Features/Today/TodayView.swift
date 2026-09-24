@@ -4,20 +4,14 @@ import KlarCore
 
 /// B1–B3 · Tab „Heute".
 ///
-/// The hierarchy of the screen is the hierarchy of the message: goal and plan on top, what was
-/// actually logged underneath. The screen's job is to keep the *intention* present, not the
-/// consumption. Its best state is its quietest.
+/// The hierarchy of the screen is the hierarchy of the message: limits on top, what was actually
+/// logged underneath.
 struct TodayView: View {
-    @Binding var selectedTab: KlarTab
-
     @Environment(\.modelContext) private var modelContext
     @Environment(\.scenePhase) private var scenePhase
     @Query private var entries: [Entry]
-    @Query private var plans: [Plan]
-    @Query private var substances: [Substance]
 
     @State private var isSettingsPresented = false
-    @State private var planBeingEdited: Plan?
     @State private var entryBeingEdited: Entry?
 
     private var store: KlarStore { KlarStore(context: modelContext) }
@@ -40,7 +34,6 @@ struct TodayView: View {
     private var todaysEntries: [Entry] {
         store.entries(onLogicalDayOf: today).sorted { $0.timestamp > $1.timestamp }
     }
-    private var activePlan: Plan? { store.activePlans().first }
     private var quotaSubstances: [SubstanceQuota] {
         store.quotaSubstances()
     }
@@ -51,9 +44,6 @@ struct TodayView: View {
         }
         .sheet(isPresented: $isSettingsPresented) {
             SettingsView()
-        }
-        .sheet(item: $planBeingEdited) { plan in
-            PlanEditorView(existingPlan: plan)
         }
         .sheet(item: $entryBeingEdited) { entry in
             EntryDetailSheet(entry: entry)
@@ -90,36 +80,6 @@ struct TodayView: View {
                     } else if quotaSubstances.count > 1 {
                         MultiQuotaCard(quotas: quotaSubstances, month: today)
                             .padding(.bottom, 12)
-                    }
-
-                    if let activePlan {
-                        PlanSummaryCard(plan: activePlan) {
-                            planBeingEdited = activePlan
-                        }
-                        .padding(.bottom, 18)
-                    } else if !substances.isEmpty {
-                        // No plan yet: point at where one gets built, without nagging.
-                        Button {
-                            selectedTab = .plans
-                        } label: {
-                            KlarCard {
-                                HStack(alignment: .top, spacing: 10) {
-                                    VStack(alignment: .leading, spacing: 4) {
-                                        Text("Noch kein Plan.")
-                                            .font(Klar.TypeScale.headline)
-                                            .foregroundStyle(Klar.text)
-                                        Text("Ein Plan entsteht aus deinen Mustern.")
-                                            .font(Klar.TypeScale.bodySmall)
-                                            .foregroundStyle(Klar.textTertiary)
-                                    }
-                                    Spacer(minLength: 0)
-                                    KlarDisclosureChevron()
-                                        .padding(.top, 3)
-                                }
-                            }
-                        }
-                        .klarRowButtonStyle()
-                        .padding(.bottom, 18)
                     }
 
                     if todaysEntries.isEmpty {
@@ -404,54 +364,6 @@ struct NewMonthCard: View {
             return "Kontingent: \(single.limit)."
         }
         return "Kontingente: " + quotas.map { "\($0.name) \($0.limit)" }.joined(separator: " · ") + "."
-    }
-}
-
-// MARK: - Plan card
-
-struct PlanSummaryCard: View {
-    let plan: Plan
-    let onEdit: () -> Void
-
-    var body: some View {
-        KlarCard {
-            HStack(alignment: .top, spacing: 10) {
-                Text("WENN")
-                    .font(Klar.TypeScale.caption.weight(.semibold))
-                    .foregroundStyle(Klar.textTertiary)
-                    .frame(width: 42, alignment: .leading)
-                    .padding(.top, 2)
-                Text(plan.situationText)
-                    .font(Klar.TypeScale.body)
-                    .foregroundStyle(Klar.text)
-            }
-            .padding(.bottom, 6)
-
-            HStack(alignment: .top, spacing: 10) {
-                Text("DANN")
-                    .font(Klar.TypeScale.caption.weight(.semibold))
-                    .foregroundStyle(Klar.textTertiary)
-                    .frame(width: 42, alignment: .leading)
-                    .padding(.top, 2)
-                Text(plan.actionText)
-                    .font(Klar.TypeScale.body)
-                    .foregroundStyle(Klar.text)
-            }
-            .padding(.bottom, 14)
-
-            HStack {
-                Text("Vorgenommen am \(KlarDate.dayAndMonth(plan.committedAt))")
-                    .font(Klar.TypeScale.caption)
-                    .foregroundStyle(Klar.textTertiary)
-                Spacer()
-                KlarIconButton(
-                    systemImage: "pencil",
-                    size: 28,
-                    accessibilityLabel: "Plan bearbeiten",
-                    action: onEdit
-                )
-            }
-        }
     }
 }
 

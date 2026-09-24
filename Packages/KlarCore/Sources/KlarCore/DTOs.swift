@@ -115,56 +115,6 @@ public struct GoalPeriodDTO: Codable, Identifiable, Sendable, Equatable {
     }
 }
 
-public struct PlanDTO: Codable, Identifiable, Sendable, Equatable {
-    public let id: UUID
-    public var situationTagID: UUID?
-    public var situationText: String
-    public var actionText: String
-    public var committedAt: Date
-    public var status: PlanStatus
-    public var supersededBy: UUID?
-
-    public init(
-        id: UUID = UUID(),
-        situationTagID: UUID?,
-        situationText: String,
-        actionText: String,
-        committedAt: Date = Date(),
-        status: PlanStatus = .active,
-        supersededBy: UUID? = nil
-    ) {
-        self.id = id
-        self.situationTagID = situationTagID
-        self.situationText = situationText
-        self.actionText = actionText
-        self.committedAt = committedAt
-        self.status = status
-        self.supersededBy = supersededBy
-    }
-}
-
-public struct PlanCheckInDTO: Codable, Identifiable, Sendable, Equatable {
-    public let id: UUID
-    public var planID: UUID?
-    public var entryID: UUID?
-    public var date: Date
-    public var outcome: CheckInOutcome
-
-    public init(
-        id: UUID = UUID(),
-        planID: UUID?,
-        entryID: UUID?,
-        date: Date,
-        outcome: CheckInOutcome
-    ) {
-        self.id = id
-        self.planID = planID
-        self.entryID = entryID
-        self.date = date
-        self.outcome = outcome
-    }
-}
-
 public struct SubstitutionActionDTO: Codable, Identifiable, Sendable, Equatable {
     public let id: UUID
     public var text: String
@@ -198,8 +148,6 @@ public struct KlarExport: Codable, Sendable, Equatable {
     public var entries: [EntryDTO]
     public var contextTags: [ContextTagDTO]
     public var goalPeriods: [GoalPeriodDTO]
-    public var plans: [PlanDTO]
-    public var planCheckIns: [PlanCheckInDTO]
     public var substitutionActions: [SubstitutionActionDTO]
     public var whyNotes: [WhyNoteDTO]
 
@@ -210,8 +158,6 @@ public struct KlarExport: Codable, Sendable, Equatable {
         entries: [EntryDTO] = [],
         contextTags: [ContextTagDTO] = [],
         goalPeriods: [GoalPeriodDTO] = [],
-        plans: [PlanDTO] = [],
-        planCheckIns: [PlanCheckInDTO] = [],
         substitutionActions: [SubstitutionActionDTO] = [],
         whyNotes: [WhyNoteDTO] = []
     ) {
@@ -221,8 +167,6 @@ public struct KlarExport: Codable, Sendable, Equatable {
         self.entries = entries
         self.contextTags = contextTags
         self.goalPeriods = goalPeriods
-        self.plans = plans
-        self.planCheckIns = planCheckIns
         self.substitutionActions = substitutionActions
         self.whyNotes = whyNotes
     }

@@ -38,7 +38,7 @@ struct CravingSOSView: View {
             VStack(alignment: .leading, spacing: 0) {
                 header
 
-                Text("Dieses Gefühl geht vorbei. Du hast einen Plan.")
+                Text("Dieses Gefühl geht vorbei.")
                     .font(Klar.TypeScale.bodySmall)
                     .foregroundStyle(Klar.textSecondary)
                     .frame(maxWidth: .infinity)

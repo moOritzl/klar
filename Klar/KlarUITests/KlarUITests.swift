@@ -97,8 +97,8 @@ final class KlarUITests: XCTestCase {
         app.tabBars.buttons["Verlauf"].tap()
         XCTAssertTrue(app.buttons["Kalender"].waitForExistence(timeout: 5))
 
-        app.tabBars.buttons["Pläne"].tap()
-        XCTAssertTrue(app.staticTexts["Noch kein Plan."].waitForExistence(timeout: 5))
+        app.tabBars.buttons["Grenzen"].tap()
+        XCTAssertTrue(app.buttons["limits.substitutionsLink"].waitForExistence(timeout: 5))
 
         app.tabBars.buttons["Hilfe"].tap()
         XCTAssertTrue(app.buttons["help.sos"].waitForExistence(timeout: 5))

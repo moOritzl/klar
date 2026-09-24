@@ -27,12 +27,6 @@ final class ExportImportTests: XCTestCase {
         let goal = GoalPeriod(substance: substance, type: .reduction, monthlyLimit: 20, validFrom: Date(timeIntervalSince1970: 1_760_000_000))
         sourceContext.insert(goal)
 
-        let plan = Plan(situationTag: tag, situationText: "Alleine zuhause", actionText: "Tee statt Kaffee")
-        sourceContext.insert(plan)
-
-        let checkIn = PlanCheckIn(plan: plan, entry: entry, date: Date(timeIntervalSince1970: 1_770_100_000), outcome: .helped)
-        sourceContext.insert(checkIn)
-
         let substitution = SubstitutionAction(text: "Wasser trinken", sortOrder: 0)
         sourceContext.insert(substitution)
 
@@ -64,16 +58,6 @@ final class ExportImportTests: XCTestCase {
         XCTAssertEqual(importedEntry.mood, 4)
         XCTAssertEqual(importedEntry.note, "Testeintrag")
         XCTAssertEqual(importedEntry.contextTags?.map(\.id), [tag.id])
-
-        let importedPlans = try destinationContext.fetch(FetchDescriptor<Plan>())
-        XCTAssertEqual(importedPlans.count, 1)
-        XCTAssertEqual(importedPlans.first?.situationTag?.id, tag.id)
-
-        let importedCheckIns = try destinationContext.fetch(FetchDescriptor<PlanCheckIn>())
-        XCTAssertEqual(importedCheckIns.count, 1)
-        XCTAssertEqual(importedCheckIns.first?.plan?.id, plan.id)
-        XCTAssertEqual(importedCheckIns.first?.entry?.id, entry.id)
-        XCTAssertEqual(importedCheckIns.first?.outcome, .helped)
 
         let importedGoals = try destinationContext.fetch(FetchDescriptor<GoalPeriod>())
         XCTAssertEqual(importedGoals.count, 1)

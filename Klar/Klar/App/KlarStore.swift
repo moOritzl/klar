@@ -5,8 +5,8 @@ import KlarCore
 /// Single write path into SwiftData, and the bridge to the pure calculators in `KlarCore`.
 ///
 /// Views read lists with `@Query` (SwiftData keeps those live), but every mutation and every
-/// derived number goes through here — so the quota rules, the plan-versioning rules and the
-/// logical-day boundary live in exactly one place.
+/// derived number goes through here — so the quota rules and the logical-day boundary live in
+/// exactly one place.
 @MainActor
 struct KlarStore {
     let context: ModelContext
@@ -35,20 +35,6 @@ struct KlarStore {
 
     func allGoalPeriods() -> [GoalPeriod] {
         (try? context.fetch(FetchDescriptor<GoalPeriod>())) ?? []
-    }
-
-    func allPlans() -> [Plan] {
-        (try? context.fetch(FetchDescriptor<Plan>())) ?? []
-    }
-
-    func activePlans() -> [Plan] {
-        allPlans()
-            .filter { $0.status == .active }
-            .sorted { $0.committedAt < $1.committedAt }
-    }
-
-    func allCheckIns() -> [PlanCheckIn] {
-        (try? context.fetch(FetchDescriptor<PlanCheckIn>())) ?? []
     }
 
     func substitutionActions() -> [SubstitutionAction] {
@@ -140,11 +126,6 @@ struct KlarStore {
     }
 
     func deleteEntry(_ entry: Entry) {
-        // Check-ins reference the entry that triggered them; drop them with it so the
-        // check-in flow can't resurface an entry that no longer exists.
-        for checkIn in allCheckIns() where checkIn.entry?.id == entry.id {
-            context.delete(checkIn)
-        }
         context.delete(entry)
         save()
     }
@@ -270,117 +251,6 @@ struct KlarStore {
     /// the one with the tightest remaining allowance.
     func primaryQuotaSubstance() -> Substance? {
         quotaSubstances().first?.substance
-    }
-
-    // MARK: - Plans
-
-    /// Creates a new plan, or a new *version* of an existing one (archiving the predecessor and
-    /// pointing `supersededBy` at the replacement). Throws when the 3-active-plan cap is hit.
-    func commitPlan(
-        replacing existing: Plan?,
-        situationTag: ContextTag?,
-        situationText: String,
-        actionText: String
-    ) throws {
-        let (updatedOld, newPlanDTO) = try PlanService.createVersion(
-            of: existing?.toDTO(),
-            situationTagID: situationTag?.id,
-            situationText: situationText,
-            actionText: actionText,
-            existingPlans: allPlans().map { $0.toDTO() }
-        )
-
-        if let updatedOld, let existing {
-            existing.status = updatedOld.status
-            existing.supersededBy = updatedOld.supersededBy
-        }
-
-        context.insert(
-            Plan(
-                id: newPlanDTO.id,
-                situationTag: situationTag,
-                situationText: situationText,
-                actionText: actionText,
-                committedAt: newPlanDTO.committedAt,
-                status: newPlanDTO.status
-            )
-        )
-        save()
-    }
-
-    func setPlanStatus(_ plan: Plan, _ status: PlanStatus) {
-        plan.status = status
-        save()
-    }
-
-    /// The oldest un-answered check-in: an entry tagged with an active plan's situation tag,
-    /// logged on a logical day *before* today. Never the same day — "einen Tag später ist
-    /// Reflexion Auswertung, nicht Konfrontation".
-    func pendingCheckIn(now: Date = Date()) -> (plan: Plan, entry: Entry)? {
-        let plans = allPlans()
-        let entries = allEntries()
-
-        let pending = PlanService.pendingCheckIns(
-            entries: entries.map { $0.toDTO() },
-            plans: plans.map { $0.toDTO() },
-            existingCheckIns: allCheckIns().map { $0.toDTO() },
-            now: now,
-            nowTimezoneID: KlarDate.timezoneID
-        )
-
-        guard let first = pending.min(by: { $0.entry.timestamp < $1.entry.timestamp }),
-              let plan = plans.first(where: { $0.id == first.plan.id }),
-              let entry = entries.first(where: { $0.id == first.entry.id })
-        else { return nil }
-
-        return (plan, entry)
-    }
-
-    func recordCheckIn(plan: Plan, entry: Entry, outcome: CheckInOutcome) {
-        context.insert(PlanCheckIn(plan: plan, entry: entry, date: Date(), outcome: outcome))
-        save()
-    }
-
-    /// "3/3 geholfen" — helped vs. total check-ins for a plan, optionally scoped to one week.
-    func checkInTally(for plan: Plan, weekStart: Date? = nil) -> (helped: Int, total: Int) {
-        var checkIns = allCheckIns().filter { $0.plan?.id == plan.id }
-        if let weekStart {
-            let weekEnd = KlarDate.calendar.date(byAdding: .day, value: 7, to: weekStart) ?? weekStart
-            checkIns = checkIns.filter { $0.date >= weekStart && $0.date < weekEnd }
-        }
-        // `.adjusted` means the user reworked the plan rather than judging it — it counts
-        // toward the total but not as a success.
-        let helped = checkIns.filter { $0.outcome == .helped }.count
-        return (helped, checkIns.count)
-    }
-
-    // MARK: - Plan suggestion (G2)
-
-    /// The design's empty-plans state proposes a plan built from a real pattern: the context tag
-    /// that carries the largest share of the user's entries. Below `minimumEntries` we stay quiet —
-    /// "ein guter Plan braucht Kenntnis der eigenen Muster".
-    func suggestedSituationTag(minimumEntries: Int = 3) -> (tag: ContextTag, share: Double)? {
-        let entries = allEntries()
-        guard entries.count >= minimumEntries else { return nil }
-
-        var counts: [UUID: Int] = [:]
-        var tagged = 0
-        for entry in entries {
-            guard let tags = entry.contextTags, !tags.isEmpty else { continue }
-            tagged += 1
-            for tag in tags { counts[tag.id, default: 0] += 1 }
-        }
-        guard tagged >= minimumEntries else { return nil }
-
-        // Don't propose a tag that an active plan already covers.
-        let covered = Set(activePlans().compactMap { $0.situationTag?.id })
-        guard let best = counts
-            .filter({ !covered.contains($0.key) })
-            .max(by: { $0.value < $1.value })
-        else { return nil }
-
-        guard let tag = allContextTags().first(where: { $0.id == best.key }) else { return nil }
-        return (tag, Double(best.value) / Double(tagged))
     }
 
     // MARK: - Substitution actions

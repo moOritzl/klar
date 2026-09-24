@@ -2,54 +2,10 @@ import SwiftUI
 import SwiftData
 import KlarCore
 
-/// G4 · Ziele je Substanz.
+/// One substance's limit on the Grenzen tab.
 ///
-/// Every change here *versions* the goal rather than overwriting it (see `KlarStore.setGoal`), so
-/// a past month keeps the limit that was actually in force at the time. Editing a goal must never
-/// retroactively rewrite whether the user met it.
-struct GoalsView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Environment(\.dismiss) private var dismiss
-    @Query private var substances: [Substance]
-    @Query private var goalPeriods: [GoalPeriod]
-
-    @State private var isManagingSubstances = false
-
-    private var store: KlarStore { KlarStore(context: modelContext) }
-
-    private var activeSubstances: [Substance] {
-        substances.filter { !$0.isArchived }.sorted { $0.sortOrder < $1.sortOrder }
-    }
-
-    var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 0) {
-                VStack(spacing: 12) {
-                    ForEach(activeSubstances) { substance in
-                        GoalCard(substance: substance, store: store)
-                    }
-                }
-
-                KlarDashedButton(title: "Substanzen verwalten", systemImage: "slider.horizontal.3") {
-                    isManagingSubstances = true
-                }
-                .padding(.top, 12)
-            }
-            .padding(.horizontal, 16)
-            .padding(.top, Klar.Space.x2)
-            .padding(.bottom, 24)
-        }
-        .scrollIndicators(.hidden)
-        .background(Klar.bgSubtle)
-        // Pushed inside Pläne's stack, so the bar and its back button are already there — the
-        // title used to be drawn a second time into the content underneath them.
-        .navigationTitle("Ziele")
-        .sheet(isPresented: $isManagingSubstances) {
-            SubstancesView()
-        }
-    }
-}
-
+/// Every change *versions* the goal rather than overwriting it (see `KlarStore.setGoal`), so a
+/// past month keeps the limit that was actually in force at the time.
 struct GoalCard: View {
     let substance: Substance
     let store: KlarStore

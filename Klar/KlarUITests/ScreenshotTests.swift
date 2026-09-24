@@ -77,16 +77,10 @@ final class ScreenshotTests: XCTestCase {
         app.buttons["Trends"].tap()
         capture(app, "E3-Trends")
 
-        // G2 · Pläne (leer)
-        app.tabBars.buttons["Pläne"].tap()
-        XCTAssertTrue(app.staticTexts["Pläne"].waitForExistence(timeout: 5))
-        capture(app, "G2-Plaene-leer")
-
-        // G4 · Ziele
-        app.buttons["plans.goalsLink"].tap()
-        XCTAssertTrue(app.staticTexts["Ziele"].waitForExistence(timeout: 5))
-        capture(app, "G4-Ziele")
-        app.navigationBars.buttons.firstMatch.tap()
+        // G · Grenzen
+        app.tabBars.buttons["Grenzen"].tap()
+        XCTAssertTrue(app.buttons["limits.substitutionsLink"].waitForExistence(timeout: 5))
+        capture(app, "G-Grenzen")
 
         // H1 · Hilfe
         app.tabBars.buttons["Hilfe"].tap()
@@ -95,7 +89,7 @@ final class ScreenshotTests: XCTestCase {
 
         // H2 · Craving-SOS
         app.buttons["help.sos"].tap()
-        XCTAssertTrue(app.staticTexts["Dieses Gefühl geht vorbei. Du hast einen Plan."].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Dieses Gefühl geht vorbei."].waitForExistence(timeout: 5))
         capture(app, "H2-Craving-SOS")
 
         // H2b · Atemübung (part of the SOS flow, no drafted screen of its own)

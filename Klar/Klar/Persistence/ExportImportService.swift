@@ -66,8 +66,6 @@ enum ExportImportService {
 
     static func wipeAll(context: ModelContext) throws {
         try context.delete(model: Entry.self)
-        try context.delete(model: PlanCheckIn.self)
-        try context.delete(model: Plan.self)
         try context.delete(model: GoalPeriod.self)
         try context.delete(model: Substance.self)
         try context.delete(model: ContextTag.self)
@@ -97,8 +95,6 @@ enum ExportImportService {
             entries: try context.fetch(FetchDescriptor<Entry>()).map { $0.toDTO() },
             contextTags: try context.fetch(FetchDescriptor<ContextTag>()).map { $0.toDTO() },
             goalPeriods: try context.fetch(FetchDescriptor<GoalPeriod>()).map { $0.toDTO() },
-            plans: try context.fetch(FetchDescriptor<Plan>()).map { $0.toDTO() },
-            planCheckIns: try context.fetch(FetchDescriptor<PlanCheckIn>()).map { $0.toDTO() },
             substitutionActions: try context.fetch(FetchDescriptor<SubstitutionAction>()).map { $0.toDTO() },
             whyNotes: try context.fetch(FetchDescriptor<WhyNote>()).map { $0.toDTO() }
         )
@@ -119,7 +115,6 @@ enum ExportImportService {
             tagByID[dto.id] = tag
         }
 
-        var entryByID: [UUID: Entry] = [:]
         for dto in export.entries {
             let entry = Entry(
                 id: dto.id,
@@ -135,24 +130,11 @@ enum ExportImportService {
                 editedAt: dto.editedAt
             )
             context.insert(entry)
-            entryByID[dto.id] = entry
         }
 
         for dto in export.goalPeriods {
             let goal = GoalPeriod(id: dto.id, substance: dto.substanceID.flatMap { substanceByID[$0] }, type: dto.type, monthlyLimit: dto.monthlyLimit, validFrom: dto.validFrom, validUntil: dto.validUntil)
             context.insert(goal)
-        }
-
-        var planByID: [UUID: Plan] = [:]
-        for dto in export.plans {
-            let plan = Plan(id: dto.id, situationTag: dto.situationTagID.flatMap { tagByID[$0] }, situationText: dto.situationText, actionText: dto.actionText, committedAt: dto.committedAt, status: dto.status, supersededBy: dto.supersededBy)
-            context.insert(plan)
-            planByID[dto.id] = plan
-        }
-
-        for dto in export.planCheckIns {
-            let checkIn = PlanCheckIn(id: dto.id, plan: dto.planID.flatMap { planByID[$0] }, entry: dto.entryID.flatMap { entryByID[$0] }, date: dto.date, outcome: dto.outcome)
-            context.insert(checkIn)
         }
 
         for dto in export.substitutionActions {

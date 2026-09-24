@@ -37,18 +37,6 @@ extension GoalPeriod {
     }
 }
 
-extension Plan {
-    func toDTO() -> PlanDTO {
-        PlanDTO(id: id, situationTagID: situationTag?.id, situationText: situationText, actionText: actionText, committedAt: committedAt, status: status, supersededBy: supersededBy)
-    }
-}
-
-extension PlanCheckIn {
-    func toDTO() -> PlanCheckInDTO {
-        PlanCheckInDTO(id: id, planID: plan?.id, entryID: entry?.id, date: date, outcome: outcome)
-    }
-}
-
 extension SubstitutionAction {
     func toDTO() -> SubstitutionActionDTO {
         SubstitutionActionDTO(id: id, text: text, sortOrder: sortOrder)
