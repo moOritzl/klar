@@ -11,11 +11,15 @@ enum ExportImportService {
     /// Decodes and validates without touching the store. Split out from the import so a corrupt
     /// or wrong-version file can be rejected *before* anything is deleted.
     static func decode(_ data: Data) throws -> KlarExport {
-        let export = try KlarExportCoding.makeDecoder().decode(KlarExport.self, from: data)
-        guard export.schemaVersion == KlarExport.currentSchemaVersion else {
-            throw ExportImportError.unknownSchemaVersion(export.schemaVersion)
+        // The version first, on its own: a file from another schema is missing keys this one
+        // requires, and would otherwise fail as a generic decoding error instead of saying why.
+        struct VersionProbe: Decodable { let schemaVersion: Int }
+        let decoder = KlarExportCoding.makeDecoder()
+        let version = try decoder.decode(VersionProbe.self, from: data).schemaVersion
+        guard version == KlarExport.currentSchemaVersion else {
+            throw ExportImportError.unknownSchemaVersion(version)
         }
-        return export
+        return try decoder.decode(KlarExport.self, from: data)
     }
 
     static func importJSON(_ data: Data, context: ModelContext) throws {
@@ -62,14 +66,12 @@ enum ExportImportService {
 
     static func wipeAll(context: ModelContext) throws {
         try context.delete(model: Entry.self)
-        try context.delete(model: PlanCheckIn.self)
-        try context.delete(model: Plan.self)
         try context.delete(model: GoalPeriod.self)
         try context.delete(model: Substance.self)
         try context.delete(model: ContextTag.self)
         try context.delete(model: SubstitutionAction.self)
         try context.delete(model: WhyNote.self)
-        try context.delete(model: ReviewDecision.self)
+        try context.delete(model: MorningAfter.self)
         try context.save()
     }
 
@@ -94,18 +96,16 @@ enum ExportImportService {
             entries: try context.fetch(FetchDescriptor<Entry>()).map { $0.toDTO() },
             contextTags: try context.fetch(FetchDescriptor<ContextTag>()).map { $0.toDTO() },
             goalPeriods: try context.fetch(FetchDescriptor<GoalPeriod>()).map { $0.toDTO() },
-            plans: try context.fetch(FetchDescriptor<Plan>()).map { $0.toDTO() },
-            planCheckIns: try context.fetch(FetchDescriptor<PlanCheckIn>()).map { $0.toDTO() },
             substitutionActions: try context.fetch(FetchDescriptor<SubstitutionAction>()).map { $0.toDTO() },
             whyNotes: try context.fetch(FetchDescriptor<WhyNote>()).map { $0.toDTO() },
-            reviewDecisions: try context.fetch(FetchDescriptor<ReviewDecision>()).map { $0.toDTO() }
+            morningAfters: try context.fetch(FetchDescriptor<MorningAfter>()).map { $0.toDTO() }
         )
     }
 
     private static func insert(_ export: KlarExport, into context: ModelContext) throws {
         var substanceByID: [UUID: Substance] = [:]
         for dto in export.substances {
-            let substance = Substance(id: dto.id, name: dto.name, unit: dto.unit, colorIndex: dto.colorIndex, costPerUnit: dto.costPerUnit, sortOrder: dto.sortOrder, isArchived: dto.isArchived)
+            let substance = Substance(id: dto.id, name: dto.name, unit: dto.unit, colorIndex: dto.colorIndex, costPerUnit: dto.costPerUnit, sortOrder: dto.sortOrder, isArchived: dto.isArchived, asksMorningAfter: dto.asksMorningAfter)
             context.insert(substance)
             substanceByID[dto.id] = substance
         }
@@ -117,7 +117,6 @@ enum ExportImportService {
             tagByID[dto.id] = tag
         }
 
-        var entryByID: [UUID: Entry] = [:]
         for dto in export.entries {
             let entry = Entry(
                 id: dto.id,
@@ -133,24 +132,11 @@ enum ExportImportService {
                 editedAt: dto.editedAt
             )
             context.insert(entry)
-            entryByID[dto.id] = entry
         }
 
         for dto in export.goalPeriods {
             let goal = GoalPeriod(id: dto.id, substance: dto.substanceID.flatMap { substanceByID[$0] }, type: dto.type, monthlyLimit: dto.monthlyLimit, validFrom: dto.validFrom, validUntil: dto.validUntil)
             context.insert(goal)
-        }
-
-        var planByID: [UUID: Plan] = [:]
-        for dto in export.plans {
-            let plan = Plan(id: dto.id, situationTag: dto.situationTagID.flatMap { tagByID[$0] }, situationText: dto.situationText, actionText: dto.actionText, committedAt: dto.committedAt, status: dto.status, supersededBy: dto.supersededBy)
-            context.insert(plan)
-            planByID[dto.id] = plan
-        }
-
-        for dto in export.planCheckIns {
-            let checkIn = PlanCheckIn(id: dto.id, plan: dto.planID.flatMap { planByID[$0] }, entry: dto.entryID.flatMap { entryByID[$0] }, date: dto.date, outcome: dto.outcome)
-            context.insert(checkIn)
         }
 
         for dto in export.substitutionActions {
@@ -161,8 +147,12 @@ enum ExportImportService {
             context.insert(WhyNote(id: dto.id, text: dto.text, createdAt: dto.createdAt))
         }
 
-        for dto in export.reviewDecisions {
-            context.insert(ReviewDecision(id: dto.id, weekStart: dto.weekStart, planDecision: dto.planDecision))
+        for dto in export.morningAfters {
+            context.insert(MorningAfter(
+                id: dto.id, dayKey: dto.dayKey, body: dto.body, regret: dto.regret, again: dto.again,
+                note: dto.note, trigger: dto.trigger, wouldHaveHelped: dto.wouldHaveHelped,
+                nextTime: dto.nextTime, recordedAt: dto.recordedAt
+            ))
         }
 
         try context.save()

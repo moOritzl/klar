@@ -20,4 +20,10 @@ enum SubstanceCatalog {
         SubstanceTemplate(name: "MDMA", unit: .mg),
         SubstanceTemplate(name: "Nikotin", unit: .piece)
     ]
+
+    /// Nicotine is used every day by most who log it, and „verkatert?" means nothing for it —
+    /// asking would turn the card into a daily chore. Everything else asks until switched off.
+    static func asksMorningAfterByDefault(_ name: String) -> Bool {
+        name.trimmingCharacters(in: .whitespaces).caseInsensitiveCompare("Nikotin") != .orderedSame
+    }
 }

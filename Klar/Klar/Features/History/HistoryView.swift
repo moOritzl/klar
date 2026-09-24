@@ -2,18 +2,18 @@ import SwiftUI
 import SwiftData
 import KlarCore
 
-/// E1–E4 · Tab „Verlauf".
+/// E1–E3 · Tab „Verlauf".
 ///
 /// Making patterns visible is the mechanism — not keeping a chronicle. Every number here answers
 /// a question the user could act on, and the only reference point is their own baseline (never a
 /// norm; see concept § 3, P4/P7).
 ///
 /// Deviation from the draft: the draft's segmented control has two segments (Kalender /
-/// Rückblick) but ships a third screen, "Trends" (E3), with no entry point drawn. A third
-/// segment is the smallest change that makes every designed screen reachable.
+/// Rückblick). The weekly review is gone (concept v3), and „Trends" (E3) takes the second
+/// segment.
 struct HistoryView: View {
     enum Section: Hashable, CaseIterable {
-        case calendar, trends, review
+        case calendar, trends
     }
 
     @State private var section: Section = .calendar
@@ -23,13 +23,12 @@ struct HistoryView: View {
 
     var body: some View {
         NavigationStack {
-            KlarScreen(title: title) {
+            KlarScreen(title: "Verlauf") {
                 VStack(alignment: .leading, spacing: 0) {
                     KlarSegmentedControl(
                         options: [
                             (Section.calendar, "Kalender"),
-                            (Section.trends, "Trends"),
-                            (Section.review, "Rückblick")
+                            (Section.trends, "Trends")
                         ],
                         selection: Binding(get: { section }, set: { select($0) })
                     )
@@ -68,7 +67,6 @@ struct HistoryView: View {
         switch section {
         case .calendar: CalendarSectionView()
         case .trends: TrendsSectionView()
-        case .review: ReviewArchiveSectionView()
         }
     }
 
@@ -89,13 +87,6 @@ struct HistoryView: View {
         let target = index + delta
         guard all.indices.contains(target) else { return }
         select(all[target])
-    }
-
-    private var title: LocalizedStringKey {
-        switch section {
-        case .calendar, .trends: "Verlauf"
-        case .review: "Wochenrückblicke"
-        }
     }
 }
 

@@ -27,20 +27,15 @@ final class ExportImportTests: XCTestCase {
         let goal = GoalPeriod(substance: substance, type: .reduction, monthlyLimit: 20, validFrom: Date(timeIntervalSince1970: 1_760_000_000))
         sourceContext.insert(goal)
 
-        let plan = Plan(situationTag: tag, situationText: "Alleine zuhause", actionText: "Tee statt Kaffee")
-        sourceContext.insert(plan)
-
-        let checkIn = PlanCheckIn(plan: plan, entry: entry, date: Date(timeIntervalSince1970: 1_770_100_000), outcome: .helped)
-        sourceContext.insert(checkIn)
-
         let substitution = SubstitutionAction(text: "Wasser trinken", sortOrder: 0)
         sourceContext.insert(substitution)
 
         let whyNote = WhyNote(text: "Mehr Energie ohne Koffein-Crash")
         sourceContext.insert(whyNote)
 
-        let reviewDecision = ReviewDecision(weekStart: Date(timeIntervalSince1970: 1_769_900_000), planDecision: .keep)
-        sourceContext.insert(reviewDecision)
+        substance.asksMorningAfter = false
+        let morning = MorningAfter(dayKey: "2026-02-01", body: .rough, regret: .slightly, again: .differently, note: "Zu spät", nextTime: "Wecker stellen")
+        sourceContext.insert(morning)
 
         try sourceContext.save()
 
@@ -56,6 +51,18 @@ final class ExportImportTests: XCTestCase {
         XCTAssertEqual(importedSubstance.name, "Kaffee")
         XCTAssertEqual(importedSubstance.unit, .drink)
         XCTAssertEqual(importedSubstance.costPerUnit, Decimal(string: "2.50"))
+        XCTAssertFalse(importedSubstance.asksMorningAfter)
+
+        let importedMornings = try destinationContext.fetch(FetchDescriptor<MorningAfter>())
+        XCTAssertEqual(importedMornings.count, 1)
+        let importedMorning = try XCTUnwrap(importedMornings.first)
+        XCTAssertEqual(importedMorning.id, morning.id)
+        XCTAssertEqual(importedMorning.dayKey, "2026-02-01")
+        XCTAssertEqual(importedMorning.body, .rough)
+        XCTAssertEqual(importedMorning.regret, .slightly)
+        XCTAssertEqual(importedMorning.again, .differently)
+        XCTAssertEqual(importedMorning.note, "Zu spät")
+        XCTAssertEqual(importedMorning.nextTime, "Wecker stellen")
 
         let importedEntries = try destinationContext.fetch(FetchDescriptor<Entry>())
         XCTAssertEqual(importedEntries.count, 1)
@@ -68,16 +75,6 @@ final class ExportImportTests: XCTestCase {
         XCTAssertEqual(importedEntry.note, "Testeintrag")
         XCTAssertEqual(importedEntry.contextTags?.map(\.id), [tag.id])
 
-        let importedPlans = try destinationContext.fetch(FetchDescriptor<Plan>())
-        XCTAssertEqual(importedPlans.count, 1)
-        XCTAssertEqual(importedPlans.first?.situationTag?.id, tag.id)
-
-        let importedCheckIns = try destinationContext.fetch(FetchDescriptor<PlanCheckIn>())
-        XCTAssertEqual(importedCheckIns.count, 1)
-        XCTAssertEqual(importedCheckIns.first?.plan?.id, plan.id)
-        XCTAssertEqual(importedCheckIns.first?.entry?.id, entry.id)
-        XCTAssertEqual(importedCheckIns.first?.outcome, .helped)
-
         let importedGoals = try destinationContext.fetch(FetchDescriptor<GoalPeriod>())
         XCTAssertEqual(importedGoals.count, 1)
         XCTAssertEqual(importedGoals.first?.monthlyLimit, 20)
@@ -87,10 +84,6 @@ final class ExportImportTests: XCTestCase {
 
         let importedWhyNotes = try destinationContext.fetch(FetchDescriptor<WhyNote>())
         XCTAssertEqual(importedWhyNotes.count, 1)
-
-        let importedReviewDecisions = try destinationContext.fetch(FetchDescriptor<ReviewDecision>())
-        XCTAssertEqual(importedReviewDecisions.count, 1)
-        XCTAssertEqual(importedReviewDecisions.first?.planDecision, .keep)
     }
 
     func testImportIntoNonEmptyStoreFails() throws {
@@ -130,10 +123,20 @@ final class ExportImportTests: XCTestCase {
     }
 
     func testDecodeRejectsAnUnknownSchemaVersion() throws {
-        let payload = #"{"schemaVersion": 999, "exportedAt": "1970-01-01T00:00:00Z", "substances": [], "entries": [], "contextTags": [], "goalPeriods": [], "plans": [], "planCheckIns": [], "substitutionActions": [], "whyNotes": [], "reviewDecisions": []}"#
+        let payload = #"{"schemaVersion": 999}"#
 
         XCTAssertThrowsError(try ExportImportService.decode(Data(payload.utf8))) { error in
             XCTAssertEqual(error as? ExportImportError, .unknownSchemaVersion(999))
+        }
+    }
+
+    /// A file from before v3 has plans and no morning-after records. It must fail on its
+    /// version, so the user sees why, not on whichever key happens to be missing.
+    func testDecodeRejectsASchemaOneFileOnItsVersion() throws {
+        let payload = #"{"schemaVersion": 1, "exportedAt": "1970-01-01T00:00:00Z", "substances": [], "entries": [], "contextTags": [], "goalPeriods": [], "plans": [], "planCheckIns": [], "substitutionActions": [], "whyNotes": [], "reviewDecisions": []}"#
+
+        XCTAssertThrowsError(try ExportImportService.decode(Data(payload.utf8))) { error in
+            XCTAssertEqual(error as? ExportImportError, .unknownSchemaVersion(1))
         }
     }
 
@@ -188,5 +191,15 @@ final class ExportImportTests: XCTestCase {
         let names = try destinationContext.fetch(FetchDescriptor<Substance>()).map(\.name)
         XCTAssertEqual(names, ["Bier"], "A failed restore must put the old store back")
         XCTAssertEqual(try destinationContext.fetchCount(FetchDescriptor<Entry>()), 1)
+    }
+
+    /// The shipped example file must stay importable — it is what the screenshots are made from.
+    func testTheExampleFileDecodes() throws {
+        let url = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
+            .appendingPathComponent("examples/klar-beispieldaten.json")
+        let export = try ExportImportService.decode(Data(contentsOf: url))
+        XCTAssertEqual(export.schemaVersion, KlarExport.currentSchemaVersion)
+        XCTAssertFalse(export.morningAfters.isEmpty)
     }
 }

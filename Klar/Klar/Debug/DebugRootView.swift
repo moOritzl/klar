@@ -153,7 +153,7 @@ struct DebugRootView: View {
 #Preview {
     DebugRootView()
         .modelContainer(for: [
-            Substance.self, Entry.self, ContextTag.self, GoalPeriod.self, Plan.self,
-            PlanCheckIn.self, SubstitutionAction.self, WhyNote.self, ReviewDecision.self
+            Substance.self, Entry.self, ContextTag.self, GoalPeriod.self,
+            SubstitutionAction.self, WhyNote.self, MorningAfter.self
         ], inMemory: true)
 }

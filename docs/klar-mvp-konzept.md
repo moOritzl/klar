@@ -17,8 +17,9 @@ v2 war für Menschen gebaut, die ihren Konsum senken wollen, und hat Self-Monito
 3. **Neuer Kern-Loop, der Rückblick:** Am Morgen danach werden die erlebten Folgen erfasst (körperlich, emotional, Gesamturteil) und beim nächsten Mal zurückgespielt (§ 2.4, Modul C).
 4. **Kontingente werden zu Grenzen:** Das Monatskontingent bleibt, wird aber als selbst gesetzte Grenze gerahmt, nicht als Reduktionsziel (Modul D).
 5. **Neuer § 7 zu Kommunikation und Compliance**, Altersfreigabe 18+ statt 17+ (Apple hat 17+ 2025 abgeschafft).
+6. **Der Weekly Review fällt weg**: Die Rückmeldung kommt laufend über die Muster; ein wöchentliches Vollbild wäre genau die Art Pflicht-Moment, die P9 ausschließt.
 
-Unverändert aus v2 bleiben der Weekly Review, Behavior Substitution, Problem Solving (neu angebunden, Modul E), Risikoinhalte als Public-Health-Funktion und der Ausschluss normativen Feedbacks.
+Unverändert aus v2 bleiben Behavior Substitution, Problem Solving (neu angebunden, Modul E), Risikoinhalte als Public-Health-Funktion und der Ausschluss normativen Feedbacks.
 
 ---
 
@@ -66,7 +67,7 @@ Die BCT-Taxonomie unterscheidet die Beobachtung des eigenen Verhaltens (2.3 *Sel
 
 **Bewusst ausgeschlossen: Pro-Contra-Abwägung.** Naheliegend wäre, nach Vor- und Nachteilen des Abends zu fragen (BCT 9.2 *Pros and cons*, im Motivational Interviewing als „Decisional Balance" bekannt). Miller und Rose (2015) zeigen in ihrer Übersicht, dass diese Abwägung bei ambivalenten Menschen die Bereitschaft zur Veränderung eher senkt, weil sie auch die Argumente für den Status quo stärkt. Klars Zielgruppe hat per Definition keinen Veränderungsentschluss. Der Rückblick fragt deshalb nach Folgen und einem einzelnen Gesamturteil, nie nach den Vorteilen des Konsums.
 
-> **Produktkonsequenz:** Der Rückblick ist Input, das Zurückspielen ist der Mechanismus. Folgen werden am Morgen danach erfasst und dort wieder gezeigt, wo die App dem nächsten Konsum am nächsten ist: in der Übersicht, im Eintrag-Sheet und im Weekly Review. Das geschieht pro Substanz und Kontext und immer am eigenen Verlauf. Den eigentlichen Entscheidungsmoment kennt die App nicht; sie sieht nur, wann sie geöffnet wird.
+> **Produktkonsequenz:** Der Rückblick ist Input, das Zurückspielen ist der Mechanismus. Folgen werden am Morgen danach erfasst und dort wieder gezeigt, wo die App dem nächsten Konsum am nächsten ist: in der Übersicht und im Eintrag-Sheet. Das geschieht pro Substanz und Kontext und immer am eigenen Verlauf. Den eigentlichen Entscheidungsmoment kennt die App nicht; sie sieht nur, wann sie geöffnet wird.
 
 ### 2.5 Grenzen der Evidenz
 
@@ -104,9 +105,8 @@ Vier Einschränkungen sind für dieses Projekt konstitutiv und werden nicht wegd
 - Kalenderansicht: eintragsfreie Tage als visuell positiver Grundzustand
 
 ### Modul B — Feedback
-- **Weekly Review als Pflichtbestandteil des MVP**: neutrale Wochenzusammenfassung (Einträge, Ø-Dosis-Trend, Abstände zwischen Konsumereignissen, Stand der Grenzen, Rückblick-Muster)
 - Trends pro Substanz: Frequenz, Ø-Dosis über Zeit, Lücken
-- Rückblick-Muster pro Substanz und Kontext-Tag (aus Modul C), als Zählung ohne Score
+- Rückblick-Muster pro Substanz und Kontext-Tag (Modul C) in der Übersicht und im Eintrag-Sheet, als Zählung ohne Score
 - Referenzpunkt ist ausschließlich die eigene Baseline (P7)
 
 ### Modul C — Rückblick (neu, ersetzt Action Planning)
@@ -117,8 +117,9 @@ Vier Einschränkungen sind für dieses Projekt konstitutiv und werden nicht wegd
   2. „Bereust du etwas von gestern?" — nein / ein bisschen / ja
   3. „Würdest du es wieder so machen?" — ja / anders / nein
 - Optionale Freitext-Notiz.
-- **Verfall:** Eine unbeantwortete Karte verschwindet, sobald der nächste Konsumtag beginnt, spätestens nach 48 Stunden. Die App fragt nicht nach.
-- **Zurückspielen:** Ab drei beantworteten Rückblicken für eine Substanz zeigt die Übersicht eine Zeile wie „Letzte 5×: 3× verkatert, 1× bereut". Im Eintrag-Sheet erscheint dieselbe Zählung für die gewählte Kombination aus Substanz und Kontext-Tag, sobald dafür drei Rückblicke vorliegen. Der Weekly Review zeigt die Muster der Woche (Modul B). Die Anzeige besteht aus Zahlen, ohne Score, Farbwertung oder Kommentar (P7).
+- **Verfall:** Fällig ist nur der jüngste Konsumtag vor heute. Er verfällt 48 Stunden nach seinem Ende (05:00 am Folgetag). Ein neuer Konsumtag verdrängt einen älteren, unbeantworteten; ein Eintrag am selben Morgen tut das nicht.
+- **Pro Substanz schaltbar** („Morgen danach fragen" im Tab Grenzen), bei Nikotin standardmäßig aus.
+- **Zurückspielen:** Ab drei beantworteten Rückblicken für eine Substanz zeigt die Übersicht eine Zeile wie „Letzte 5×: 3× verkatert, 1× bereut". Im Eintrag-Sheet erscheint dieselbe Zählung für die gewählte Kombination aus Substanz und Kontext-Tag, sobald dafür drei Rückblicke vorliegen. Die Anzeige besteht aus Zahlen, ohne Score, Farbwertung oder Kommentar (P7). Ein Muster erscheint nur für Substanzen, bei denen „Morgen danach fragen" an ist; schaltet man eine Substanz aus, verschwindet auch ihr Muster (die Einträge bleiben und das Muster kommt beim Wiedereinschalten zurück).
 - **Ausgeschlossen:** Bewertung des Rauschs, „bester Abend", Serien positiver Antworten, Vor-/Nachteil-Listen (P8).
 - **Entfernt aus v2:** Wenn-Dann-Pläne, Plan-Vorlagen, Plan-Check-in, Plan-Erfolgsquote.
 
@@ -131,7 +132,7 @@ Vier Einschränkungen sind für dieses Projekt konstitutiv und werden nicht wegd
 ### Modul E — Craving-SOS (mit Behavior Substitution & Problem Solving)
 - Urge-Surfing-Timer, Atemübung, eigene „Warum"-Notizen, Ein-Tap-Anruf an selbstgewählten Kontakt
 - **Behavior Substitution:** Nutzer:in hinterlegt im Onboarding 2–3 Ersatzhandlungen („rausgehen", „Freund:in schreiben", „duschen"); SOS-Screen schlägt genau diese vor
-- **Problem Solving:** Nach einem Eintrag, der eine Grenze überschreitet, oder nach einem Rückblick mit „bereut: ja" gibt es einen optionalen 3-Fragen-Flow (Was war der Auslöser? Was hätte geholfen? Was machst du nächstes Mal anders?). Die letzte Antwort wird als Notiz gespeichert und beim nächsten Zurückspielen für diese Substanz und diesen Kontext mit angezeigt. Es entsteht kein Plan, und es gibt keine Nachfrage, ob es geklappt hat.
+- **Problem Solving:** Nach einem Rückblick mit „bereut: ja" gibt es einen optionalen 3-Fragen-Flow (Was war der Auslöser? Was hätte geholfen? Was machst du nächstes Mal anders?) — ein Eintrag, der eine Grenze überschreitet, löst ihn nicht eigens aus, dieser Tag bekommt ohnehin am nächsten Morgen eine Karte. Die letzte Antwort wird als Notiz gespeichert und beim nächsten Zurückspielen für diese Substanz und diesen Kontext mit angezeigt. Es entsteht kein Plan, und es gibt keine Nachfrage, ob es geklappt hat.
 
 ### Modul F — Notfall & Beratung (Public-Health-Schicht)
 - Notfall-Screen: Warnzeichen erkennen, Erste-Hilfe-Schritte, Ein-Tap-112
@@ -214,7 +215,7 @@ Diese Texte werden eingesetzt, **sobald Modul C gebaut und die Pläne aus der Ap
 
 **„What it does"** (ersetzt den Absatz):
 
-> Entry logging with context tags, a morning-after check-in, per-substance monthly limits that count up, a three-step weekly review, calendar and trend history, behaviour substitution prompts, and a craving SOS screen with attributed content from established organisations.
+> Entry logging with context tags, a morning-after check-in, per-substance monthly limits that count up, calendar and trend history, behaviour substitution prompts, and a craving SOS screen with attributed content from established organisations.
 
 **„Limitations"**, neuer zweiter Satz nach dem ersten:
 

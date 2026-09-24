@@ -10,9 +10,9 @@ enum DemoDataSeeder {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = TimeZone(identifier: "Europe/Berlin")!
 
-        let coffee = Substance(name: "Kaffee", unit: .drink, colorIndex: 0, costPerUnit: Decimal(string: "3.00"), sortOrder: 0)
+        let coffee = Substance(name: "Kaffee", unit: .drink, colorIndex: 0, costPerUnit: Decimal(string: "3.00"), sortOrder: 0, asksMorningAfter: false)
         let alcohol = Substance(name: "Alkohol", unit: .drink, colorIndex: 1, costPerUnit: Decimal(string: "5.00"), sortOrder: 1)
-        let nicotine = Substance(name: "Nikotin", unit: .piece, colorIndex: 2, sortOrder: 2)
+        let nicotine = Substance(name: "Nikotin", unit: .piece, colorIndex: 2, sortOrder: 2, asksMorningAfter: false)
         for substance in [coffee, alcohol, nicotine] {
             context.insert(substance)
         }
@@ -21,7 +21,6 @@ enum DemoDataSeeder {
         let zuhause = tags.first { $0.name == "Zuhause" }
         let allein = tags.first { $0.name == "Allein" }
         let club = tags.first { $0.name == "Club" }
-        let sozial = tags.first { $0.name == "Sozial" }
 
         let periodStart = calendar.date(byAdding: .month, value: -3, to: now)!
 
@@ -30,32 +29,6 @@ enum DemoDataSeeder {
         context.insert(GoalPeriod(substance: alcohol, type: .reduction, monthlyLimit: 10, validFrom: periodStart, validUntil: changeDate))
         context.insert(GoalPeriod(substance: alcohol, type: .reduction, monthlyLimit: 6, validFrom: changeDate, validUntil: nil))
         context.insert(GoalPeriod(substance: coffee, type: .observe, monthlyLimit: nil, validFrom: periodStart, validUntil: nil))
-
-        // Two plans; the party plan has been revised once (superseded predecessor + current version).
-        let originalPartyPlan = Plan(
-            situationTag: sozial,
-            situationText: "Auf einer Party",
-            actionText: "Erst ein Wasser bestellen",
-            committedAt: calendar.date(byAdding: .month, value: -2, to: now)!,
-            status: .archived
-        )
-        context.insert(originalPartyPlan)
-        let revisedPartyPlan = Plan(
-            situationTag: sozial,
-            situationText: "Auf einer Party",
-            actionText: "Alkoholfreies Bier statt Bier",
-            committedAt: calendar.date(byAdding: .weekOfYear, value: -2, to: now)!,
-            status: .active
-        )
-        context.insert(revisedPartyPlan)
-        originalPartyPlan.supersededBy = revisedPartyPlan.id
-
-        context.insert(Plan(
-            situationTag: allein,
-            situationText: "Abends allein zuhause",
-            actionText: "Tee statt Kaffee nach 18 Uhr",
-            status: .active
-        ))
 
         func insertEntry(_ substance: Substance, day: Date, hour: Int, minute: Int = 0, tag: ContextTag?) {
             let timestamp = calendar.date(bySettingHour: hour, minute: minute, second: 0, of: day) ?? day
@@ -90,6 +63,28 @@ enum DemoDataSeeder {
                 insertEntry(nicotine, day: day, hour: 20, tag: allein)
                 entryCount += 1
             }
+        }
+
+        // Answer most past alcohol evenings, so Übersicht and the entry sheet have a pattern.
+        // The newest one is left unanswered on purpose, to exercise the "never asked about an
+        // older day once it's no longer the newest" path — it is ~8 days old here, past the 48 h
+        // expiry, so no card shows on launch. Launch with --klar-uitest-seed-yesterday to see one.
+        let alcoholDays = Set(
+            try context.fetch(FetchDescriptor<Entry>())
+                .filter { $0.substance?.id == alcohol.id }
+                .map { LogicalDay.dayKey(for: $0.timestamp, timezoneID: $0.timezoneID) }
+        )
+        let todayKey = LogicalDay.dayKey(for: now, timezoneID: "Europe/Berlin")
+        let answered = alcoholDays.filter { $0 < todayKey }.sorted().dropLast()
+        for (index, key) in answered.enumerated() {
+            let hungover = index % 3 != 1
+            context.insert(MorningAfter(
+                dayKey: key,
+                body: hungover ? .hungover : .fine,
+                regret: index % 3 == 0 ? .yes : .no,
+                again: hungover ? .differently : .yes,
+                nextTime: index == answered.count - 1 ? "Zwischendurch Wasser" : nil
+            ))
         }
 
         try context.save()

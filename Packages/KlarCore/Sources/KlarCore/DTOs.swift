@@ -8,6 +8,7 @@ public struct SubstanceDTO: Codable, Identifiable, Sendable, Equatable {
     public var costPerUnitRaw: String?
     public var sortOrder: Int
     public var isArchived: Bool
+    public var asksMorningAfter: Bool
 
     public var costPerUnit: Decimal? {
         get { costPerUnitRaw.flatMap { Decimal(string: $0) } }
@@ -21,7 +22,8 @@ public struct SubstanceDTO: Codable, Identifiable, Sendable, Equatable {
         colorIndex: Int,
         costPerUnit: Decimal? = nil,
         sortOrder: Int,
-        isArchived: Bool = false
+        isArchived: Bool = false,
+        asksMorningAfter: Bool = true
     ) {
         self.id = id
         self.name = name
@@ -30,6 +32,7 @@ public struct SubstanceDTO: Codable, Identifiable, Sendable, Equatable {
         self.costPerUnitRaw = costPerUnit.map { "\($0)" }
         self.sortOrder = sortOrder
         self.isArchived = isArchived
+        self.asksMorningAfter = asksMorningAfter
     }
 }
 
@@ -115,56 +118,6 @@ public struct GoalPeriodDTO: Codable, Identifiable, Sendable, Equatable {
     }
 }
 
-public struct PlanDTO: Codable, Identifiable, Sendable, Equatable {
-    public let id: UUID
-    public var situationTagID: UUID?
-    public var situationText: String
-    public var actionText: String
-    public var committedAt: Date
-    public var status: PlanStatus
-    public var supersededBy: UUID?
-
-    public init(
-        id: UUID = UUID(),
-        situationTagID: UUID?,
-        situationText: String,
-        actionText: String,
-        committedAt: Date = Date(),
-        status: PlanStatus = .active,
-        supersededBy: UUID? = nil
-    ) {
-        self.id = id
-        self.situationTagID = situationTagID
-        self.situationText = situationText
-        self.actionText = actionText
-        self.committedAt = committedAt
-        self.status = status
-        self.supersededBy = supersededBy
-    }
-}
-
-public struct PlanCheckInDTO: Codable, Identifiable, Sendable, Equatable {
-    public let id: UUID
-    public var planID: UUID?
-    public var entryID: UUID?
-    public var date: Date
-    public var outcome: CheckInOutcome
-
-    public init(
-        id: UUID = UUID(),
-        planID: UUID?,
-        entryID: UUID?,
-        date: Date,
-        outcome: CheckInOutcome
-    ) {
-        self.id = id
-        self.planID = planID
-        self.entryID = entryID
-        self.date = date
-        self.outcome = outcome
-    }
-}
-
 public struct SubstitutionActionDTO: Codable, Identifiable, Sendable, Equatable {
     public let id: UUID
     public var text: String
@@ -189,20 +142,8 @@ public struct WhyNoteDTO: Codable, Identifiable, Sendable, Equatable {
     }
 }
 
-public struct ReviewDecisionDTO: Codable, Identifiable, Sendable, Equatable {
-    public let id: UUID
-    public var weekStart: Date
-    public var planDecision: ReviewPlanDecision
-
-    public init(id: UUID = UUID(), weekStart: Date, planDecision: ReviewPlanDecision) {
-        self.id = id
-        self.weekStart = weekStart
-        self.planDecision = planDecision
-    }
-}
-
 public struct KlarExport: Codable, Sendable, Equatable {
-    public static let currentSchemaVersion = 1
+    public static let currentSchemaVersion = 2
 
     public var schemaVersion: Int
     public var exportedAt: Date
@@ -210,11 +151,9 @@ public struct KlarExport: Codable, Sendable, Equatable {
     public var entries: [EntryDTO]
     public var contextTags: [ContextTagDTO]
     public var goalPeriods: [GoalPeriodDTO]
-    public var plans: [PlanDTO]
-    public var planCheckIns: [PlanCheckInDTO]
     public var substitutionActions: [SubstitutionActionDTO]
     public var whyNotes: [WhyNoteDTO]
-    public var reviewDecisions: [ReviewDecisionDTO]
+    public var morningAfters: [MorningAfterDTO]
 
     public init(
         schemaVersion: Int = KlarExport.currentSchemaVersion,
@@ -223,11 +162,9 @@ public struct KlarExport: Codable, Sendable, Equatable {
         entries: [EntryDTO] = [],
         contextTags: [ContextTagDTO] = [],
         goalPeriods: [GoalPeriodDTO] = [],
-        plans: [PlanDTO] = [],
-        planCheckIns: [PlanCheckInDTO] = [],
         substitutionActions: [SubstitutionActionDTO] = [],
         whyNotes: [WhyNoteDTO] = [],
-        reviewDecisions: [ReviewDecisionDTO] = []
+        morningAfters: [MorningAfterDTO] = []
     ) {
         self.schemaVersion = schemaVersion
         self.exportedAt = exportedAt
@@ -235,11 +172,9 @@ public struct KlarExport: Codable, Sendable, Equatable {
         self.entries = entries
         self.contextTags = contextTags
         self.goalPeriods = goalPeriods
-        self.plans = plans
-        self.planCheckIns = planCheckIns
         self.substitutionActions = substitutionActions
         self.whyNotes = whyNotes
-        self.reviewDecisions = reviewDecisions
+        self.morningAfters = morningAfters
     }
 }
 

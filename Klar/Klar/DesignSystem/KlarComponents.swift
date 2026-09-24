@@ -83,7 +83,7 @@ struct KlarRowDivider: View {
     }
 }
 
-/// The dark "the app speaks" card — new month banner (B3), plan suggestion (G2).
+/// The dark "the app speaks" card — the new month banner (B3).
 struct KlarInverseCard<Content: View>: View {
     var padding: CGFloat = 20
     @ViewBuilder var content: Content
@@ -287,7 +287,7 @@ struct KlarOutlineChip: View {
 
 // MARK: - Segmented control
 
-/// The tinted-track segmented control (A3 goal type, E1 Kalender/Rückblick).
+/// The tinted-track segmented control (A3 goal type, E1 Kalender/Trends).
 struct KlarSegmentedControl<Value: Hashable>: View {
     let options: [(value: Value, label: String)]
     @Binding var selection: Value
@@ -368,22 +368,6 @@ struct KlarStepDots: View {
             return onInverse ? .white : Klar.accent
         }
         return onInverse ? Color.white.opacity(0.28) : Klar.borderStrong
-    }
-}
-
-/// The 3-segment progress rail at the top of the Weekly Review (F1–F3).
-struct KlarProgressRail: View {
-    let count: Int
-    let current: Int
-
-    var body: some View {
-        HStack(spacing: 6) {
-            ForEach(0..<count, id: \.self) { index in
-                Capsule()
-                    .fill(index <= current ? Klar.accent : Klar.borderStrong)
-                    .frame(height: 4)
-            }
-        }
     }
 }
 

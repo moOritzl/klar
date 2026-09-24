@@ -41,6 +41,24 @@ public enum LogicalDay: Sendable {
         return dateA < dateB
     }
 
+    /// The logical day as "yyyy-MM-dd". The key a morning-after record is filed under, and
+    /// zero-padded so two keys compare correctly as plain strings.
+    public static func dayKey(for date: Date, timezoneID: String) -> String {
+        let day = components(for: date, timezoneID: timezoneID)
+        return String(format: "%04d-%02d-%02d", day.year ?? 0, day.month ?? 0, day.day ?? 0)
+    }
+
+    /// The instant a logical day ends: the cutoff hour on the following calendar day.
+    public static func end(ofDayKey key: String, timezoneID: String) -> Date? {
+        let parts = key.split(separator: "-").compactMap { Int($0) }
+        guard parts.count == 3 else { return nil }
+        let calendar = calendar(for: timezoneID)
+        guard let start = calendar.date(from: DateComponents(year: parts[0], month: parts[1], day: parts[2])),
+              let next = calendar.date(byAdding: .day, value: 1, to: start)
+        else { return nil }
+        return calendar.date(bySettingHour: cutoffHour, minute: 0, second: 0, of: next)
+    }
+
     private static func calendar(for timezoneID: String) -> Calendar {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = TimeZone(identifier: timezoneID) ?? .current

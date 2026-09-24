@@ -36,16 +36,6 @@ enum KlarDate {
         LogicalDay.isBeforeCutoff(date, timezoneID: timezoneID)
     }
 
-    /// Monday 00:00 of the week containing `date`.
-    static func weekStart(for date: Date) -> Date {
-        calendar.dateInterval(of: .weekOfYear, for: date)?.start ?? date
-    }
-
-    /// Sunday of the week containing `date`.
-    static func weekEnd(for date: Date) -> Date {
-        calendar.date(byAdding: .day, value: 6, to: weekStart(for: date)) ?? date
-    }
-
     /// True when `date`'s logical day is the 1st of its month — drives the "Neuer Monat" card (B3).
     static func isFirstOfMonth(_ date: Date = Date()) -> Bool {
         calendar.component(.day, from: logicalDay(for: date)) == 1
@@ -111,7 +101,7 @@ enum KlarDate {
         return formatter.string(from: date)
     }
 
-    /// "3. Juli" — plan commitment date.
+    /// "3. Juli"
     static func dayAndMonth(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "de_DE")
@@ -135,35 +125,6 @@ enum KlarDate {
         return formatter.string(from: date)
     }
 
-    /// "7. – 13. Jul" — the review week range, collapsing the month when both ends share one.
-    static func weekRange(_ weekStart: Date) -> String {
-        let end = weekEnd(for: weekStart)
-        let dayOnly = DateFormatter()
-        dayOnly.locale = Locale(identifier: "de_DE")
-        dayOnly.dateFormat = "d."
-
-        let dayMonth = DateFormatter()
-        dayMonth.locale = Locale(identifier: "de_DE")
-        dayMonth.dateFormat = "d. MMM"
-
-        let sameMonth = calendar.component(.month, from: weekStart) == calendar.component(.month, from: end)
-        let startText = sameMonth ? dayOnly.string(from: weekStart) : dayMonth.string(from: weekStart)
-        return "\(startText) – \(dayMonth.string(from: end))"
-    }
-
-    /// "7. – 13. JULI" — the Weekly Review eyebrow.
-    static func weekRangeLong(_ weekStart: Date) -> String {
-        let end = weekEnd(for: weekStart)
-        let dayOnly = DateFormatter()
-        dayOnly.locale = Locale(identifier: "de_DE")
-        dayOnly.dateFormat = "d."
-
-        let dayMonth = DateFormatter()
-        dayMonth.locale = Locale(identifier: "de_DE")
-        dayMonth.dateFormat = "d. MMMM"
-
-        return "\(dayOnly.string(from: weekStart)) – \(dayMonth.string(from: end))"
-    }
 }
 
 // MARK: - Amount formatting

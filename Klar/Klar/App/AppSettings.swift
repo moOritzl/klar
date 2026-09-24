@@ -35,9 +35,7 @@ final class AppSettings {
         self.autoLockDelay = AutoLockDelay(
             rawValue: defaults.object(forKey: Keys.autoLockDelay) as? Int ?? 0
         ) ?? .immediately
-        self.areNotificationsEnabled = defaults.bool(forKey: Keys.areNotificationsEnabled)
         self.counselingCity = defaults.string(forKey: Keys.counselingCity) ?? "Berlin"
-        self.lastReviewedWeekStart = defaults.object(forKey: Keys.lastReviewedWeekStart) as? Date
         self.supportContactName = defaults.string(forKey: Keys.supportContactName)
         self.supportContactPhone = defaults.string(forKey: Keys.supportContactPhone)
         // No stored value means System, so existing installs adopt the default without a migration.
@@ -63,18 +61,8 @@ final class AppSettings {
         didSet { defaults.set(appearance.rawValue, forKey: Keys.appearance) }
     }
 
-    var areNotificationsEnabled: Bool {
-        didSet { defaults.set(areNotificationsEnabled, forKey: Keys.areNotificationsEnabled) }
-    }
-
     var counselingCity: String {
         didSet { defaults.set(counselingCity, forKey: Keys.counselingCity) }
-    }
-
-    /// Monday of the last week the user completed a Weekly Review for. Drives whether the
-    /// review is offered on launch.
-    var lastReviewedWeekStart: Date? {
-        didSet { defaults.set(lastReviewedWeekStart, forKey: Keys.lastReviewedWeekStart) }
     }
 
     /// The Craving-SOS one-tap call target. Deliberately *not* part of the SwiftData store: it is
@@ -89,7 +77,6 @@ final class AppSettings {
 
     func resetForOnboarding() {
         hasCompletedOnboarding = false
-        lastReviewedWeekStart = nil
     }
 
     private enum Keys {
@@ -99,8 +86,6 @@ final class AppSettings {
         static let isAppLockEnabled = "klar.isAppLockEnabled"
         static let autoLockDelay = "klar.autoLockDelay"
         static let appearance = "klar.appearance"
-        static let areNotificationsEnabled = "klar.areNotificationsEnabled"
         static let counselingCity = "klar.counselingCity"
-        static let lastReviewedWeekStart = "klar.lastReviewedWeekStart"
     }
 }

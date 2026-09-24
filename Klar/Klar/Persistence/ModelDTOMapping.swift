@@ -3,7 +3,7 @@ import KlarCore
 
 extension Substance {
     func toDTO() -> SubstanceDTO {
-        SubstanceDTO(id: id, name: name, unit: unit, colorIndex: colorIndex, costPerUnit: costPerUnit, sortOrder: sortOrder, isArchived: isArchived)
+        SubstanceDTO(id: id, name: name, unit: unit, colorIndex: colorIndex, costPerUnit: costPerUnit, sortOrder: sortOrder, isArchived: isArchived, asksMorningAfter: asksMorningAfter)
     }
 }
 
@@ -37,18 +37,6 @@ extension GoalPeriod {
     }
 }
 
-extension Plan {
-    func toDTO() -> PlanDTO {
-        PlanDTO(id: id, situationTagID: situationTag?.id, situationText: situationText, actionText: actionText, committedAt: committedAt, status: status, supersededBy: supersededBy)
-    }
-}
-
-extension PlanCheckIn {
-    func toDTO() -> PlanCheckInDTO {
-        PlanCheckInDTO(id: id, planID: plan?.id, entryID: entry?.id, date: date, outcome: outcome)
-    }
-}
-
 extension SubstitutionAction {
     func toDTO() -> SubstitutionActionDTO {
         SubstitutionActionDTO(id: id, text: text, sortOrder: sortOrder)
@@ -61,8 +49,11 @@ extension WhyNote {
     }
 }
 
-extension ReviewDecision {
-    func toDTO() -> ReviewDecisionDTO {
-        ReviewDecisionDTO(id: id, weekStart: weekStart, planDecision: planDecision)
+extension MorningAfter {
+    func toDTO() -> MorningAfterDTO {
+        MorningAfterDTO(
+            id: id, dayKey: dayKey, body: body, regret: regret, again: again, note: note,
+            trigger: trigger, wouldHaveHelped: wouldHaveHelped, nextTime: nextTime, recordedAt: recordedAt
+        )
     }
 }
