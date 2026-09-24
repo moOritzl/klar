@@ -17,13 +17,18 @@ struct RootView: View {
 
     @State private var lockManager = AppLockManager()
     @State private var selectedTab: KlarTab = .today
+    /// Bumped only after this view has finished applying a `.active` scenePhase change to
+    /// `lockManager` — the signal `MainTabView` waits for before re-checking whether to present
+    /// „Der Morgen danach". See the comment on `MainTabView.foregroundTick` for why this exists
+    /// instead of `MainTabView` listening to `scenePhase` itself.
+    @State private var foregroundTick = 0
 
     private var store: KlarStore { KlarStore(context: modelContext) }
 
     var body: some View {
         ZStack {
             if settings.hasCompletedOnboarding {
-                MainTabView(selectedTab: $selectedTab, lockManager: lockManager)
+                MainTabView(selectedTab: $selectedTab, lockManager: lockManager, foregroundTick: foregroundTick)
             } else {
                 OnboardingFlowView()
             }
@@ -40,11 +45,21 @@ struct RootView: View {
         .background(WindowAppearance(style: settings.appearance.uiStyle))
         .tint(Klar.accent)
         .onChange(of: scenePhase) { _, newPhase in
-            guard settings.isAppLockEnabled else { return }
             if newPhase == .background {
-                lockManager.scheduleLock(after: TimeInterval(settings.autoLockDelay.rawValue))
+                if settings.isAppLockEnabled {
+                    lockManager.scheduleLock(after: TimeInterval(settings.autoLockDelay.rawValue))
+                }
             } else if newPhase == .active {
-                lockManager.cancelPendingLockIfStillWithinGrace()
+                if settings.isAppLockEnabled {
+                    lockManager.cancelPendingLockIfStillWithinGrace()
+                }
+                // Only now — the lock decision above, if any, is final. `MainTabView` must not
+                // re-check on `scenePhase` itself: SwiftUI runs a child's `.onChange(of:)` for a
+                // shared observed value *before* the parent's, so a listener there would read
+                // `lockManager` before the line above ever ran. Bumping this afterwards, from a
+                // single ordered place, makes the dependency explicit instead of relying on
+                // handler-dispatch order.
+                foregroundTick += 1
             }
         }
         .task {
@@ -59,14 +74,25 @@ struct RootView: View {
 
 struct MainTabView: View {
     @Binding var selectedTab: KlarTab
-    /// Read directly rather than as a passed-in `Bool` — `isLocked` below must always reflect
-    /// `lockManager`'s *current* state, including at the moment `RootView`'s own `scenePhase`
-    /// handling flips it in the same update. A reference type reads live; a copied `Bool` could
-    /// still be the one from the render before that flip.
+    /// Read directly rather than as a passed-in `Bool`, so `isLocked` below always reflects
+    /// `lockManager`'s current state at the moment it's read.
     let lockManager: AppLockManager
+    /// Bumped by `RootView` on every return to `.active`, strictly *after* it has applied that
+    /// scenePhase change to `lockManager` (see `RootView.body`'s `.onChange(of: scenePhase)`).
+    ///
+    /// This view used to listen to `scenePhase` itself for the same purpose, but that races
+    /// `RootView`'s own handler: SwiftUI runs a child's `.onChange(of:)` for a shared observed
+    /// value *before* the parent's, so with an auto-lock delay ("Nach 1 Minute") this view's
+    /// handler fired first, read `isLocked == false` — the deferred lock hadn't been applied yet —
+    /// and presented the card; only afterwards did `RootView` lock, leaving the card above the
+    /// lock screen. Reading `lockManager` live does not fix that particular race: the problem
+    /// isn't a stale *value*, it's that the parent's write plainly had not happened yet when this
+    /// view's handler ran. `foregroundTick` is a value `RootView` only changes after that write,
+    /// so this view reacting to it is necessarily ordered after — a real data dependency instead
+    /// of an assumption about `onChange` dispatch order.
+    let foregroundTick: Int
     @Environment(AppSettings.self) private var settings
     @Environment(\.modelContext) private var modelContext
-    @Environment(\.scenePhase) private var scenePhase
 
     /// Lives here rather than in `TodayView` because the button that sets it does too — the
     /// bottom accessory is a property of the `TabView`, not of any one tab.
@@ -127,10 +153,12 @@ struct MainTabView: View {
                 .presentationBackground(.clear)
         }
         .task { presentDueMorning() }
-        .onChange(of: scenePhase) { _, phase in
+        .onChange(of: foregroundTick) { _, _ in
             // The morning after usually starts with the app still in the background from the
-            // night before, so checking only at launch would miss it.
-            if phase == .active { presentDueMorning() }
+            // night before, so checking only at launch would miss it. Driven by `RootView`'s
+            // counter rather than `scenePhase` directly — see the doc comment on
+            // `foregroundTick` above.
+            presentDueMorning()
         }
         .onChange(of: isLocked) { _, isLocked in
             // Unlocking is itself a trigger: the day may have been due since before the phase
