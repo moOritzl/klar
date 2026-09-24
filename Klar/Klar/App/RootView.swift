@@ -60,10 +60,16 @@ struct RootView: View {
 struct MainTabView: View {
     @Binding var selectedTab: KlarTab
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.scenePhase) private var scenePhase
 
     /// Lives here rather than in `TodayView` because the button that sets it does too — the
     /// bottom accessory is a property of the `TabView`, not of any one tab.
     @State private var isEntrySheetPresented = false
+    /// „Der Morgen danach" is the one moment the app speaks unprompted. Presented here, on top
+    /// of the tabs, so whichever tab is showing cannot swallow it.
+    @State private var dueMorning: DueMorning?
+    /// Kept apart from `dueMorning`, which is already `nil` by the time `onDismiss` runs.
+    @State private var presentedMorningKey: String?
 
     private var store: KlarStore { KlarStore(context: modelContext) }
 
@@ -101,5 +107,31 @@ struct MainTabView: View {
         .sheet(isPresented: $isEntrySheetPresented) {
             EntrySheetView()
         }
+        .sheet(item: $dueMorning, onDismiss: {
+            // Swiping the card away is a skip. After „Fertig" the record exists and this is a no-op.
+            if let key = presentedMorningKey { store.skipMorningAfter(dayKey: key) }
+            presentedMorningKey = nil
+        }) { due in
+            MorningAfterCardView(dayKey: due.dayKey)
+                .presentationBackground(.clear)
+        }
+        .task { presentDueMorning() }
+        .onChange(of: scenePhase) { _, phase in
+            // The morning after usually starts with the app still in the background from the
+            // night before, so checking only at launch would miss it.
+            if phase == .active { presentDueMorning() }
+        }
     }
+
+    private func presentDueMorning() {
+        guard dueMorning == nil, !isEntrySheetPresented, let key = store.dueMorningAfterDay() else { return }
+        presentedMorningKey = key
+        dueMorning = DueMorning(dayKey: key)
+    }
+}
+
+/// `sheet(item:)` needs an Identifiable payload.
+struct DueMorning: Identifiable {
+    let dayKey: String
+    var id: String { dayKey }
 }

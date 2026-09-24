@@ -24,6 +24,10 @@ struct KlarApp: App {
             UITestSupport.reset()
             DemoModeSupport.skipOnboarding()
         }
+        if UITestSupport.isSeedYesterdayRequested {
+            UITestSupport.reset()
+            DemoModeSupport.skipOnboarding()
+        }
         #endif
 
         _settings = State(initialValue: AppSettings())
@@ -35,6 +39,9 @@ struct KlarApp: App {
         #if DEBUG
         if DemoModeSupport.isRequested {
             DemoModeSupport.seed(container: container)
+        }
+        if UITestSupport.isSeedYesterdayRequested {
+            UITestSupport.seedYesterday(container: container)
         }
         #endif
     }
