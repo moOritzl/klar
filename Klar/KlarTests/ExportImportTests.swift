@@ -39,9 +39,6 @@ final class ExportImportTests: XCTestCase {
         let whyNote = WhyNote(text: "Mehr Energie ohne Koffein-Crash")
         sourceContext.insert(whyNote)
 
-        let reviewDecision = ReviewDecision(weekStart: Date(timeIntervalSince1970: 1_769_900_000), planDecision: .keep)
-        sourceContext.insert(reviewDecision)
-
         try sourceContext.save()
 
         let jsonData = try ExportImportService.exportJSON(context: sourceContext)
@@ -87,10 +84,6 @@ final class ExportImportTests: XCTestCase {
 
         let importedWhyNotes = try destinationContext.fetch(FetchDescriptor<WhyNote>())
         XCTAssertEqual(importedWhyNotes.count, 1)
-
-        let importedReviewDecisions = try destinationContext.fetch(FetchDescriptor<ReviewDecision>())
-        XCTAssertEqual(importedReviewDecisions.count, 1)
-        XCTAssertEqual(importedReviewDecisions.first?.planDecision, .keep)
     }
 
     func testImportIntoNonEmptyStoreFails() throws {
@@ -130,10 +123,20 @@ final class ExportImportTests: XCTestCase {
     }
 
     func testDecodeRejectsAnUnknownSchemaVersion() throws {
-        let payload = #"{"schemaVersion": 999, "exportedAt": "1970-01-01T00:00:00Z", "substances": [], "entries": [], "contextTags": [], "goalPeriods": [], "plans": [], "planCheckIns": [], "substitutionActions": [], "whyNotes": [], "reviewDecisions": []}"#
+        let payload = #"{"schemaVersion": 999}"#
 
         XCTAssertThrowsError(try ExportImportService.decode(Data(payload.utf8))) { error in
             XCTAssertEqual(error as? ExportImportError, .unknownSchemaVersion(999))
+        }
+    }
+
+    /// A file from before v3 has plans and no morning-after records. It must fail on its
+    /// version, so the user sees why, not on whichever key happens to be missing.
+    func testDecodeRejectsASchemaOneFileOnItsVersion() throws {
+        let payload = #"{"schemaVersion": 1, "exportedAt": "1970-01-01T00:00:00Z", "substances": [], "entries": [], "contextTags": [], "goalPeriods": [], "plans": [], "planCheckIns": [], "substitutionActions": [], "whyNotes": [], "reviewDecisions": []}"#
+
+        XCTAssertThrowsError(try ExportImportService.decode(Data(payload.utf8))) { error in
+            XCTAssertEqual(error as? ExportImportError, .unknownSchemaVersion(1))
         }
     }
 

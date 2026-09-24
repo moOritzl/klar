@@ -11,11 +11,15 @@ enum ExportImportService {
     /// Decodes and validates without touching the store. Split out from the import so a corrupt
     /// or wrong-version file can be rejected *before* anything is deleted.
     static func decode(_ data: Data) throws -> KlarExport {
-        let export = try KlarExportCoding.makeDecoder().decode(KlarExport.self, from: data)
-        guard export.schemaVersion == KlarExport.currentSchemaVersion else {
-            throw ExportImportError.unknownSchemaVersion(export.schemaVersion)
+        // The version first, on its own: a file from another schema is missing keys this one
+        // requires, and would otherwise fail as a generic decoding error instead of saying why.
+        struct VersionProbe: Decodable { let schemaVersion: Int }
+        let decoder = KlarExportCoding.makeDecoder()
+        let version = try decoder.decode(VersionProbe.self, from: data).schemaVersion
+        guard version == KlarExport.currentSchemaVersion else {
+            throw ExportImportError.unknownSchemaVersion(version)
         }
-        return export
+        return try decoder.decode(KlarExport.self, from: data)
     }
 
     static func importJSON(_ data: Data, context: ModelContext) throws {
@@ -69,7 +73,6 @@ enum ExportImportService {
         try context.delete(model: ContextTag.self)
         try context.delete(model: SubstitutionAction.self)
         try context.delete(model: WhyNote.self)
-        try context.delete(model: ReviewDecision.self)
         try context.save()
     }
 
@@ -97,8 +100,7 @@ enum ExportImportService {
             plans: try context.fetch(FetchDescriptor<Plan>()).map { $0.toDTO() },
             planCheckIns: try context.fetch(FetchDescriptor<PlanCheckIn>()).map { $0.toDTO() },
             substitutionActions: try context.fetch(FetchDescriptor<SubstitutionAction>()).map { $0.toDTO() },
-            whyNotes: try context.fetch(FetchDescriptor<WhyNote>()).map { $0.toDTO() },
-            reviewDecisions: try context.fetch(FetchDescriptor<ReviewDecision>()).map { $0.toDTO() }
+            whyNotes: try context.fetch(FetchDescriptor<WhyNote>()).map { $0.toDTO() }
         )
     }
 
@@ -159,10 +161,6 @@ enum ExportImportService {
 
         for dto in export.whyNotes {
             context.insert(WhyNote(id: dto.id, text: dto.text, createdAt: dto.createdAt))
-        }
-
-        for dto in export.reviewDecisions {
-            context.insert(ReviewDecision(id: dto.id, weekStart: dto.weekStart, planDecision: dto.planDecision))
         }
 
         try context.save()

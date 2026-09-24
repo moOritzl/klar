@@ -12,8 +12,7 @@ enum ModelContainerFactory {
         Plan.self,
         PlanCheckIn.self,
         SubstitutionAction.self,
-        WhyNote.self,
-        ReviewDecision.self
+        WhyNote.self
     ])
 
     static func makeContainer(fileManager: FileManager = .default) -> ModelContainer {

@@ -13,7 +13,3 @@ public enum PlanStatus: String, Codable, CaseIterable, Sendable {
 public enum CheckInOutcome: String, Codable, CaseIterable, Sendable {
     case helped, notHelped, adjusted
 }
-
-public enum ReviewPlanDecision: String, Codable, CaseIterable, Sendable {
-    case keep, adjust, pause
-}

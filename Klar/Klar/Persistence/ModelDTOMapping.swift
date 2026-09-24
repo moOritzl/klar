@@ -60,9 +60,3 @@ extension WhyNote {
         WhyNoteDTO(id: id, text: text, createdAt: createdAt)
     }
 }
-
-extension ReviewDecision {
-    func toDTO() -> ReviewDecisionDTO {
-        ReviewDecisionDTO(id: id, weekStart: weekStart, planDecision: planDecision)
-    }
-}

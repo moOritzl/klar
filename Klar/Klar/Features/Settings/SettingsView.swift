@@ -107,18 +107,6 @@ struct SettingsView: View {
 
                             KlarRowDivider()
 
-                            SettingsToggleRow(
-                                icon: "bell",
-                                title: "Benachrichtigungen",
-                                subtitle: "Generische Texte, nie Substanznamen",
-                                isOn: Binding(
-                                    get: { settings.areNotificationsEnabled },
-                                    set: { enableNotifications($0) }
-                                )
-                            )
-
-                            KlarRowDivider()
-
                             SettingsNavigationRow(
                                 icon: "square.and.arrow.down",
                                 title: "Daten"
@@ -180,21 +168,6 @@ struct SettingsView: View {
             return
         }
         settings.isAppLockEnabled = true
-    }
-
-    private func enableNotifications(_ isOn: Bool) {
-        guard isOn else {
-            settings.areNotificationsEnabled = false
-            NotificationScheduler.cancelAll()
-            return
-        }
-        Task {
-            let granted = await NotificationScheduler.requestAuthorization()
-            settings.areNotificationsEnabled = granted
-            if granted {
-                await NotificationScheduler.scheduleWeeklyReviewReminder()
-            }
-        }
     }
 }
 

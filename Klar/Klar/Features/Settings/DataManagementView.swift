@@ -213,7 +213,6 @@ struct DataManagementView: View {
             settings.supportContactName = nil
             settings.supportContactPhone = nil
             settings.resetForOnboarding()
-            NotificationScheduler.cancelAll()
             dismiss()
         } catch {
             errorMessage = error.localizedDescription

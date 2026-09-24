@@ -61,11 +61,6 @@ struct KlarStore {
         return all.max { $0.createdAt < $1.createdAt }
     }
 
-    func reviewDecisions() -> [ReviewDecision] {
-        let all = (try? context.fetch(FetchDescriptor<ReviewDecision>())) ?? []
-        return all.sorted { $0.weekStart > $1.weekStart }
-    }
-
     // MARK: - Entries
 
     /// Entries whose *logical* day equals that of the wall-clock instant `date`.
@@ -445,18 +440,6 @@ struct KlarStore {
         context.insert(tag)
         save()
         return tag
-    }
-
-    // MARK: - Weekly review
-
-    func recordReviewDecision(weekStart: Date, decision: ReviewPlanDecision) {
-        let existing = reviewDecisions().first { KlarDate.weekStart(for: $0.weekStart) == weekStart }
-        if let existing {
-            existing.planDecision = decision
-        } else {
-            context.insert(ReviewDecision(weekStart: weekStart, planDecision: decision))
-        }
-        save()
     }
 
     // MARK: - Saving

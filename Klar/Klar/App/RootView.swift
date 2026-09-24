@@ -60,13 +60,10 @@ struct RootView: View {
 struct MainTabView: View {
     @Binding var selectedTab: KlarTab
     @Environment(\.modelContext) private var modelContext
-    @Environment(AppSettings.self) private var settings
 
-    /// The plan check-in (D1) and the weekly review (F1–F3) are the only two moments the app
-    /// speaks unprompted. Both are presented here, on top of the tabs, so they can't be
-    /// swallowed by whichever tab happens to be showing.
+    /// The plan check-in (D1) is the one moment the app speaks unprompted. It is presented here,
+    /// on top of the tabs, so it can't be swallowed by whichever tab happens to be showing.
     @State private var pendingCheckIn: PendingCheckIn?
-    @State private var isReviewPresented = false
     /// Lives here rather than in `TodayView` because the button that sets it does too — the
     /// bottom accessory is a property of the `TabView`, not of any one tab.
     @State private var isEntrySheetPresented = false
@@ -111,26 +108,15 @@ struct MainTabView: View {
             PlanCheckInView(plan: pending.plan, entry: pending.entry)
                 .presentationBackground(.clear)
         }
-        .fullScreenCover(isPresented: $isReviewPresented) {
-            WeeklyReviewFlowView()
-        }
         .task {
             await presentDueMoments()
         }
     }
 
-    /// Runs once per foregrounding. Check-in first — it's about a concrete entry and is the
-    /// tighter loop; the review can wait a beat.
+    /// Runs once per foregrounding.
     private func presentDueMoments() async {
         if let pending = store.pendingCheckIn() {
             pendingCheckIn = PendingCheckIn(plan: pending.plan, entry: pending.entry)
-            return
-        }
-        if WeeklyReviewSummary.isReviewDue(
-            lastReviewedWeekStart: settings.lastReviewedWeekStart,
-            hasAnyEntries: !store.allEntries().isEmpty
-        ) {
-            isReviewPresented = true
         }
     }
 }

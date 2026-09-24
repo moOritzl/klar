@@ -77,10 +77,6 @@ final class ScreenshotTests: XCTestCase {
         app.buttons["Trends"].tap()
         capture(app, "E3-Trends")
 
-        // E4 · Rückblick-Archiv
-        app.buttons["Rückblick"].tap()
-        capture(app, "E4-Rueckblick-Archiv")
-
         // G2 · Pläne (leer)
         app.tabBars.buttons["Pläne"].tap()
         XCTAssertTrue(app.staticTexts["Pläne"].waitForExistence(timeout: 5))

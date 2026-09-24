@@ -189,20 +189,8 @@ public struct WhyNoteDTO: Codable, Identifiable, Sendable, Equatable {
     }
 }
 
-public struct ReviewDecisionDTO: Codable, Identifiable, Sendable, Equatable {
-    public let id: UUID
-    public var weekStart: Date
-    public var planDecision: ReviewPlanDecision
-
-    public init(id: UUID = UUID(), weekStart: Date, planDecision: ReviewPlanDecision) {
-        self.id = id
-        self.weekStart = weekStart
-        self.planDecision = planDecision
-    }
-}
-
 public struct KlarExport: Codable, Sendable, Equatable {
-    public static let currentSchemaVersion = 1
+    public static let currentSchemaVersion = 2
 
     public var schemaVersion: Int
     public var exportedAt: Date
@@ -214,7 +202,6 @@ public struct KlarExport: Codable, Sendable, Equatable {
     public var planCheckIns: [PlanCheckInDTO]
     public var substitutionActions: [SubstitutionActionDTO]
     public var whyNotes: [WhyNoteDTO]
-    public var reviewDecisions: [ReviewDecisionDTO]
 
     public init(
         schemaVersion: Int = KlarExport.currentSchemaVersion,
@@ -226,8 +213,7 @@ public struct KlarExport: Codable, Sendable, Equatable {
         plans: [PlanDTO] = [],
         planCheckIns: [PlanCheckInDTO] = [],
         substitutionActions: [SubstitutionActionDTO] = [],
-        whyNotes: [WhyNoteDTO] = [],
-        reviewDecisions: [ReviewDecisionDTO] = []
+        whyNotes: [WhyNoteDTO] = []
     ) {
         self.schemaVersion = schemaVersion
         self.exportedAt = exportedAt
@@ -239,7 +225,6 @@ public struct KlarExport: Codable, Sendable, Equatable {
         self.planCheckIns = planCheckIns
         self.substitutionActions = substitutionActions
         self.whyNotes = whyNotes
-        self.reviewDecisions = reviewDecisions
     }
 }
 
