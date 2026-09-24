@@ -23,7 +23,7 @@ struct RootView: View {
     var body: some View {
         ZStack {
             if settings.hasCompletedOnboarding {
-                MainTabView(selectedTab: $selectedTab)
+                MainTabView(selectedTab: $selectedTab, lockManager: lockManager)
             } else {
                 OnboardingFlowView()
             }
@@ -59,6 +59,12 @@ struct RootView: View {
 
 struct MainTabView: View {
     @Binding var selectedTab: KlarTab
+    /// Read directly rather than as a passed-in `Bool` — `isLocked` below must always reflect
+    /// `lockManager`'s *current* state, including at the moment `RootView`'s own `scenePhase`
+    /// handling flips it in the same update. A reference type reads live; a copied `Bool` could
+    /// still be the one from the render before that flip.
+    let lockManager: AppLockManager
+    @Environment(AppSettings.self) private var settings
     @Environment(\.modelContext) private var modelContext
     @Environment(\.scenePhase) private var scenePhase
 
@@ -72,6 +78,11 @@ struct MainTabView: View {
     @State private var presentedMorningKey: String?
 
     private var store: KlarStore { KlarStore(context: modelContext) }
+
+    /// Whether the app-lock overlay (`RootView`) is currently in front of everything, including
+    /// this view's own `.sheet`s — a `.sheet` draws in its own window above a parent's `.overlay`,
+    /// so the card must not go up while this is true or it is readable without unlocking.
+    private var isLocked: Bool { settings.isAppLockEnabled && lockManager.requiresUnlock }
 
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -121,12 +132,31 @@ struct MainTabView: View {
             // night before, so checking only at launch would miss it.
             if phase == .active { presentDueMorning() }
         }
+        .onChange(of: isLocked) { _, isLocked in
+            // Unlocking is itself a trigger: the day may have been due since before the phase
+            // even changed (Face ID can take a while), and `scenePhase` already went `.active`
+            // while still locked.
+            if !isLocked { presentDueMorning() }
+        }
     }
 
     private func presentDueMorning() {
-        guard dueMorning == nil, !isEntrySheetPresented, let key = store.dueMorningAfterDay() else { return }
-        presentedMorningKey = key
-        dueMorning = DueMorning(dayKey: key)
+        // Never above the lock screen: a `.sheet` draws in its own window, in front of
+        // `RootView`'s `.overlay`, so presenting here while locked would make the card readable
+        // without unlocking. (Pre-existing, out of scope: a sheet already open when the app
+        // backgrounds sits above the lock too — that needs a window-level lock, not this guard.)
+        let dueKey = store.dueMorningAfterDay()
+        guard Self.shouldPresentMorning(
+            isLocked: isLocked, isEntrySheetPresented: isEntrySheetPresented, dueMorning: dueMorning, dueKey: dueKey
+        ) else { return }
+        presentedMorningKey = dueKey
+        dueMorning = dueKey.map(DueMorning.init)
+    }
+
+    /// Pulled out of `presentDueMorning()` so the guard is testable without `AppLockManager`'s
+    /// Face ID plumbing or a real `TabView`.
+    static func shouldPresentMorning(isLocked: Bool, isEntrySheetPresented: Bool, dueMorning: DueMorning?, dueKey: String?) -> Bool {
+        !isLocked && dueMorning == nil && !isEntrySheetPresented && dueKey != nil
     }
 }
 
