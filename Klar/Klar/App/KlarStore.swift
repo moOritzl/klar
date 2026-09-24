@@ -209,7 +209,11 @@ struct KlarStore {
     }
 
     func morningPattern(for substance: Substance, contextTag: ContextTag? = nil) -> MorningPattern? {
-        MorningAfterService.pattern(
+        // A day-after pattern for a substance the user switched off is noise, not a feature —
+        // they said this one is not about the day after (coffee, nicotine). The records stay and
+        // the pattern comes back if the substance is switched on again.
+        guard substance.asksMorningAfter else { return nil }
+        return MorningAfterService.pattern(
             substanceID: substance.id,
             contextTagID: contextTag?.id,
             entries: allEntries().map { $0.toDTO() },

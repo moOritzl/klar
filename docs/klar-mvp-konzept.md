@@ -119,7 +119,7 @@ Vier Einschränkungen sind für dieses Projekt konstitutiv und werden nicht wegd
 - Optionale Freitext-Notiz.
 - **Verfall:** Fällig ist nur der jüngste Konsumtag vor heute. Er verfällt 48 Stunden nach seinem Ende (05:00 am Folgetag). Ein neuer Konsumtag verdrängt einen älteren, unbeantworteten; ein Eintrag am selben Morgen tut das nicht.
 - **Pro Substanz schaltbar** („Morgen danach fragen" im Tab Grenzen), bei Nikotin standardmäßig aus.
-- **Zurückspielen:** Ab drei beantworteten Rückblicken für eine Substanz zeigt die Übersicht eine Zeile wie „Letzte 5×: 3× verkatert, 1× bereut". Im Eintrag-Sheet erscheint dieselbe Zählung für die gewählte Kombination aus Substanz und Kontext-Tag, sobald dafür drei Rückblicke vorliegen. Die Anzeige besteht aus Zahlen, ohne Score, Farbwertung oder Kommentar (P7).
+- **Zurückspielen:** Ab drei beantworteten Rückblicken für eine Substanz zeigt die Übersicht eine Zeile wie „Letzte 5×: 3× verkatert, 1× bereut". Im Eintrag-Sheet erscheint dieselbe Zählung für die gewählte Kombination aus Substanz und Kontext-Tag, sobald dafür drei Rückblicke vorliegen. Die Anzeige besteht aus Zahlen, ohne Score, Farbwertung oder Kommentar (P7). Ein Muster erscheint nur für Substanzen, bei denen „Morgen danach fragen" an ist; schaltet man eine Substanz aus, verschwindet auch ihr Muster (die Einträge bleiben und das Muster kommt beim Wiedereinschalten zurück).
 - **Ausgeschlossen:** Bewertung des Rauschs, „bester Abend", Serien positiver Antworten, Vor-/Nachteil-Listen (P8).
 - **Entfernt aus v2:** Wenn-Dann-Pläne, Plan-Vorlagen, Plan-Check-in, Plan-Erfolgsquote.
 

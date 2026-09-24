@@ -156,7 +156,9 @@ Both places that read a pattern back — the Übersicht card and the entry sheet
 no score (P7, P8). A pattern needs at least three answered mornings for that substance
 (`MorningAfterService.pattern`, newest 5 counted); the entry sheet narrows further, to the first
 selected context tag that has a pattern of its own, and falls back to the substance-wide line when
-none does.
+none does. Only substances with „Morgen danach fragen" switched on ever get a pattern
+(`KlarStore.morningPattern`) — switching it off hides the pattern too, though the underlying
+records stay and the pattern reappears if the substance is switched back on.
 
 ### E · Verlauf — [HistoryView.swift](../Klar/Klar/Features/History/HistoryView.swift) · [TrendsSectionView.swift](../Klar/Klar/Features/History/TrendsSectionView.swift)
 
