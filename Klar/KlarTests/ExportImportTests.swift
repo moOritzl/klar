@@ -33,6 +33,10 @@ final class ExportImportTests: XCTestCase {
         let whyNote = WhyNote(text: "Mehr Energie ohne Koffein-Crash")
         sourceContext.insert(whyNote)
 
+        substance.asksMorningAfter = false
+        let morning = MorningAfter(dayKey: "2026-02-01", body: .rough, regret: .slightly, again: .differently, note: "Zu spät", nextTime: "Wecker stellen")
+        sourceContext.insert(morning)
+
         try sourceContext.save()
 
         let jsonData = try ExportImportService.exportJSON(context: sourceContext)
@@ -47,6 +51,18 @@ final class ExportImportTests: XCTestCase {
         XCTAssertEqual(importedSubstance.name, "Kaffee")
         XCTAssertEqual(importedSubstance.unit, .drink)
         XCTAssertEqual(importedSubstance.costPerUnit, Decimal(string: "2.50"))
+        XCTAssertFalse(importedSubstance.asksMorningAfter)
+
+        let importedMornings = try destinationContext.fetch(FetchDescriptor<MorningAfter>())
+        XCTAssertEqual(importedMornings.count, 1)
+        let importedMorning = try XCTUnwrap(importedMornings.first)
+        XCTAssertEqual(importedMorning.id, morning.id)
+        XCTAssertEqual(importedMorning.dayKey, "2026-02-01")
+        XCTAssertEqual(importedMorning.body, .rough)
+        XCTAssertEqual(importedMorning.regret, .slightly)
+        XCTAssertEqual(importedMorning.again, .differently)
+        XCTAssertEqual(importedMorning.note, "Zu spät")
+        XCTAssertEqual(importedMorning.nextTime, "Wecker stellen")
 
         let importedEntries = try destinationContext.fetch(FetchDescriptor<Entry>())
         XCTAssertEqual(importedEntries.count, 1)

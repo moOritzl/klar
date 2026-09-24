@@ -139,7 +139,8 @@ struct KlarStore {
             name: name,
             unit: unit,
             colorIndex: existing.count,
-            sortOrder: existing.count
+            sortOrder: existing.count,
+            asksMorningAfter: SubstanceCatalog.asksMorningAfterByDefault(name)
         )
         context.insert(substance)
         save()
@@ -149,6 +150,88 @@ struct KlarStore {
     func archiveSubstance(_ substance: Substance) {
         substance.isArchived = true
         save()
+    }
+
+    // MARK: - Der Morgen danach
+
+    func allMorningAfters() -> [MorningAfter] {
+        (try? context.fetch(FetchDescriptor<MorningAfter>())) ?? []
+    }
+
+    func morningAfter(forDayKey key: String) -> MorningAfter? {
+        allMorningAfters().first { $0.dayKey == key }
+    }
+
+    /// The day the card should ask about now, if any (`MorningAfterService.dueDayKey`).
+    /// Archived substances still count: their entries happened.
+    func dueMorningAfterDay(now: Date = Date()) -> String? {
+        let asking = Set(allSubstances(includeArchived: true).filter(\.asksMorningAfter).map(\.id))
+        return MorningAfterService.dueDayKey(
+            entries: allEntries().map { $0.toDTO() },
+            askingSubstanceIDs: asking,
+            records: allMorningAfters().map { $0.toDTO() },
+            now: now,
+            nowTimezoneID: KlarDate.timezoneID
+        )
+    }
+
+    /// The entries filed under `key`, each read in its own timezone, oldest first.
+    func entries(onDayKey key: String) -> [Entry] {
+        allEntries()
+            .filter { LogicalDay.dayKey(for: $0.timestamp, timezoneID: $0.timezoneID) == key }
+            .sorted { $0.timestamp < $1.timestamp }
+    }
+
+    /// Writes whatever was answered. Nothing answered is still a record — a skip.
+    func recordMorningAfter(dayKey: String, body: MorningBody?, regret: MorningRegret?, again: MorningAgain?, note: String?) {
+        let record = morningRecord(forDayKey: dayKey)
+        record.body = body
+        record.regret = regret
+        record.again = again
+        record.note = Self.nonBlank(note)
+        record.recordedAt = Date()
+        save()
+    }
+
+    /// Makes sure the day is never asked about again. Leaves an existing record alone.
+    func skipMorningAfter(dayKey: String) {
+        guard morningAfter(forDayKey: dayKey) == nil else { return }
+        context.insert(MorningAfter(dayKey: dayKey))
+        save()
+    }
+
+    func recordReflection(dayKey: String, trigger: String?, wouldHaveHelped: String?, nextTime: String?) {
+        let record = morningRecord(forDayKey: dayKey)
+        record.trigger = Self.nonBlank(trigger)
+        record.wouldHaveHelped = Self.nonBlank(wouldHaveHelped)
+        record.nextTime = Self.nonBlank(nextTime)
+        save()
+    }
+
+    func morningPattern(for substance: Substance, contextTag: ContextTag? = nil) -> MorningPattern? {
+        MorningAfterService.pattern(
+            substanceID: substance.id,
+            contextTagID: contextTag?.id,
+            entries: allEntries().map { $0.toDTO() },
+            records: allMorningAfters().map { $0.toDTO() }
+        )
+    }
+
+    func setAsksMorningAfter(_ asks: Bool, for substance: Substance) {
+        substance.asksMorningAfter = asks
+        save()
+    }
+
+    private func morningRecord(forDayKey key: String) -> MorningAfter {
+        if let existing = morningAfter(forDayKey: key) { return existing }
+        let record = MorningAfter(dayKey: key)
+        context.insert(record)
+        return record
+    }
+
+    private static func nonBlank(_ text: String?) -> String? {
+        guard let trimmed = text?.trimmingCharacters(in: .whitespacesAndNewlines), !trimmed.isEmpty else { return nil }
+        return trimmed
     }
 
     // MARK: - Goals

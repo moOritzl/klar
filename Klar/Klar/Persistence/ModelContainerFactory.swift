@@ -10,7 +10,8 @@ enum ModelContainerFactory {
         ContextTag.self,
         GoalPeriod.self,
         SubstitutionAction.self,
-        WhyNote.self
+        WhyNote.self,
+        MorningAfter.self
     ])
 
     static func makeContainer(fileManager: FileManager = .default) -> ModelContainer {

@@ -71,6 +71,7 @@ enum ExportImportService {
         try context.delete(model: ContextTag.self)
         try context.delete(model: SubstitutionAction.self)
         try context.delete(model: WhyNote.self)
+        try context.delete(model: MorningAfter.self)
         try context.save()
     }
 
@@ -96,14 +97,15 @@ enum ExportImportService {
             contextTags: try context.fetch(FetchDescriptor<ContextTag>()).map { $0.toDTO() },
             goalPeriods: try context.fetch(FetchDescriptor<GoalPeriod>()).map { $0.toDTO() },
             substitutionActions: try context.fetch(FetchDescriptor<SubstitutionAction>()).map { $0.toDTO() },
-            whyNotes: try context.fetch(FetchDescriptor<WhyNote>()).map { $0.toDTO() }
+            whyNotes: try context.fetch(FetchDescriptor<WhyNote>()).map { $0.toDTO() },
+            morningAfters: try context.fetch(FetchDescriptor<MorningAfter>()).map { $0.toDTO() }
         )
     }
 
     private static func insert(_ export: KlarExport, into context: ModelContext) throws {
         var substanceByID: [UUID: Substance] = [:]
         for dto in export.substances {
-            let substance = Substance(id: dto.id, name: dto.name, unit: dto.unit, colorIndex: dto.colorIndex, costPerUnit: dto.costPerUnit, sortOrder: dto.sortOrder, isArchived: dto.isArchived)
+            let substance = Substance(id: dto.id, name: dto.name, unit: dto.unit, colorIndex: dto.colorIndex, costPerUnit: dto.costPerUnit, sortOrder: dto.sortOrder, isArchived: dto.isArchived, asksMorningAfter: dto.asksMorningAfter)
             context.insert(substance)
             substanceByID[dto.id] = substance
         }
@@ -143,6 +145,14 @@ enum ExportImportService {
 
         for dto in export.whyNotes {
             context.insert(WhyNote(id: dto.id, text: dto.text, createdAt: dto.createdAt))
+        }
+
+        for dto in export.morningAfters {
+            context.insert(MorningAfter(
+                id: dto.id, dayKey: dto.dayKey, body: dto.body, regret: dto.regret, again: dto.again,
+                note: dto.note, trigger: dto.trigger, wouldHaveHelped: dto.wouldHaveHelped,
+                nextTime: dto.nextTime, recordedAt: dto.recordedAt
+            ))
         }
 
         try context.save()

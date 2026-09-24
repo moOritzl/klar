@@ -154,6 +154,6 @@ struct DebugRootView: View {
     DebugRootView()
         .modelContainer(for: [
             Substance.self, Entry.self, ContextTag.self, GoalPeriod.self,
-            SubstitutionAction.self, WhyNote.self
+            SubstitutionAction.self, WhyNote.self, MorningAfter.self
         ], inMemory: true)
 }

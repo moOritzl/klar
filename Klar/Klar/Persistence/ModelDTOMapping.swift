@@ -3,7 +3,7 @@ import KlarCore
 
 extension Substance {
     func toDTO() -> SubstanceDTO {
-        SubstanceDTO(id: id, name: name, unit: unit, colorIndex: colorIndex, costPerUnit: costPerUnit, sortOrder: sortOrder, isArchived: isArchived)
+        SubstanceDTO(id: id, name: name, unit: unit, colorIndex: colorIndex, costPerUnit: costPerUnit, sortOrder: sortOrder, isArchived: isArchived, asksMorningAfter: asksMorningAfter)
     }
 }
 
@@ -46,5 +46,14 @@ extension SubstitutionAction {
 extension WhyNote {
     func toDTO() -> WhyNoteDTO {
         WhyNoteDTO(id: id, text: text, createdAt: createdAt)
+    }
+}
+
+extension MorningAfter {
+    func toDTO() -> MorningAfterDTO {
+        MorningAfterDTO(
+            id: id, dayKey: dayKey, body: body, regret: regret, again: again, note: note,
+            trigger: trigger, wouldHaveHelped: wouldHaveHelped, nextTime: nextTime, recordedAt: recordedAt
+        )
     }
 }

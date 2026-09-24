@@ -8,6 +8,7 @@ public struct SubstanceDTO: Codable, Identifiable, Sendable, Equatable {
     public var costPerUnitRaw: String?
     public var sortOrder: Int
     public var isArchived: Bool
+    public var asksMorningAfter: Bool
 
     public var costPerUnit: Decimal? {
         get { costPerUnitRaw.flatMap { Decimal(string: $0) } }
@@ -21,7 +22,8 @@ public struct SubstanceDTO: Codable, Identifiable, Sendable, Equatable {
         colorIndex: Int,
         costPerUnit: Decimal? = nil,
         sortOrder: Int,
-        isArchived: Bool = false
+        isArchived: Bool = false,
+        asksMorningAfter: Bool = true
     ) {
         self.id = id
         self.name = name
@@ -30,6 +32,7 @@ public struct SubstanceDTO: Codable, Identifiable, Sendable, Equatable {
         self.costPerUnitRaw = costPerUnit.map { "\($0)" }
         self.sortOrder = sortOrder
         self.isArchived = isArchived
+        self.asksMorningAfter = asksMorningAfter
     }
 }
 
@@ -150,6 +153,7 @@ public struct KlarExport: Codable, Sendable, Equatable {
     public var goalPeriods: [GoalPeriodDTO]
     public var substitutionActions: [SubstitutionActionDTO]
     public var whyNotes: [WhyNoteDTO]
+    public var morningAfters: [MorningAfterDTO]
 
     public init(
         schemaVersion: Int = KlarExport.currentSchemaVersion,
@@ -159,7 +163,8 @@ public struct KlarExport: Codable, Sendable, Equatable {
         contextTags: [ContextTagDTO] = [],
         goalPeriods: [GoalPeriodDTO] = [],
         substitutionActions: [SubstitutionActionDTO] = [],
-        whyNotes: [WhyNoteDTO] = []
+        whyNotes: [WhyNoteDTO] = [],
+        morningAfters: [MorningAfterDTO] = []
     ) {
         self.schemaVersion = schemaVersion
         self.exportedAt = exportedAt
@@ -169,6 +174,7 @@ public struct KlarExport: Codable, Sendable, Equatable {
         self.goalPeriods = goalPeriods
         self.substitutionActions = substitutionActions
         self.whyNotes = whyNotes
+        self.morningAfters = morningAfters
     }
 }
 

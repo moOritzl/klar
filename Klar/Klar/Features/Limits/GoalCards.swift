@@ -80,6 +80,27 @@ struct GoalCard: View {
                 .frame(maxWidth: .infinity)
                 .padding(.top, 12)
             }
+
+            Divider()
+                .overlay(Klar.borderSubtle)
+                .padding(.top, 14)
+                .padding(.bottom, 10)
+
+            Toggle(isOn: Binding(
+                get: { substance.asksMorningAfter },
+                set: { store.setAsksMorningAfter($0, for: substance) }
+            )) {
+                VStack(alignment: .leading, spacing: 1) {
+                    Text("Morgen danach fragen")
+                        .font(Klar.TypeScale.body)
+                        .foregroundStyle(Klar.text)
+                    Text("Eine kurze Karte am Morgen nach einem Tag mit Einträgen")
+                        .font(Klar.TypeScale.caption)
+                        .foregroundStyle(Klar.textTertiary)
+                }
+            }
+            .tint(Klar.accent)
+            .accessibilityIdentifier("limits.asksMorningAfter.\(substance.name)")
         }
         .task {
             monthlyLimit = goal?.monthlyLimit ?? 4

@@ -11,6 +11,7 @@ final class Substance {
     var costPerUnitRaw: String?
     var sortOrder: Int = 0
     var isArchived: Bool = false
+    var asksMorningAfter: Bool = true
 
     var unit: SubstanceUnit {
         get { SubstanceUnit(rawValue: unitRawValue) ?? .mg }
@@ -29,7 +30,8 @@ final class Substance {
         colorIndex: Int,
         costPerUnit: Decimal? = nil,
         sortOrder: Int,
-        isArchived: Bool = false
+        isArchived: Bool = false,
+        asksMorningAfter: Bool = true
     ) {
         self.id = id
         self.name = name
@@ -38,5 +40,6 @@ final class Substance {
         self.costPerUnitRaw = costPerUnit.map { "\($0)" }
         self.sortOrder = sortOrder
         self.isArchived = isArchived
+        self.asksMorningAfter = asksMorningAfter
     }
 }
