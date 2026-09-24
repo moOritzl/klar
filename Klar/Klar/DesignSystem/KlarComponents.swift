@@ -83,7 +83,7 @@ struct KlarRowDivider: View {
     }
 }
 
-/// The dark "the app speaks" card — new month banner (B3), plan suggestion (G2).
+/// The dark "the app speaks" card — the new month banner (B3).
 struct KlarInverseCard<Content: View>: View {
     var padding: CGFloat = 20
     @ViewBuilder var content: Content

@@ -147,11 +147,11 @@ struct TodayView: View {
             // content travels under the bar, and the default bounce stays so a quiet day can
             // still be dragged — that drag is what collapses the title.
             .background(Klar.bgSubtle)
-            // Not „Heute". The screen leads with a *monthly* quota and carries a standing plan
-            // underneath it, and only the third block is actually about today — so a title that
-            // promised one day forced the quota card to correct it („Diesen Monat") just to be
-            // read right. A scope-neutral title lets the three blocks name their own timeframe,
-            // which is why Health's tab is „Übersicht" and not „Heute" either.
+            // Not „Heute". The screen leads with a *monthly* quota, and only the second block is
+            // actually about today — so a title that promised one day forced the quota card to
+            // correct it („Diesen Monat") just to be read right. A scope-neutral title lets both
+            // blocks name their own timeframe, which is why Health's tab is „Übersicht" and not
+            // „Heute" either.
             .navigationTitle("Übersicht")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -173,8 +173,7 @@ struct TodayView: View {
     /// appears only inside that window, because only there does the date contradict the phone.
     ///
     /// It sits on the „Heute erfasst" header rather than on the screen, because that is what it
-    /// labels — the screen also carries a monthly quota and a standing plan, and neither of those
-    /// is dated today.
+    /// labels — the screen also carries a monthly quota, which isn't dated today either.
     private var dayLabel: String {
         let day = KlarDate.logicalDayLabel(now: today)
         return KlarDate.isBeforeCutoff(today) ? "\(day) · bis 5 Uhr" : day
