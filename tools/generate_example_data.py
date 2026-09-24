@@ -26,7 +26,7 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 # The app's own constants. See KlarCore/LogicalDay.swift and KlarExport.
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 CUTOFF_HOUR = 5
 TZ_NAME = "Europe/Berlin"
 TZ = ZoneInfo(TZ_NAME)
@@ -88,6 +88,7 @@ class Substance:
     sort_order: int
     cost: str | None = None
     archived: bool = False
+    asks_morning_after: bool = True
     id: str = field(default_factory=new_id)
 
     def dto(self) -> dict:
@@ -100,6 +101,7 @@ class Substance:
                 "costPerUnitRaw": self.cost,
                 "sortOrder": self.sort_order,
                 "isArchived": self.archived,
+                "asksMorningAfter": self.asks_morning_after,
             }
         )
 
@@ -170,45 +172,28 @@ class Goal:
 
 
 @dataclass
-class Plan:
-    tag: Tag
-    situation: str
-    action: str
-    committed: date
-    status: str
-    superseded_by: str | None = None
+class Morning:
+    day: date
+    body: str | None
+    regret: str | None
+    again: str | None
+    note: str | None = None
+    next_time: str | None = None
     id: str = field(default_factory=new_id)
 
     def dto(self) -> dict:
         return compact(
             {
                 "id": self.id,
-                "situationTagID": self.tag.id,
-                "situationText": self.situation,
-                "actionText": self.action,
-                "committedAt": iso(local(self.committed, 20, 30)),
-                "status": self.status,
-                "supersededBy": self.superseded_by,
+                "dayKey": self.day.isoformat(),
+                "body": self.body,
+                "regret": self.regret,
+                "again": self.again,
+                "note": self.note,
+                "nextTime": self.next_time,
+                "recordedAt": iso(local(self.day + timedelta(days=1), rng.randint(8, 11), rng.randint(0, 55))),
             }
         )
-
-
-@dataclass
-class CheckIn:
-    plan: Plan
-    entry: Entry
-    when: datetime
-    outcome: str
-    id: str = field(default_factory=new_id)
-
-    def dto(self) -> dict:
-        return {
-            "id": self.id,
-            "planID": self.plan.id,
-            "entryID": self.entry.id,
-            "date": iso(self.when),
-            "outcome": self.outcome,
-        }
 
 
 # --------------------------------------------------------------------------- #
@@ -221,8 +206,8 @@ class CheckIn:
 # carry a reduction goal, so the Today screen shows the combined quota card.
 SUBSTANCES = {
     "alkohol": Substance("Alkohol", "drink", 0, 0, cost="5.50"),
-    "nikotin": Substance("Nikotin", "piece", 1, 1, cost="0.45"),
-    "kaffee": Substance("Kaffee", "drink", 2, 2, cost="2.80"),
+    "nikotin": Substance("Nikotin", "piece", 1, 1, cost="0.45", asks_morning_after=False),
+    "kaffee": Substance("Kaffee", "drink", 2, 2, cost="2.80", asks_morning_after=False),
 }
 
 # The four built-in names must match ContextTagSeeder.builtInNames exactly, or the
@@ -406,12 +391,23 @@ def build(today: date, now_hour: int) -> dict:
 
     entries.sort(key=lambda entry: entry.when)
 
+    # Drinking alone at home after work, tagged the way the user tags it.
+    evening_start = first_day + timedelta(weeks=9)
+    for entry in entries:
+        if (
+            entry.substance is SUBSTANCES["alkohol"]
+            and entry.day >= evening_start
+            and TAGS["allein"] in entry.tags
+            and rng.random() < 0.8
+        ):
+            entry.tags = [TAGS["feierabend"]]
+
     # A couple of entries carry an edit stamp — someone corrected the dose later.
     for entry in rng.sample([e for e in entries if e.day < today - timedelta(days=14)], k=3):
         entry.edited = entry.when + timedelta(days=1, hours=rng.randint(1, 9))
 
     goals = build_goals(first_day, today)
-    plans, check_ins, review_decisions = build_plans_and_checkins(entries, first_day, monday, today)
+    mornings = build_mornings(entries, today)
 
     return {
         "schemaVersion": SCHEMA_VERSION,
@@ -420,8 +416,7 @@ def build(today: date, now_hour: int) -> dict:
         "entries": [entry.dto() for entry in entries],
         "contextTags": [tag.dto() for tag in TAGS.values()],
         "goalPeriods": [goal.dto() for goal in goals],
-        "plans": [plan.dto() for plan in plans],
-        "planCheckIns": [check_in.dto() for check_in in check_ins],
+        "morningAfters": [m.dto() for m in mornings],
         "substitutionActions": [
             {"id": new_id(), "text": text, "sortOrder": index}
             for index, text in enumerate(SUBSTITUTIONS)
@@ -430,8 +425,7 @@ def build(today: date, now_hour: int) -> dict:
             {"id": new_id(), "text": text, "createdAt": iso(local(today + timedelta(weeks=offset), 21, 10))}
             for offset, text in WHY_NOTES
         ],
-        "reviewDecisions": review_decisions,
-    }, entries, goals, plans, check_ins
+    }, entries, goals, mornings
 
 
 def weighted_mood(progress: float) -> int | None:
@@ -473,9 +467,8 @@ def pick_days(
 
 # A fixed wobble around the dose curve instead of a random one. Two numbers in this
 # file have to hold no matter which reference day is used: „Sozial" must stay the
-# dominant context (or E3 drops the „Plan dafür bauen?" offer at 50 %), and the most
-# recent week must sit below the one before it (or the trend card reads „↑"). Neither
-# survives being left to a sampler.
+# dominant context in E3, and the most recent week must sit below the one before it
+# (or the trend card reads „↑"). Neither survives being left to a sampler.
 WOBBLE = [0.3, -0.25, 0.1, -0.3, 0.25, -0.1]
 
 
@@ -565,8 +558,8 @@ def nicotine_occasion(day: date, progress: float, with_alcohol: bool) -> list[En
     one at 22:00 on a Friday you are out drinking is at the club. Deriving it from the
     index instead put „Club" on a Friday afternoon.
 
-    Never tagged „Sozial" or „Feierabend": those two belong to the active plans, and
-    every entry carrying one owes a check-in.
+    Never tagged „Sozial" or „Feierabend": those two are reserved for alcohol, so the
+    Feierabend retagging below only ever touches alcohol entries.
     """
     count = max(1, round(rng.gauss(3.6 - progress * 1.4, 1.0)))
     weekday = day.weekday() < 5
@@ -623,105 +616,34 @@ def build_goals(first_day: date, today: date) -> list[Goal]:
     ]
 
 
-def build_plans_and_checkins(
-    entries: list[Entry],
-    first_day: date,
-    monday: date,
-    today: date,
-) -> tuple[list[Plan], list[CheckIn], list[dict]]:
-    party_v1 = Plan(
-        tag=TAGS["sozial"],
-        situation="Auf einer Party",
-        action="Erst ein Wasser bestellen",
-        committed=first_day + timedelta(weeks=4),
-        status="archived",
+def build_mornings(entries: list[Entry], today: date) -> list[Morning]:
+    """Roughly 70 % of past alcohol evenings are answered, the rest skipped (a record with no
+    answers). Club and social nights come out rough more often than the others, so the entry
+    sheet has a context pattern to show. The newest evening stays open: that is the card
+    the app shows after the import."""
+    evenings = sorted(
+        {entry.day for entry in entries if entry.substance is SUBSTANCES["alkohol"] and entry.day < today}
     )
-    party_v2 = Plan(
-        tag=TAGS["sozial"],
-        situation="Auf einer Party",
-        action="Alkoholfreies Bier in der Hand behalten",
-        committed=first_day + timedelta(weeks=13),
-        status="active",
-    )
-    party_v1.superseded_by = party_v2.id
-
-    evening = Plan(
-        tag=TAGS["feierabend"],
-        situation="Der Tag ist vorbei und ich komme heim",
-        action="Zuerst 15 Minuten rausgehen",
-        committed=first_day + timedelta(weeks=9),
-        status="active",
-    )
-    # A plan the user pushed aside during the last review — paused, not deleted.
-    stress = Plan(
-        tag=TAGS["stress"],
-        situation="Der Tag kippt und ich merke Druck",
-        action="Drei Minuten Atmen, dann entscheiden",
-        committed=first_day + timedelta(weeks=6),
-        status="paused",
-    )
-
-    plans = [party_v1, party_v2, evening, stress]
-
-    # The Feierabend tag only exists once its plan does, so no entry predates it.
-    # Drinking alone at home after work is exactly the situation that plan is for.
-    evening_start = evening.committed
-    for entry in entries:
-        if (
-            entry.substance is SUBSTANCES["alkohol"]
-            and entry.day >= evening_start
-            and TAGS["allein"] in entry.tags
-            and rng.random() < 0.8
-        ):
-            entry.tags = [TAGS["feierabend"]]
-
-    # A check-in is due for every past entry carrying an active plan's situation
-    # tag, so every one of them needs an answer here — anything missed resurfaces
-    # as a pending check-in on launch. All but the newest are answered, which
-    # leaves exactly one waiting after the import (D1) instead of a queue.
-    watched = {TAGS["sozial"].id: (party_v1, party_v2), TAGS["feierabend"].id: (evening, evening)}
-    to_answer = [
-        entry
+    loud = {
+        entry.day
         for entry in entries
-        if entry.day < today and watched.keys() & {tag.id for tag in entry.tags}
-    ]
-    to_answer.pop()  # the newest one stays unanswered
-
-    check_ins: list[CheckIn] = []
-    for entry in to_answer:
-        tag_id = next(iter(watched.keys() & {tag.id for tag in entry.tags}))
-        early, late = watched[tag_id]
-        plan = early if entry.day < late.committed else late
-        # Success rate climbs over the timeline; "adjusted" is rare.
-        progress = (entry.day - first_day).days / max((today - first_day).days, 1)
-        outcome = rng.choices(
-            ["helped", "notHelped", "adjusted"],
-            weights=[0.5 + progress * 0.45, 0.42 - progress * 0.3, 0.08],
-        )[0]
-        check_ins.append(
-            CheckIn(
-                plan=plan,
-                entry=entry,
-                when=local(entry.day + timedelta(days=1), rng.randint(9, 20), rng.randint(0, 55)),
-                outcome=outcome,
-            )
-        )
-
-    # Weekly review decisions for the completed weeks. Mostly "keep" — the point
-    # of the review is that most weeks end in no change.
-    decisions: list[dict] = []
-    week = monday - timedelta(weeks=WEEKS_OF_HISTORY - 1)
-    while week < monday:
-        decisions.append(
-            {
-                "id": new_id(),
-                "weekStart": iso(midnight(week)),
-                "planDecision": rng.choices(["keep", "adjust", "pause"], weights=[0.7, 0.22, 0.08])[0],
-            }
-        )
-        week += timedelta(weeks=1)
-
-    return plans, check_ins, decisions
+        if entry.substance is SUBSTANCES["alkohol"] and {TAGS["club"].id, TAGS["sozial"].id} & {t.id for t in entry.tags}
+    }
+    mornings: list[Morning] = []
+    for day in evenings[:-1]:
+        if rng.random() > 0.7:
+            mornings.append(Morning(day, None, None, None))
+            continue
+        heavy = day in loud
+        body = rng.choices(["fine", "rough", "hungover"], weights=[2, 3, 5] if heavy else [6, 3, 1])[0]
+        regret = rng.choices(["no", "slightly", "yes"], weights=[4, 3, 3] if heavy else [8, 2, 1])[0]
+        again = {"yes": "differently", "slightly": "differently", "no": "yes"}[regret] if rng.random() < 0.8 else None
+        mornings.append(Morning(day, body, regret, again))
+    for morning in reversed(mornings):
+        if morning.regret == "yes":
+            morning.next_time = "Nach dem dritten Getränk auf Wasser umsteigen"
+            break
+    return mornings
 
 
 # --------------------------------------------------------------------------- #
@@ -729,7 +651,7 @@ def build_plans_and_checkins(
 # --------------------------------------------------------------------------- #
 
 
-def report(today: date, entries, goals, plans, check_ins) -> None:
+def report(today: date, entries, goals, mornings) -> None:
     """Re-derives, in Python, what the app's own calculators will show — so a
     generated file that would look broken on screen fails here instead."""
     problems: list[str] = []
@@ -828,34 +750,18 @@ def report(today: date, entries, goals, plans, check_ins) -> None:
     ranked = sorted(counts.items(), key=lambda item: -item[1])
     for name, count in ranked:
         print(f"    {name:<13} {count / total:>5.0%}")
-    if ranked[0][1] / total < 0.5:
-        problems.append(
-            f"kein Kontext über 50 % ({ranked[0][0]} bei {ranked[0][1] / total:.0%}) — "
-            "der „Plan dafür bauen?“-Vorschlag bleibt aus"
-        )
 
     print()
-    print("  Pläne (G1)")
-    for plan in plans:
-        tally = [c for c in check_ins if c.plan is plan]
-        helped = sum(1 for c in tally if c.outcome == "helped")
-        label = f"{helped}/{len(tally)} geholfen" if tally else "noch kein Check-in"
-        print(f"    {plan.status:<9} „{plan.situation}“ · {label}")
-
-    # PlanService.pendingCheckIns: an entry tagged with an *active* plan's situation
-    # tag, on a logical day before today, with no check-in — one is intentional.
-    answered = {check_in.entry.id for check_in in check_ins}
-    active_tags = {plan.tag.id for plan in plans if plan.status == "active"}
-    open_check_ins = [
-        entry
-        for entry in entries
-        if entry.day < today
-        and entry.id not in answered
-        and active_tags & {tag.id for tag in entry.tags}
-    ]
-    print(f"    offene Check-ins beim Start: {len(open_check_ins)}")
-    if len(open_check_ins) != 1:
-        problems.append(f"{len(open_check_ins)} offene Check-ins statt genau einem")
+    print("  Der Morgen danach")
+    answered = [m for m in mornings if m.body or m.regret or m.again]
+    print(f"    {len(answered)} beantwortet · {len(mornings) - len(answered)} übersprungen")
+    if len(answered) < 3:
+        problems.append("weniger als drei beantwortete Morgen — Übersicht zeigt kein Muster")
+    alcohol_days = {e.day for e in entries if e.substance is SUBSTANCES["alkohol"] and e.day < today}
+    recorded = {m.day for m in mornings}
+    open_days = sorted(alcohol_days - recorded)
+    if not open_days or open_days[-1] != max(alcohol_days):
+        problems.append("der jüngste Alkohol-Abend ist nicht offen — nach dem Import erscheint keine Karte")
 
     print()
     if problems:
@@ -875,11 +781,11 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    payload, entries, goals, plans, check_ins = build(args.today, args.now_hour)
+    payload, entries, goals, mornings = build(args.today, args.now_hour)
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n")
 
-    report(args.today, entries, goals, plans, check_ins)
+    report(args.today, entries, goals, mornings)
     print()
     print(f"Geschrieben: {args.out} ({args.out.stat().st_size / 1024:.0f} kB)")
 

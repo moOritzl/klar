@@ -192,4 +192,14 @@ final class ExportImportTests: XCTestCase {
         XCTAssertEqual(names, ["Bier"], "A failed restore must put the old store back")
         XCTAssertEqual(try destinationContext.fetchCount(FetchDescriptor<Entry>()), 1)
     }
+
+    /// The shipped example file must stay importable — it is what the screenshots are made from.
+    func testTheExampleFileDecodes() throws {
+        let url = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
+            .appendingPathComponent("examples/klar-beispieldaten.json")
+        let export = try ExportImportService.decode(Data(contentsOf: url))
+        XCTAssertEqual(export.schemaVersion, KlarExport.currentSchemaVersion)
+        XCTAssertFalse(export.morningAfters.isEmpty)
+    }
 }

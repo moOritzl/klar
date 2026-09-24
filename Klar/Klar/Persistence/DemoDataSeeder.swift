@@ -10,9 +10,9 @@ enum DemoDataSeeder {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = TimeZone(identifier: "Europe/Berlin")!
 
-        let coffee = Substance(name: "Kaffee", unit: .drink, colorIndex: 0, costPerUnit: Decimal(string: "3.00"), sortOrder: 0)
+        let coffee = Substance(name: "Kaffee", unit: .drink, colorIndex: 0, costPerUnit: Decimal(string: "3.00"), sortOrder: 0, asksMorningAfter: false)
         let alcohol = Substance(name: "Alkohol", unit: .drink, colorIndex: 1, costPerUnit: Decimal(string: "5.00"), sortOrder: 1)
-        let nicotine = Substance(name: "Nikotin", unit: .piece, colorIndex: 2, sortOrder: 2)
+        let nicotine = Substance(name: "Nikotin", unit: .piece, colorIndex: 2, sortOrder: 2, asksMorningAfter: false)
         for substance in [coffee, alcohol, nicotine] {
             context.insert(substance)
         }
@@ -63,6 +63,26 @@ enum DemoDataSeeder {
                 insertEntry(nicotine, day: day, hour: 20, tag: allein)
                 entryCount += 1
             }
+        }
+
+        // Answer most past alcohol evenings, so Übersicht and the entry sheet have a pattern.
+        // The newest one stays open: that is the card the demo shows on launch.
+        let alcoholDays = Set(
+            try context.fetch(FetchDescriptor<Entry>())
+                .filter { $0.substance?.id == alcohol.id }
+                .map { LogicalDay.dayKey(for: $0.timestamp, timezoneID: $0.timezoneID) }
+        )
+        let todayKey = LogicalDay.dayKey(for: now, timezoneID: "Europe/Berlin")
+        let answered = alcoholDays.filter { $0 < todayKey }.sorted().dropLast()
+        for (index, key) in answered.enumerated() {
+            let hungover = index % 3 != 1
+            context.insert(MorningAfter(
+                dayKey: key,
+                body: hungover ? .hungover : .fine,
+                regret: index % 3 == 0 ? .yes : .no,
+                again: hungover ? .differently : .yes,
+                nextTime: index == answered.count - 1 ? "Zwischendurch Wasser" : nil
+            ))
         }
 
         try context.save()
