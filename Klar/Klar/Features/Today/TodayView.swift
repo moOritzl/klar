@@ -10,6 +10,7 @@ struct TodayView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.scenePhase) private var scenePhase
     @Query private var entries: [Entry]
+    @Query private var morningAfters: [MorningAfter]
 
     @State private var isSettingsPresented = false
     @State private var entryBeingEdited: Entry?
@@ -36,6 +37,11 @@ struct TodayView: View {
     }
     private var quotaSubstances: [SubstanceQuota] {
         store.quotaSubstances()
+    }
+    private var morningRows: [MorningPatternRow] {
+        store.allSubstances().compactMap { substance in
+            store.morningPattern(for: substance).map { MorningPatternRow(substance: substance, pattern: $0) }
+        }
     }
 
     var body: some View {
@@ -80,6 +86,11 @@ struct TodayView: View {
                     } else if quotaSubstances.count > 1 {
                         MultiQuotaCard(quotas: quotaSubstances, month: today)
                             .padding(.bottom, 12)
+                    }
+
+                    if !morningRows.isEmpty {
+                        MorningPatternsCard(rows: morningRows)
+                            .padding(.bottom, 18)
                     }
 
                     if todaysEntries.isEmpty {

@@ -278,6 +278,18 @@ struct EntryDetailForm: View {
         contextTags.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
     }
 
+    /// The substance's morning-after pattern, narrowed to the first selected tag (in display
+    /// order) that has one of its own. Recomputed as tags are toggled.
+    private var morningPatternLine: String? {
+        guard let substance = entry.substance else { return nil }
+        for tag in sortedTags where selectedTagIDs.contains(tag.id) {
+            if let pattern = store.morningPattern(for: substance, contextTag: tag) {
+                return MorningPatternText.contextual(pattern, tagName: tag.name)
+            }
+        }
+        return store.morningPattern(for: substance).map { "Der Morgen danach · \(MorningPatternText.summary($0))" }
+    }
+
     /// 1 = Gut, 0 = Neutral, -1 = Mies. Stored as an Int so the scale can widen later without
     /// a migration.
     private let moods: [(value: Int, label: String)] = [
@@ -303,6 +315,14 @@ struct EntryDetailForm: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
+                    if let line = morningPatternLine {
+                        Text(line)
+                            .font(Klar.TypeScale.bodySmall)
+                            .foregroundStyle(Klar.textSecondary)
+                            .accessibilityIdentifier("entry.morningPattern")
+                            .padding(.bottom, 16)
+                    }
+
                     KlarSectionLabel(text: "Dosis (optional)", color: Klar.textSecondary)
                         .padding(.bottom, 8)
 
