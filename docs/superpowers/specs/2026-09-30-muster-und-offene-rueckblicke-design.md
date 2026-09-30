@@ -34,8 +34,9 @@ Lands first, without its own spec:
   `StatsSummary` gains `taggedEntryCount`. Bars no longer sum to 100 %. A caption under the bars
   reads „Basis: N Einträge mit Kontext".
 - **Kalender:** one dot per substance logged that day, in `Klar.substanceColor`, ordered by
-  `sortOrder`, at most three. `KlarStore.loggedDays(inMonthOf:)` returns
-  `[Date: [Substance]]`. The today cell keeps its dots in `Klar.bg`. VoiceOver names the
+  `sortOrder`, at most three. A new `KlarStore.loggedSubstances(inMonthOf:)` returns
+  `[Date: [Substance]]`, and `loggedDays(inMonthOf:)` becomes the set of its keys. The legend
+  lists the active substances with their colour. The today cell keeps its dots in `Klar.bg`. VoiceOver names the
   substances.
 
 Section 3.2 below reuses the new denominator.
@@ -123,8 +124,8 @@ stays for Übersicht and the entry sheet.
   - `canAnswerMorningAfter(dayKey:now:) -> Bool`
   - `morningDistribution(for:) -> MorningPattern?`, which is `pattern` with `limit: .max`,
     minimum 3
-  - `morningPatternsByContext(for:) -> [(ContextTag, MorningPattern)]`, with `limit: .max`,
-    minimum 3 per tag
+  - `morningPatternsByContext(for:) -> [UUID: MorningPattern]` (keyed by tag id), with
+    `limit: .max`, minimum 3 per tag
   - `sharedMorningDays(for:) -> [(Substance, Int)]`, ordered by count
   - `reflections(for:limit:) -> [MorningAfter]`: records of days with an entry of the substance
     and at least one non-empty `trigger`, `wouldHaveHelped` or `nextTime`, newest first
@@ -268,9 +269,11 @@ Order: quota cards, Offen card, Kurzmuster card, „Heute erfasst".
   - one open day (yesterday or the day before, no record), so the Offen card, the calendar ring
     and the pop-up can be seen;
   - at least one record with all three reflection answers.
-- **`tools/generate_example_data.py`:** make sure some answered days have two asking
-  substances. The file's dates lie in the past, so it has no open days. That is fine.
-  Regenerate `examples/klar-beispieldaten.json`.
+- **`DemoDataSeeder`, second asking substance:** the demo gains Cannabis (asks), logged on some
+  alcohol nights and on some evenings alone, so the mixed-use line has something to count.
+- **`tools/generate_example_data.py`:** unchanged. Its persona has one asking substance
+  (Alkohol), and a fourth substance would rewrite the story the file tells. It already
+  exercises reflections (`nextTime`). Mixed use is shown through the demo data only.
 
 ---
 
