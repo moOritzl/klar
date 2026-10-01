@@ -59,6 +59,19 @@ public enum LogicalDay: Sendable {
         return calendar.date(bySettingHour: cutoffHour, minute: 0, second: 0, of: next)
     }
 
+    /// The key of the calendar day before `key`. Pure date arithmetic in UTC, so no DST shift can
+    /// land it on the wrong day.
+    public static func previousDayKey(_ key: String) -> String? {
+        let parts = key.split(separator: "-").compactMap { Int($0) }
+        guard parts.count == 3 else { return nil }
+        let calendar = calendar(for: "UTC")
+        guard let day = calendar.date(from: DateComponents(year: parts[0], month: parts[1], day: parts[2])),
+              let previous = calendar.date(byAdding: .day, value: -1, to: day)
+        else { return nil }
+        let components = calendar.dateComponents([.year, .month, .day], from: previous)
+        return String(format: "%04d-%02d-%02d", components.year ?? 0, components.month ?? 0, components.day ?? 0)
+    }
+
     private static func calendar(for timezoneID: String) -> Calendar {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = TimeZone(identifier: timezoneID) ?? .current
