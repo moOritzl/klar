@@ -66,23 +66,33 @@ struct KlarStore {
             .sorted { $0.timestamp < $1.timestamp }
     }
 
-    /// The set of logical days in `month` that carry at least one entry — the calendar dots (E1).
+    /// Each logical day in `month` with an entry, and the substances logged on it — each once, in
+    /// `sortOrder`. A day whose entries have no substance maps to an empty list. The calendar
+    /// dots (E1).
     ///
     /// `date` is a month anchor from the calendar grid, so its calendar month is taken as given.
     /// Reading it through `monthComponents` instead would push a 00:00 anchor on the 1st back into
     /// the previous month, and the dots would then describe a different month than the grid drew.
-    func loggedDays(inMonthOf date: Date) -> Set<Date> {
+    func loggedSubstances(inMonthOf date: Date) -> [Date: [Substance]] {
         let anchor = KlarDate.calendar.dateComponents([.year, .month], from: date)
-        guard let year = anchor.year, let month = anchor.month else { return [] }
-        var days: Set<Date> = []
+        guard let year = anchor.year, let month = anchor.month else { return [:] }
+        var byDay: [Date: [Substance]] = [:]
         for entry in allEntries() {
             let day = KlarDate.logicalDay(for: entry.timestamp, timezoneID: entry.timezoneID)
             let components = KlarDate.calendar.dateComponents([.year, .month], from: day)
-            if components.year == year && components.month == month {
-                days.insert(day)
+            guard components.year == year && components.month == month else { continue }
+            var substances = byDay[day, default: []]
+            if let substance = entry.substance, !substances.contains(where: { $0.id == substance.id }) {
+                substances.append(substance)
             }
+            byDay[day] = substances
         }
-        return days
+        return byDay.mapValues { $0.sorted { $0.sortOrder < $1.sortOrder } }
+    }
+
+    /// The logical days in `month` that carry at least one entry.
+    func loggedDays(inMonthOf date: Date) -> Set<Date> {
+        Set(loggedSubstances(inMonthOf: date).keys)
     }
 
     @discardableResult

@@ -158,6 +158,7 @@ struct CalendarSectionView: View {
     /// invalidates the grid when an entry is added, so the day dots stay current. Deleting it
     /// silently stops the calendar updating.
     @Query private var entries: [Entry]
+    @Query private var substances: [Substance]
 
     /// The 1st of the visible month at 00:00, never a wall-clock moment: every derived number here
     /// (the dots, the two tiles, the cell dates) reads its calendar month off this anchor, and they
@@ -169,7 +170,9 @@ struct CalendarSectionView: View {
     private var store: KlarStore { KlarStore(context: modelContext) }
     private var calendar: Calendar { KlarDate.calendar }
 
-    private var loggedDays: Set<Date> { store.loggedDays(inMonthOf: visibleMonth) }
+    private var activeSubstances: [Substance] {
+        substances.filter { !$0.isArchived }.sorted { $0.sortOrder < $1.sortOrder }
+    }
 
     private var daysInMonth: Int {
         calendar.range(of: .day, in: .month, for: visibleMonth)?.count ?? 30
@@ -279,10 +282,12 @@ struct CalendarSectionView: View {
     }
 
     private var dayGrid: some View {
-        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 2), count: 7), spacing: 2) {
+        // Read once per render, not once per cell: every cell used to rescan all entries.
+        let logged = store.loggedSubstances(inMonthOf: visibleMonth)
+        return LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 2), count: 7), spacing: 2) {
             ForEach(cells) { cell in
                 if let day = cell.day {
-                    dayCell(day)
+                    dayCell(day, logged: logged)
                 } else {
                     Color.clear.frame(height: 38)
                 }
@@ -290,9 +295,9 @@ struct CalendarSectionView: View {
         }
     }
 
-    private func dayCell(_ day: Int) -> some View {
+    private func dayCell(_ day: Int, logged: [Date: [Substance]]) -> some View {
         let date = dayDate(day)
-        let hasEntries = date.map { loggedDays.contains($0) } ?? false
+        let substances = date.flatMap { logged[$0] }
         let isToday = date.map { $0 == KlarDate.logicalDay(for: Date()) } ?? false
         let isFuture = date.map { $0 > KlarDate.logicalDay(for: Date()) } ?? false
 
@@ -307,11 +312,18 @@ struct CalendarSectionView: View {
                     .font(Klar.TypeScale.bodySmall)
                     .foregroundStyle(dayColor(isToday: isToday, isFuture: isFuture))
 
-                if hasEntries {
-                    Circle()
-                        .fill(isToday ? Klar.bg : Klar.Palette.cyan600)
-                        .frame(width: 5, height: 5)
-                        .offset(y: 11)
+                if let substances {
+                    // One dot per substance, at most three — the cell is 38 pt tall. On the today
+                    // pill the colours would vanish into `Klar.text`, so they take the page colour.
+                    HStack(spacing: 2) {
+                        if substances.isEmpty {
+                            dot(isToday ? Klar.bg : Klar.Palette.cyan600)
+                        }
+                        ForEach(Array(substances.prefix(3))) { substance in
+                            dot(isToday ? Klar.bg : Klar.substanceColor(substance.colorIndex))
+                        }
+                    }
+                    .offset(y: 11)
                 }
             }
             .frame(height: 38)
@@ -319,7 +331,11 @@ struct CalendarSectionView: View {
         }
         .buttonStyle(.plain)
         .disabled(isFuture)
-        .accessibilityLabel(accessibilityLabel(day: day, hasEntries: hasEntries))
+        .accessibilityLabel(accessibilityLabel(day: day, substances: substances))
+    }
+
+    private func dot(_ color: Color) -> some View {
+        Circle().fill(color).frame(width: 5, height: 5)
     }
 
     private func dayColor(isToday: Bool, isFuture: Bool) -> Color {
@@ -329,23 +345,28 @@ struct CalendarSectionView: View {
         return isFuture ? Klar.borderStrong : Klar.text
     }
 
-    private func accessibilityLabel(day: Int, hasEntries: Bool) -> String {
-        "\(day). \(KlarDate.monthName(visibleMonth))" + (hasEntries ? ", erfasst" : ", eintragsfrei")
+    private func accessibilityLabel(day: Int, substances: [Substance]?) -> String {
+        let base = "\(day). \(KlarDate.monthName(visibleMonth))"
+        guard let substances else { return base + ", eintragsfrei" }
+        let names = substances.map(\.name)
+        return base + (names.isEmpty ? ", erfasst" : ", " + names.joined(separator: ", "))
     }
 
     private var legend: some View {
-        HStack(spacing: 18) {
+        KlarFlowLayout(spacing: 14) {
             HStack(spacing: 6) {
                 RoundedRectangle(cornerRadius: 3)
                     .fill(Klar.borderStrong)
                     .frame(width: 10, height: 10)
                 Text("Eintragsfrei")
             }
-            HStack(spacing: 6) {
-                Circle()
-                    .fill(Klar.Palette.cyan600)
-                    .frame(width: 10, height: 10)
-                Text("Erfasst")
+            ForEach(activeSubstances) { substance in
+                HStack(spacing: 6) {
+                    Circle()
+                        .fill(Klar.substanceColor(substance.colorIndex))
+                        .frame(width: 10, height: 10)
+                    Text(substance.name)
+                }
             }
         }
         .font(Klar.TypeScale.bodySmall)

@@ -1,5 +1,6 @@
 import XCTest
 import SwiftData
+import KlarCore
 @testable import Klar
 
 /// The calendar's currency is the *normalized* logical day (00:00 of the day), not a wall-clock
@@ -65,5 +66,18 @@ final class KlarStoreLogicalDayLookupTests: XCTestCase {
         let augustAnchor = try date(2026, 8, 1, 0)
         let logged = store.loggedDays(inMonthOf: augustAnchor)
         XCTAssertEqual(logged, [KlarDate.logicalDay(for: firstOfAugust)])
+    }
+
+    func testLoggedSubstancesListsEachSubstanceOnceInSortOrder() throws {
+        let alcohol = store.addSubstance(name: "Alkohol", unit: .drink)   // sortOrder 0
+        let cannabis = store.addSubstance(name: "Cannabis", unit: .g)     // sortOrder 1
+        store.addEntry(substance: cannabis, timestamp: try date(2026, 8, 3, 20))
+        store.addEntry(substance: alcohol, timestamp: try date(2026, 8, 3, 21))
+        store.addEntry(substance: alcohol, timestamp: try date(2026, 8, 3, 23))
+
+        let anchor = try date(2026, 8, 1, 0)
+        let day = KlarDate.logicalDay(for: try date(2026, 8, 3, 21))
+        XCTAssertEqual(store.loggedSubstances(inMonthOf: anchor)[day]?.map(\.name), ["Alkohol", "Cannabis"])
+        XCTAssertEqual(store.loggedDays(inMonthOf: anchor), [day])
     }
 }
