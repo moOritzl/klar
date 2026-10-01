@@ -41,4 +41,22 @@ final class MorningAfterUITests: XCTestCase {
         XCTAssertTrue(relaunched.staticTexts["Übersicht"].waitForExistence(timeout: 10))
         XCTAssertFalse(relaunched.staticTexts["morningAfter.header"].waitForExistence(timeout: 3))
     }
+
+    /// „Später" leaves the day open, and the card does not pop up again by itself.
+    @MainActor
+    func testLaterKeepsTheCardFromPoppingUpAgain() throws {
+        let app = XCUIApplication()
+        app.launchArguments = ["--klar-uitest-seed-yesterday"]
+        app.launch()
+
+        XCTAssertTrue(app.staticTexts["morningAfter.header"].waitForExistence(timeout: 10))
+        app.buttons["Später"].tap()
+        XCTAssertTrue(app.staticTexts["Übersicht"].waitForExistence(timeout: 5))
+
+        app.terminate()
+        let relaunched = XCUIApplication()
+        relaunched.launch()
+        XCTAssertTrue(relaunched.staticTexts["Übersicht"].waitForExistence(timeout: 10))
+        XCTAssertFalse(relaunched.staticTexts["morningAfter.header"].waitForExistence(timeout: 3))
+    }
 }

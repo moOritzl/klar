@@ -212,6 +212,7 @@ struct DataManagementView: View {
             try ContextTagSeeder.seedIfNeeded(context: modelContext)
             settings.supportContactName = nil
             settings.supportContactPhone = nil
+            settings.lastPresentedMorningDayKey = nil
             settings.resetForOnboarding()
             dismiss()
         } catch {

@@ -100,8 +100,6 @@ struct MainTabView: View {
     /// „Der Morgen danach" is the one moment the app speaks unprompted. Presented here, on top
     /// of the tabs, so whichever tab is showing cannot swallow it.
     @State private var dueMorning: DueMorning?
-    /// Kept apart from `dueMorning`, which is already `nil` by the time `onDismiss` runs.
-    @State private var presentedMorningKey: String?
 
     private var store: KlarStore { KlarStore(context: modelContext) }
 
@@ -144,11 +142,9 @@ struct MainTabView: View {
         .sheet(isPresented: $isEntrySheetPresented) {
             EntrySheetView()
         }
-        .sheet(item: $dueMorning, onDismiss: {
-            // Swiping the card away is a skip. After „Fertig" the record exists and this is a no-op.
-            if let key = presentedMorningKey { store.skipMorningAfter(dayKey: key) }
-            presentedMorningKey = nil
-        }) { due in
+        // Dismissing writes nothing: swiping the card away is „Später", and the day waits in
+        // „Offen". Only the card's own „Überspringen" records a skip.
+        .sheet(item: $dueMorning) { due in
             MorningAfterCardView(dayKey: due.dayKey)
                 .presentationBackground(.clear)
         }
@@ -175,16 +171,27 @@ struct MainTabView: View {
         // backgrounds sits above the lock too — that needs a window-level lock, not this guard.)
         let dueKey = store.dueMorningAfterDay()
         guard Self.shouldPresentMorning(
-            isLocked: isLocked, isEntrySheetPresented: isEntrySheetPresented, dueMorning: dueMorning, dueKey: dueKey
+            isLocked: isLocked,
+            isEntrySheetPresented: isEntrySheetPresented,
+            dueMorning: dueMorning,
+            dueKey: dueKey,
+            lastPresentedKey: settings.lastPresentedMorningDayKey
         ) else { return }
-        presentedMorningKey = dueKey
+        settings.lastPresentedMorningDayKey = dueKey
         dueMorning = dueKey.map(DueMorning.init)
     }
 
     /// Pulled out of `presentDueMorning()` so the guard is testable without `AppLockManager`'s
-    /// Face ID plumbing or a real `TabView`.
-    static func shouldPresentMorning(isLocked: Bool, isEntrySheetPresented: Bool, dueMorning: DueMorning?, dueKey: String?) -> Bool {
-        !isLocked && dueMorning == nil && !isEntrySheetPresented && dueKey != nil
+    /// Face ID plumbing or a real `TabView`. A day the card already popped up for is not
+    /// presented again — P9: every question is asked by itself once.
+    static func shouldPresentMorning(
+        isLocked: Bool,
+        isEntrySheetPresented: Bool,
+        dueMorning: DueMorning?,
+        dueKey: String?,
+        lastPresentedKey: String?
+    ) -> Bool {
+        !isLocked && dueMorning == nil && !isEntrySheetPresented && dueKey != nil && dueKey != lastPresentedKey
     }
 }
 

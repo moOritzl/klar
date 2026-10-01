@@ -4,10 +4,10 @@ import KlarCore
 
 /// „Der Morgen danach" (concept v3, module C).
 ///
-/// Asks about one logical day, once. Everything is optional and nothing is judged: no option is
-/// coloured, a good morning is not praised and a bad one is not commented on (P7, P8). What it
-/// collects comes back as a pattern, on Übersicht and in the entry sheet — the card is the
-/// input, not the point.
+/// Asks about one logical day. It pops up by itself once (see `MainTabView`); after that the
+/// same card opens from „Offen" and the day detail, for up to 72 h after the day ended, and shows
+/// what was already answered. Everything is optional and nothing is judged: no option is
+/// coloured, a good morning is not praised and a bad one is not commented on (P7, P8).
 struct MorningAfterCardView: View {
     let dayKey: String
 
@@ -20,14 +20,19 @@ struct MorningAfterCardView: View {
     @State private var note = ""
     @State private var isNoteOpen = false
     @State private var isReflecting = false
+    /// The record is read once. Reading it again when the reflection cover closes would throw
+    /// away whatever was tapped in the meantime.
+    @State private var hasLoaded = false
 
     private var store: KlarStore { KlarStore(context: modelContext) }
     private var dayEntries: [Entry] { store.entries(onDayKey: dayKey) }
+    private var wording: Wording { Wording(dayKey: dayKey, now: Date(), timezoneID: KlarDate.timezoneID) }
 
     private var header: String {
         guard let first = dayEntries.first else { return "Der Morgen danach" }
         let day = KlarDate.logicalDay(for: first.timestamp, timezoneID: first.timezoneID)
-        return "Der Morgen danach · \(KlarDate.weekdayName(day))"
+        let label = wording.isAboutYesterday ? KlarDate.weekdayName(day) : KlarDate.shortWeekdayDate(day)
+        return "Der Morgen danach · \(label)"
     }
 
     /// The day's substances, then its context tags, each once, in the order they were logged.
@@ -59,18 +64,18 @@ struct MorningAfterCardView: View {
 
                 VStack(alignment: .leading, spacing: 16) {
                     AnswerRow(
-                        question: "Wie geht's dir heute körperlich?",
-                        options: [(.fine, "gut"), (.rough, "angeschlagen"), (.hungover, "verkatert")],
+                        question: wording.bodyQuestion,
+                        options: MorningBody.allCases.map { ($0, $0.label) },
                         selection: $bodyAnswer
                     )
                     AnswerRow(
-                        question: "Bereust du etwas von gestern?",
-                        options: [(.no, "nein"), (.slightly, "ein bisschen"), (.yes, "ja")],
+                        question: wording.regretQuestion,
+                        options: MorningRegret.allCases.map { ($0, $0.label) },
                         selection: $regretAnswer
                     )
                     AnswerRow(
-                        question: "Würdest du es wieder so machen?",
-                        options: [(.yes, "ja"), (.differently, "anders"), (.no, "nein")],
+                        question: Wording.againQuestion,
+                        options: MorningAgain.allCases.map { ($0, $0.label) },
                         selection: $againAnswer
                     )
                 }
@@ -103,9 +108,16 @@ struct MorningAfterCardView: View {
                         save()
                         dismiss()
                     }
-                    KlarQuietButton(title: "Überspringen") {
-                        store.skipMorningAfter(dayKey: dayKey)
-                        dismiss()
+                    // „Später" writes nothing: the day stays in „Offen". „Überspringen" takes it
+                    // off that list; the day detail can still answer it.
+                    HStack(spacing: 10) {
+                        KlarQuietButton(title: "Später") {
+                            dismiss()
+                        }
+                        KlarQuietButton(title: "Überspringen") {
+                            store.skipMorningAfter(dayKey: dayKey)
+                            dismiss()
+                        }
                     }
                 }
                 .padding(.top, 22)
@@ -118,9 +130,21 @@ struct MorningAfterCardView: View {
         }
         .presentationBackground(.clear)
         .sensoryFeedback(.selection, trigger: [bodyAnswer?.rawValue, regretAnswer?.rawValue, againAnswer?.rawValue])
+        .onAppear(perform: loadExistingAnswers)
         .fullScreenCover(isPresented: $isReflecting) {
             MorningReflectionView(dayKey: dayKey) { dismiss() }
         }
+    }
+
+    private func loadExistingAnswers() {
+        guard !hasLoaded else { return }
+        hasLoaded = true
+        guard let record = store.morningAfter(forDayKey: dayKey) else { return }
+        bodyAnswer = record.body
+        regretAnswer = record.regret
+        againAnswer = record.again
+        note = record.note ?? ""
+        isNoteOpen = !note.isEmpty
     }
 
     private func save() {
@@ -128,10 +152,32 @@ struct MorningAfterCardView: View {
     }
 }
 
+extension MorningAfterCardView {
+    /// „heute" and „gestern" only when it really is the morning after. Answered later — from
+    /// „Offen" or the day detail — the questions speak of „dem Tag danach".
+    struct Wording: Equatable {
+        let isAboutYesterday: Bool
+
+        init(dayKey: String, now: Date, timezoneID: String) {
+            isAboutYesterday = LogicalDay.previousDayKey(LogicalDay.dayKey(for: now, timezoneID: timezoneID)) == dayKey
+        }
+
+        var bodyQuestion: String {
+            isAboutYesterday ? "Wie geht's dir heute körperlich?" : "Wie ging's dir am Tag danach körperlich?"
+        }
+
+        var regretQuestion: String {
+            isAboutYesterday ? "Bereust du etwas von gestern?" : "Bereust du etwas von dem Tag?"
+        }
+
+        static let againQuestion = "Würdest du es wieder so machen?"
+    }
+}
+
 /// A question over a three-way control with nothing preselected. Tapping the selected option
 /// again clears it, the same rule as the mood control in the entry sheet.
 private struct AnswerRow<Value: Hashable>: View {
-    let question: LocalizedStringKey
+    let question: String
     let options: [(value: Value, label: String)]
     @Binding var selection: Value?
 
