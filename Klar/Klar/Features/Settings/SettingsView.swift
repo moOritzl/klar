@@ -15,6 +15,7 @@ struct SettingsView: View {
     @State private var isEditingWhy = false
     @State private var isEditingContact = false
     @State private var isManagingSubstances = false
+    @State private var isEditingSubstitutions = false
     @State private var isShowingDataScreen = false
     @State private var lockUnavailable = false
 
@@ -86,8 +87,29 @@ struct SettingsView: View {
                         SettingsGroup {
                             SettingsNavigationRow(
                                 icon: "list.bullet",
-                                title: "Substanzen & Kosten"
+                                title: "Substanzen",
+                                subtitle: "Grenzen, Morgen danach, Kosten"
                             ) { isManagingSubstances = true }
+                            .accessibilityIdentifier("settings.substances")
+
+                            KlarRowDivider()
+
+                            SettingsNavigationRow(
+                                icon: "square.and.arrow.down",
+                                title: "Daten"
+                            ) { isShowingDataScreen = true }
+                        }
+                        .padding(.bottom, 16)
+
+                        KlarGroupHeader(text: "Craving-SOS")
+                            .padding(.bottom, 8)
+
+                        SettingsGroup {
+                            SettingsNavigationRow(
+                                icon: "arrow.triangle.swap",
+                                title: "Ersatzhandlungen"
+                            ) { isEditingSubstitutions = true }
+                            .accessibilityIdentifier("settings.substitutions")
 
                             KlarRowDivider()
 
@@ -104,13 +126,6 @@ struct SettingsView: View {
                                 title: "Vertrauensperson",
                                 subtitle: settings.supportContactName ?? "Für den Ein-Tap-Anruf im SOS"
                             ) { isEditingContact = true }
-
-                            KlarRowDivider()
-
-                            SettingsNavigationRow(
-                                icon: "square.and.arrow.down",
-                                title: "Daten"
-                            ) { isShowingDataScreen = true }
                         }
                         .padding(.bottom, 16)
 
@@ -146,6 +161,16 @@ struct SettingsView: View {
         .sheet(isPresented: $isEditingContact) { SupportContactSheet() }
         .sheet(isPresented: $isManagingSubstances) { SubstancesView() }
         .sheet(isPresented: $isShowingDataScreen) { DataManagementView() }
+        .sheet(isPresented: $isEditingSubstitutions) {
+            NavigationStack {
+                SubstitutionActionsView()
+                    .toolbar {
+                        ToolbarItem(placement: .confirmationAction) {
+                            Button("Fertig") { isEditingSubstitutions = false }
+                        }
+                    }
+            }
+        }
         .alert("Face ID nicht verfügbar", isPresented: $lockUnavailable) {
             Button("Verstanden", role: .cancel) {}
         } message: {
