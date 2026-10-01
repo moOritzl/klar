@@ -11,6 +11,10 @@ public struct StatsSummary: Sendable, Equatable {
     public let occasionFrequencyPerWeek: Double
     public let averageGapDays: Double?
     public let contextTagDistribution: [UUID: Int]
+    /// Entries of the substance with at least one context tag — the base the context
+    /// distribution divides by. An entry with two tags counts once here and once per tag in
+    /// `contextTagDistribution`, so the shares are per entry and need not add up to 100 %.
+    public let taggedEntryCount: Int
     public let daysSinceLastOccasion: Int?
 }
 
@@ -73,6 +77,8 @@ public enum StatsCalculator {
             }
         }
 
+        let taggedEntryCount = relevant.filter { !($0.contextTagIDs ?? []).isEmpty }.count
+
         var daysSinceLast: Int?
         if let lastOccasion = occasionDates.last {
             let referenceLogicalDate = LogicalDay.date(
@@ -87,6 +93,7 @@ public enum StatsCalculator {
             occasionFrequencyPerWeek: frequency,
             averageGapDays: averageGapDays,
             contextTagDistribution: tagCounts,
+            taggedEntryCount: taggedEntryCount,
             daysSinceLastOccasion: daysSinceLast
         )
     }

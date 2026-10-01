@@ -206,13 +206,15 @@ struct ContextDistributionCard: View {
     let summary: StatsSummary
     let tags: [ContextTag]
 
+    /// Share of the entries *with context* that carry each tag. Entries without context are left
+    /// out of the base: context is optional, and counting them would make every tag look rare.
     private var distribution: [(tag: ContextTag, count: Int, share: Double)] {
-        let total = summary.contextTagDistribution.values.reduce(0, +)
-        guard total > 0 else { return [] }
+        let base = summary.taggedEntryCount
+        guard base > 0 else { return [] }
         return summary.contextTagDistribution
             .compactMap { tagID, count -> (ContextTag, Int, Double)? in
                 guard let tag = tags.first(where: { $0.id == tagID }) else { return nil }
-                return (tag, count, Double(count) / Double(total))
+                return (tag, count, Double(count) / Double(base))
             }
             .sorted { $0.2 > $1.2 }
     }
@@ -252,6 +254,12 @@ struct ContextDistributionCard: View {
                     }
                     .padding(.bottom, index == distribution.count - 1 ? 0 : 12)
                 }
+                Text(summary.taggedEntryCount == 1
+                     ? "Basis: 1 Eintrag mit Kontext"
+                     : "Basis: \(summary.taggedEntryCount) Einträge mit Kontext")
+                    .font(Klar.TypeScale.caption)
+                    .foregroundStyle(Klar.textTertiary)
+                    .padding(.top, 12)
             }
         }
     }
