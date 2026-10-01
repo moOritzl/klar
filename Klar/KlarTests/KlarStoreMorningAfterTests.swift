@@ -104,4 +104,46 @@ final class KlarStoreMorningAfterTests: XCTestCase {
         store.setAsksMorningAfter(true, for: nikotin)
         XCTAssertNotNil(store.morningPattern(for: nikotin), "switching it back on brings the pattern back")
     }
+
+    private func evening(daysAgo: Int) -> Date {
+        let today = KlarDate.logicalDay(for: Date())
+        let day = KlarDate.calendar.date(byAdding: .day, value: -daysAgo, to: today)!
+        return KlarDate.calendar.date(bySettingHour: 21, minute: 0, second: 0, of: day)!
+    }
+
+    func testYesterdayStaysOpenUntilItHasARecord() {
+        let store = makeStore()
+        let alcohol = store.addSubstance(name: "Alkohol", unit: .drink)
+        let entry = store.addEntry(substance: alcohol, timestamp: yesterdayEvening())
+        let key = LogicalDay.dayKey(for: entry.timestamp, timezoneID: entry.timezoneID)
+
+        XCTAssertEqual(store.openMorningAfterDays(), [key])
+
+        store.skipMorningAfter(dayKey: key)
+        XCTAssertEqual(store.openMorningAfterDays(), [])
+        XCTAssertTrue(store.canAnswerMorningAfter(dayKey: key), "a skipped day can still be answered from the day detail")
+    }
+
+    func testAnsweringASkippedDayTurnsTheSkipIntoAnAnswer() throws {
+        let store = makeStore()
+        let alcohol = store.addSubstance(name: "Alkohol", unit: .drink)
+        let entry = store.addEntry(substance: alcohol, timestamp: yesterdayEvening())
+        let key = LogicalDay.dayKey(for: entry.timestamp, timezoneID: entry.timezoneID)
+
+        store.skipMorningAfter(dayKey: key)
+        store.recordMorningAfter(dayKey: key, body: .rough, regret: nil, again: nil, note: nil)
+
+        XCTAssertEqual(store.allMorningAfters().count, 1)
+        XCTAssertEqual(try XCTUnwrap(store.morningAfter(forDayKey: key)).body, .rough)
+    }
+
+    func testADayFiveDaysAgoCanNoLongerBeAnswered() {
+        let store = makeStore()
+        let alcohol = store.addSubstance(name: "Alkohol", unit: .drink)
+        let entry = store.addEntry(substance: alcohol, timestamp: evening(daysAgo: 5))
+        let key = LogicalDay.dayKey(for: entry.timestamp, timezoneID: entry.timezoneID)
+
+        XCTAssertFalse(store.canAnswerMorningAfter(dayKey: key))
+        XCTAssertEqual(store.openMorningAfterDays(), [])
+    }
 }

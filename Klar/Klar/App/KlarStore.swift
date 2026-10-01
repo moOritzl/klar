@@ -172,17 +172,43 @@ struct KlarStore {
         allMorningAfters().first { $0.dayKey == key }
     }
 
+    /// Substances whose days the card asks about. Archived substances still count: their
+    /// entries happened.
+    private var askingSubstanceIDs: Set<UUID> {
+        Set(allSubstances(includeArchived: true).filter(\.asksMorningAfter).map(\.id))
+    }
+
     /// The day the card should ask about now, if any (`MorningAfterService.dueDayKey`).
     /// Archived substances still count: their entries happened.
     func dueMorningAfterDay(now: Date = Date()) -> String? {
-        let asking = Set(allSubstances(includeArchived: true).filter(\.asksMorningAfter).map(\.id))
         return MorningAfterService.dueDayKey(
             entries: allEntries().map { $0.toDTO() },
-            askingSubstanceIDs: asking,
+            askingSubstanceIDs: askingSubstanceIDs,
             records: allMorningAfters().map { $0.toDTO() },
             now: now,
             nowTimezoneID: KlarDate.timezoneID
         )
+    }
+
+    /// „Offen": days that can still be answered and have no record, newest first.
+    func openMorningAfterDays(now: Date = Date()) -> [String] {
+        MorningAfterService.openDayKeys(
+            entries: allEntries().map { $0.toDTO() },
+            askingSubstanceIDs: askingSubstanceIDs,
+            records: allMorningAfters().map { $0.toDTO() },
+            now: now,
+            nowTimezoneID: KlarDate.timezoneID
+        )
+    }
+
+    /// Whether the day detail may answer or edit `dayKey` — skipped days included.
+    func canAnswerMorningAfter(dayKey: String, now: Date = Date()) -> Bool {
+        MorningAfterService.answerableDayKeys(
+            entries: allEntries().map { $0.toDTO() },
+            askingSubstanceIDs: askingSubstanceIDs,
+            now: now,
+            nowTimezoneID: KlarDate.timezoneID
+        ).contains(dayKey)
     }
 
     /// The entries filed under `key`, each read in its own timezone, oldest first.
