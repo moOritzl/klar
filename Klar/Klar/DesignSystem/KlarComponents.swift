@@ -264,7 +264,7 @@ struct KlarChip: View {
     }
 }
 
-/// Outlined variant used where chips sit on a tinted background (E3 filters, G3 tags).
+/// Outlined variant used where chips sit on a tinted background (Muster substance filter, onboarding suggestions).
 struct KlarOutlineChip: View {
     let text: String
     var isSelected: Bool = false
@@ -287,7 +287,7 @@ struct KlarOutlineChip: View {
 
 // MARK: - Segmented control
 
-/// The tinted-track segmented control (A3 goal type, E1 Kalender/Trends).
+/// The tinted-track segmented control (entry sheet, LimitEditor, Morgen-danach card, onboarding).
 struct KlarSegmentedControl<Value: Hashable>: View {
     let options: [(value: Value, label: String)]
     @Binding var selection: Value
@@ -371,7 +371,7 @@ struct KlarStepDots: View {
     }
 }
 
-/// Horizontal share bar used for the context distribution (E3).
+/// Horizontal share bar used for the context distribution (Muster tab, Kontext card).
 struct KlarShareBar: View {
     let fraction: Double
     let color: Color

@@ -26,6 +26,20 @@ enum KlarDate {
         )
     }
 
+    /// The morning-after key of a normalized logical day (00:00), as the calendar grid and the
+    /// day detail hold it. Not `LogicalDay.dayKey(for:)`, which would apply the cutoff again.
+    static func dayKey(forLogicalDay day: Date) -> String {
+        let components = calendar.dateComponents([.year, .month, .day], from: day)
+        return String(format: "%04d-%02d-%02d", components.year ?? 0, components.month ?? 0, components.day ?? 0)
+    }
+
+    /// The normalized logical day a morning-after key names.
+    static func date(fromDayKey key: String) -> Date? {
+        let parts = key.split(separator: "-").compactMap { Int($0) }
+        guard parts.count == 3 else { return nil }
+        return calendar.date(from: DateComponents(year: parts[0], month: parts[1], day: parts[2]))
+    }
+
     static func isToday(_ date: Date, timezoneID: String, now: Date = Date()) -> Bool {
         LogicalDay.isSameLogicalDay(date, timezoneID, now, KlarDate.timezoneID)
     }

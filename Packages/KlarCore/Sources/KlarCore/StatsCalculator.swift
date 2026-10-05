@@ -8,13 +8,23 @@ public struct WeeklyAverage: Sendable, Equatable {
 
 public struct StatsSummary: Sendable, Equatable {
     public let weeklyAverages: [WeeklyAverage]
+    /// Occasion days inside a window ending at the logical day of the reference date and at most
+    /// 56 days long (starting no earlier than the first occasion), divided by the window in weeks
+    /// floored at one — so it never exceeds 7 and it falls when the user stops.
     public let occasionFrequencyPerWeek: Double
     public let averageGapDays: Double?
     public let contextTagDistribution: [UUID: Int]
+    /// Entries of the substance with at least one context tag — the base the context
+    /// distribution divides by. An entry with two tags counts once here and once per tag in
+    /// `contextTagDistribution`, so the shares are per entry and need not add up to 100 %.
+    public let taggedEntryCount: Int
     public let daysSinceLastOccasion: Int?
 }
 
 public enum StatsCalculator {
+    /// Longest window, in days, that `occasionFrequencyPerWeek` looks back over (8 weeks).
+    private static let frequencyWindowDays = 56
+
     public static func summary(
         entries: [EntryDTO],
         substanceID: UUID,
@@ -58,12 +68,20 @@ public enum StatsCalculator {
         }
         let averageGapDays = gaps.isEmpty ? nil : gaps.reduce(0, +) / Double(gaps.count)
 
+        let referenceLogicalDate = LogicalDay.date(
+            from: LogicalDay.components(for: referenceDate, timezoneID: referenceTimezoneID),
+            timezoneID: referenceTimezoneID
+        )
+
         let frequency: Double
-        if let first = occasionDates.first, let last = occasionDates.last, last > first {
-            let totalWeeks = last.timeIntervalSince(first) / (7 * 86400)
-            frequency = totalWeeks > 0 ? Double(occasionDates.count) / totalWeeks : Double(occasionDates.count)
+        if let first = occasionDates.first {
+            let earliestStart = calendar.date(byAdding: .day, value: -(frequencyWindowDays - 1), to: referenceLogicalDate) ?? first
+            let windowStart = max(first, earliestStart)
+            let windowDays = (calendar.dateComponents([.day], from: windowStart, to: referenceLogicalDate).day ?? 0) + 1
+            let inWindow = occasionDates.filter { $0 >= windowStart && $0 <= referenceLogicalDate }.count
+            frequency = Double(inWindow) / max(1, Double(windowDays) / 7)
         } else {
-            frequency = Double(occasionDates.count)
+            frequency = 0
         }
 
         var tagCounts: [UUID: Int] = [:]
@@ -73,12 +91,10 @@ public enum StatsCalculator {
             }
         }
 
+        let taggedEntryCount = relevant.filter { !($0.contextTagIDs ?? []).isEmpty }.count
+
         var daysSinceLast: Int?
         if let lastOccasion = occasionDates.last {
-            let referenceLogicalDate = LogicalDay.date(
-                from: LogicalDay.components(for: referenceDate, timezoneID: referenceTimezoneID),
-                timezoneID: referenceTimezoneID
-            )
             daysSinceLast = calendar.dateComponents([.day], from: lastOccasion, to: referenceLogicalDate).day
         }
 
@@ -87,6 +103,7 @@ public enum StatsCalculator {
             occasionFrequencyPerWeek: frequency,
             averageGapDays: averageGapDays,
             contextTagDistribution: tagCounts,
+            taggedEntryCount: taggedEntryCount,
             daysSinceLastOccasion: daysSinceLast
         )
     }

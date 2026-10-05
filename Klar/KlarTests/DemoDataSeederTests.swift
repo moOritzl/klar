@@ -35,7 +35,20 @@ final class DemoDataSeederTests: XCTestCase {
 
         XCTAssertFalse(
             recordedDayKeys.contains(newestAlcoholDay),
-            "the newest alcohol evening must stay open, to exercise the never-asked-about-an-older-day path"
+            "the newest alcohol evening is the open day and must stay unrecorded"
         )
+    }
+
+    /// The demo must show every new surface: an open day, mixed use and written reflections.
+    func testSeedShowsAnOpenDayMixedUseAndReflections() throws {
+        let context = TestModelContainer.makeInMemoryContext()
+        try DemoDataSeeder.seed(context: context)
+        let store = KlarStore(context: context)
+
+        XCTAssertEqual(store.openMorningAfterDays().count, 1)
+        let alcohol = try XCTUnwrap(store.allSubstances().first { $0.name == "Alkohol" })
+        XCTAssertNotNil(store.morningDistribution(for: alcohol))
+        XCTAssertFalse(store.sharedMorningDays(for: alcohol).isEmpty)
+        XCTAssertFalse(store.reflections(for: alcohol).isEmpty)
     }
 }

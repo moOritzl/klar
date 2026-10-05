@@ -104,4 +104,91 @@ final class KlarStoreMorningAfterTests: XCTestCase {
         store.setAsksMorningAfter(true, for: nikotin)
         XCTAssertNotNil(store.morningPattern(for: nikotin), "switching it back on brings the pattern back")
     }
+
+    private func evening(daysAgo: Int) -> Date {
+        let today = KlarDate.logicalDay(for: Date())
+        let day = KlarDate.calendar.date(byAdding: .day, value: -daysAgo, to: today)!
+        return KlarDate.calendar.date(bySettingHour: 21, minute: 0, second: 0, of: day)!
+    }
+
+    func testYesterdayStaysOpenUntilItHasARecord() {
+        let store = makeStore()
+        let alcohol = store.addSubstance(name: "Alkohol", unit: .drink)
+        let entry = store.addEntry(substance: alcohol, timestamp: yesterdayEvening())
+        let key = LogicalDay.dayKey(for: entry.timestamp, timezoneID: entry.timezoneID)
+
+        XCTAssertEqual(store.openMorningAfterDays(), [key])
+
+        store.skipMorningAfter(dayKey: key)
+        XCTAssertEqual(store.openMorningAfterDays(), [])
+        XCTAssertTrue(store.canAnswerMorningAfter(dayKey: key), "a skipped day can still be answered from the day detail")
+    }
+
+    func testAnsweringASkippedDayTurnsTheSkipIntoAnAnswer() throws {
+        let store = makeStore()
+        let alcohol = store.addSubstance(name: "Alkohol", unit: .drink)
+        let entry = store.addEntry(substance: alcohol, timestamp: yesterdayEvening())
+        let key = LogicalDay.dayKey(for: entry.timestamp, timezoneID: entry.timezoneID)
+
+        store.skipMorningAfter(dayKey: key)
+        store.recordMorningAfter(dayKey: key, body: .rough, regret: nil, again: nil, note: nil)
+
+        XCTAssertEqual(store.allMorningAfters().count, 1)
+        XCTAssertEqual(try XCTUnwrap(store.morningAfter(forDayKey: key)).body, .rough)
+    }
+
+    func testADayFiveDaysAgoCanNoLongerBeAnswered() {
+        let store = makeStore()
+        let alcohol = store.addSubstance(name: "Alkohol", unit: .drink)
+        let entry = store.addEntry(substance: alcohol, timestamp: evening(daysAgo: 5))
+        let key = LogicalDay.dayKey(for: entry.timestamp, timezoneID: entry.timezoneID)
+
+        XCTAssertFalse(store.canAnswerMorningAfter(dayKey: key))
+        XCTAssertEqual(store.openMorningAfterDays(), [])
+    }
+
+    /// The Muster tab counts every answered day, not the newest five.
+    func testTheDistributionCountsAllAnsweredDays() throws {
+        let store = makeStore()
+        let alcohol = store.addSubstance(name: "Alkohol", unit: .drink)
+        for daysAgo in 10...16 {
+            let entry = store.addEntry(substance: alcohol, timestamp: evening(daysAgo: daysAgo))
+            store.recordMorningAfter(dayKey: LogicalDay.dayKey(for: entry.timestamp, timezoneID: entry.timezoneID), body: .rough, regret: nil, again: nil, note: nil)
+        }
+        XCTAssertEqual(try XCTUnwrap(store.morningDistribution(for: alcohol)).days, 7)
+
+        store.setAsksMorningAfter(false, for: alcohol)
+        XCTAssertNil(store.morningDistribution(for: alcohol))
+    }
+
+    func testSharedDaysNameTheOtherAskingSubstance() {
+        let store = makeStore()
+        let alcohol = store.addSubstance(name: "Alkohol", unit: .drink)
+        let cannabis = store.addSubstance(name: "Cannabis", unit: .g)
+        let entry = store.addEntry(substance: alcohol, timestamp: evening(daysAgo: 10))
+        store.addEntry(substance: cannabis, timestamp: evening(daysAgo: 10))
+        store.recordMorningAfter(dayKey: LogicalDay.dayKey(for: entry.timestamp, timezoneID: entry.timezoneID), body: .hungover, regret: nil, again: nil, note: nil)
+
+        let shared = store.sharedMorningDays(for: alcohol)
+        XCTAssertEqual(shared.map(\.substance.name), ["Cannabis"])
+        XCTAssertEqual(shared.map(\.days), [1])
+    }
+
+    func testReflectionsAreTheSubstancesDaysWithWrittenAnswersNewestFirst() {
+        let store = makeStore()
+        let alcohol = store.addSubstance(name: "Alkohol", unit: .drink)
+        let coffee = store.addSubstance(name: "Kaffee", unit: .drink)
+        let old = store.addEntry(substance: alcohol, timestamp: evening(daysAgo: 12))
+        let new = store.addEntry(substance: alcohol, timestamp: evening(daysAgo: 10))
+        let silent = store.addEntry(substance: alcohol, timestamp: evening(daysAgo: 11))
+        let other = store.addEntry(substance: coffee, timestamp: evening(daysAgo: 9))
+        func key(_ entry: Entry) -> String { LogicalDay.dayKey(for: entry.timestamp, timezoneID: entry.timezoneID) }
+
+        store.recordReflection(dayKey: key(old), trigger: "Stress", wouldHaveHelped: nil, nextTime: nil)
+        store.recordReflection(dayKey: key(new), trigger: nil, wouldHaveHelped: nil, nextTime: "Wasser")
+        store.recordMorningAfter(dayKey: key(silent), body: .fine, regret: nil, again: nil, note: nil)
+        store.recordReflection(dayKey: key(other), trigger: "Müde", wouldHaveHelped: nil, nextTime: nil)
+
+        XCTAssertEqual(store.reflections(for: alcohol).map(\.dayKey), [key(new), key(old)])
+    }
 }

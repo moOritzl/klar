@@ -70,17 +70,13 @@ final class ScreenshotTests: XCTestCase {
 
         // E1 · Verlauf · Kalender
         app.tabBars.buttons["Verlauf"].tap()
-        XCTAssertTrue(app.buttons["Kalender"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["Vorheriger Monat"].waitForExistence(timeout: 5))
         capture(app, "E1-Kalender")
 
-        // E3 · Trends
-        app.buttons["Trends"].tap()
-        capture(app, "E3-Trends")
-
-        // G · Grenzen
-        app.tabBars.buttons["Grenzen"].tap()
-        XCTAssertTrue(app.buttons["limits.substitutionsLink"].waitForExistence(timeout: 5))
-        capture(app, "G-Grenzen")
+        // M · Muster
+        app.tabBars.buttons["Muster"].tap()
+        XCTAssertTrue(app.buttons["patterns.substance.MDMA"].waitForExistence(timeout: 5))
+        capture(app, "M-Muster")
 
         // H1 · Hilfe
         app.tabBars.buttons["Hilfe"].tap()
@@ -129,6 +125,14 @@ final class ScreenshotTests: XCTestCase {
         app.buttons["Einstellungen"].tap()
         XCTAssertTrue(app.staticTexts["Einstellungen"].waitForExistence(timeout: 5))
         capture(app, "I1-Einstellungen")
+
+        // I2 · Substanzen, I3 · eine Substanz
+        app.buttons["settings.substances"].tap()
+        XCTAssertTrue(app.buttons["settings.substance.MDMA"].waitForExistence(timeout: 5))
+        capture(app, "I2-Substanzen")
+        app.buttons["settings.substance.MDMA"].tap()
+        XCTAssertTrue(app.staticTexts["Morgen danach fragen"].waitForExistence(timeout: 5))
+        capture(app, "I3-Substanz")
     }
 
     @MainActor
@@ -141,5 +145,21 @@ final class ScreenshotTests: XCTestCase {
         capture(app, "D-Morgen-danach")
         app.buttons["ja"].firstMatch.tap()
         capture(app, "D-Morgen-danach-bereut")
+
+        // B · Offen, E1 with the ring, E2 with „Rückblick nachtragen"
+        app.buttons["Später"].tap()
+        XCTAssertTrue(app.staticTexts["Übersicht"].waitForExistence(timeout: 5))
+        capture(app, "B-Offen")
+        app.tabBars.buttons["Verlauf"].tap()
+        XCTAssertTrue(app.buttons["Vorheriger Monat"].waitForExistence(timeout: 5))
+        capture(app, "E1-Kalender-offen")
+        // On the 1st of a month „yesterday" lies in the previous month: look there once.
+        let openDay = app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Rückblick offen")).firstMatch
+        if !openDay.waitForExistence(timeout: 2) {
+            app.buttons["Vorheriger Monat"].tap()
+        }
+        openDay.tap()
+        XCTAssertTrue(app.buttons["dayDetail.morning"].waitForExistence(timeout: 5))
+        capture(app, "E2-Tagesdetail-offen")
     }
 }

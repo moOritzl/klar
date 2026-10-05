@@ -8,7 +8,7 @@ import SwiftData
 /// there is history behind them — weeks of trend data, which is not
 /// something you can tap in by hand. Passing `--klar-demo-seed` wipes the
 /// store, seeds `DemoDataSeeder`'s neutral sample data (Kaffee, Alkohol,
-/// Nikotin) and skips onboarding.
+/// Nikotin, Cannabis) and skips onboarding.
 enum DemoModeSupport {
     static let argument = "--klar-demo-seed"
 

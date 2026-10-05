@@ -66,23 +66,33 @@ struct KlarStore {
             .sorted { $0.timestamp < $1.timestamp }
     }
 
-    /// The set of logical days in `month` that carry at least one entry — the calendar dots (E1).
+    /// Each logical day in `month` with an entry, and the substances logged on it — each once, in
+    /// `sortOrder`. A day whose entries have no substance maps to an empty list. The calendar
+    /// dots (E1).
     ///
     /// `date` is a month anchor from the calendar grid, so its calendar month is taken as given.
     /// Reading it through `monthComponents` instead would push a 00:00 anchor on the 1st back into
     /// the previous month, and the dots would then describe a different month than the grid drew.
-    func loggedDays(inMonthOf date: Date) -> Set<Date> {
+    func loggedSubstances(inMonthOf date: Date) -> [Date: [Substance]] {
         let anchor = KlarDate.calendar.dateComponents([.year, .month], from: date)
-        guard let year = anchor.year, let month = anchor.month else { return [] }
-        var days: Set<Date> = []
+        guard let year = anchor.year, let month = anchor.month else { return [:] }
+        var byDay: [Date: [Substance]] = [:]
         for entry in allEntries() {
             let day = KlarDate.logicalDay(for: entry.timestamp, timezoneID: entry.timezoneID)
             let components = KlarDate.calendar.dateComponents([.year, .month], from: day)
-            if components.year == year && components.month == month {
-                days.insert(day)
+            guard components.year == year && components.month == month else { continue }
+            var substances = byDay[day, default: []]
+            if let substance = entry.substance, !substances.contains(where: { $0.id == substance.id }) {
+                substances.append(substance)
             }
+            byDay[day] = substances
         }
-        return days
+        return byDay.mapValues { $0.sorted { $0.sortOrder < $1.sortOrder } }
+    }
+
+    /// The logical days in `month` that carry at least one entry.
+    func loggedDays(inMonthOf date: Date) -> Set<Date> {
+        Set(loggedSubstances(inMonthOf: date).keys)
     }
 
     @discardableResult
@@ -162,17 +172,43 @@ struct KlarStore {
         allMorningAfters().first { $0.dayKey == key }
     }
 
+    /// Substances whose days the card asks about. Archived substances still count: their
+    /// entries happened.
+    private var askingSubstanceIDs: Set<UUID> {
+        Set(allSubstances(includeArchived: true).filter(\.asksMorningAfter).map(\.id))
+    }
+
     /// The day the card should ask about now, if any (`MorningAfterService.dueDayKey`).
     /// Archived substances still count: their entries happened.
     func dueMorningAfterDay(now: Date = Date()) -> String? {
-        let asking = Set(allSubstances(includeArchived: true).filter(\.asksMorningAfter).map(\.id))
         return MorningAfterService.dueDayKey(
             entries: allEntries().map { $0.toDTO() },
-            askingSubstanceIDs: asking,
+            askingSubstanceIDs: askingSubstanceIDs,
             records: allMorningAfters().map { $0.toDTO() },
             now: now,
             nowTimezoneID: KlarDate.timezoneID
         )
+    }
+
+    /// „Offen": days that can still be answered and have no record, newest first.
+    func openMorningAfterDays(now: Date = Date()) -> [String] {
+        MorningAfterService.openDayKeys(
+            entries: allEntries().map { $0.toDTO() },
+            askingSubstanceIDs: askingSubstanceIDs,
+            records: allMorningAfters().map { $0.toDTO() },
+            now: now,
+            nowTimezoneID: KlarDate.timezoneID
+        )
+    }
+
+    /// Whether the day detail may answer or edit `dayKey` — skipped days included.
+    func canAnswerMorningAfter(dayKey: String, now: Date = Date()) -> Bool {
+        MorningAfterService.answerableDayKeys(
+            entries: allEntries().map { $0.toDTO() },
+            askingSubstanceIDs: askingSubstanceIDs,
+            now: now,
+            nowTimezoneID: KlarDate.timezoneID
+        ).contains(dayKey)
     }
 
     /// The entries filed under `key`, each read in its own timezone, oldest first.
@@ -218,6 +254,69 @@ struct KlarStore {
             contextTagID: contextTag?.id,
             entries: allEntries().map { $0.toDTO() },
             records: allMorningAfters().map { $0.toDTO() }
+        )
+    }
+
+    /// All answered days of the substance, not only the newest five — the Muster tab.
+    func morningDistribution(for substance: Substance) -> MorningPattern? {
+        guard substance.asksMorningAfter else { return nil }
+        return MorningAfterService.pattern(
+            substanceID: substance.id,
+            contextTagID: nil,
+            entries: allEntries().map { $0.toDTO() },
+            records: allMorningAfters().map { $0.toDTO() },
+            limit: .max
+        )
+    }
+
+    /// Per context tag, the pattern over all answered days with that tag — only tags with at
+    /// least three.
+    func morningPatternsByContext(for substance: Substance) -> [UUID: MorningPattern] {
+        guard substance.asksMorningAfter else { return [:] }
+        let entries = allEntries().map { $0.toDTO() }
+        let records = allMorningAfters().map { $0.toDTO() }
+        var result: [UUID: MorningPattern] = [:]
+        for tag in allContextTags() {
+            if let pattern = MorningAfterService.pattern(
+                substanceID: substance.id, contextTagID: tag.id, entries: entries, records: records, limit: .max
+            ) {
+                result[tag.id] = pattern
+            }
+        }
+        return result
+    }
+
+    /// The other asking substances logged on this substance's answered days, most shared first.
+    func sharedMorningDays(for substance: Substance) -> [(substance: Substance, days: Int)] {
+        guard substance.asksMorningAfter else { return [] }
+        let all = allSubstances(includeArchived: true)
+        let counts = MorningAfterService.sharedDays(
+            substanceID: substance.id,
+            askingSubstanceIDs: askingSubstanceIDs,
+            entries: allEntries().map { $0.toDTO() },
+            records: allMorningAfters().map { $0.toDTO() }
+        )
+        return counts
+            .compactMap { id, days in all.first { $0.id == id }.map { (substance: $0, days: days) } }
+            .sorted { $0.days != $1.days ? $0.days > $1.days : $0.substance.sortOrder < $1.substance.sortOrder }
+    }
+
+    /// Records of this substance's days that carry at least one written reflection, newest first.
+    func reflections(for substance: Substance, limit: Int = 5) -> [MorningAfter] {
+        guard substance.asksMorningAfter else { return [] }
+        let days = Set(
+            allEntries()
+                .filter { $0.substance?.id == substance.id }
+                .map { LogicalDay.dayKey(for: $0.timestamp, timezoneID: $0.timezoneID) }
+        )
+        return Array(
+            allMorningAfters()
+                .filter { days.contains($0.dayKey) }
+                .filter {
+                    !MorningPatternText.reflectionLines(trigger: $0.trigger, wouldHaveHelped: $0.wouldHaveHelped, nextTime: $0.nextTime).isEmpty
+                }
+                .sorted { $0.dayKey > $1.dayKey }
+                .prefix(limit)
         )
     }
 

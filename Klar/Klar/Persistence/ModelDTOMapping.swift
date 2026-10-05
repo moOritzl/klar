@@ -3,7 +3,7 @@ import KlarCore
 
 extension Substance {
     func toDTO() -> SubstanceDTO {
-        SubstanceDTO(id: id, name: name, unit: unit, colorIndex: colorIndex, costPerUnit: costPerUnit, sortOrder: sortOrder, isArchived: isArchived, asksMorningAfter: asksMorningAfter)
+        SubstanceDTO(id: id, name: name, unit: unit, colorIndex: colorIndex, sortOrder: sortOrder, isArchived: isArchived, asksMorningAfter: asksMorningAfter)
     }
 }
 

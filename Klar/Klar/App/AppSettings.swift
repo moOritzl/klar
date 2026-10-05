@@ -38,6 +38,7 @@ final class AppSettings {
         self.counselingCity = defaults.string(forKey: Keys.counselingCity) ?? "Berlin"
         self.supportContactName = defaults.string(forKey: Keys.supportContactName)
         self.supportContactPhone = defaults.string(forKey: Keys.supportContactPhone)
+        self.lastPresentedMorningDayKey = defaults.string(forKey: Keys.lastPresentedMorningDayKey)
         // No stored value means System, so existing installs adopt the default without a migration.
         self.appearance = AppAppearance(
             rawValue: defaults.string(forKey: Keys.appearance) ?? ""
@@ -75,6 +76,13 @@ final class AppSettings {
         didSet { defaults.set(supportContactPhone, forKey: Keys.supportContactPhone) }
     }
 
+    /// The last day „Der Morgen danach" presented itself for. The card pops up once per day;
+    /// after that the day is reachable from „Offen" and the day detail only. Device state: after
+    /// an import on a new phone the card may pop up once more, which is harmless.
+    var lastPresentedMorningDayKey: String? {
+        didSet { defaults.set(lastPresentedMorningDayKey, forKey: Keys.lastPresentedMorningDayKey) }
+    }
+
     func resetForOnboarding() {
         hasCompletedOnboarding = false
     }
@@ -87,5 +95,6 @@ final class AppSettings {
         static let autoLockDelay = "klar.autoLockDelay"
         static let appearance = "klar.appearance"
         static let counselingCity = "klar.counselingCity"
+        static let lastPresentedMorningDayKey = "klar.lastPresentedMorningDayKey"
     }
 }

@@ -2,91 +2,37 @@ import SwiftUI
 import SwiftData
 import KlarCore
 
-/// E1–E3 · Tab „Verlauf".
+/// E1–E2 · Tab „Verlauf": open reviews, the calendar, and what each day held.
 ///
-/// Making patterns visible is the mechanism — not keeping a chronicle. Every number here answers
-/// a question the user could act on, and the only reference point is their own baseline (never a
-/// norm; see concept § 3, P4/P7).
-///
-/// Deviation from the draft: the draft's segmented control has two segments (Kalender /
-/// Rückblick). The weekly review is gone (concept v3), and „Trends" (E3) takes the second
-/// segment.
+/// Trends moved into the tab „Muster" with the morning-after evaluation. What is left here is
+/// the record itself, so the segmented control and the section swipe went with them.
 struct HistoryView: View {
-    enum Section: Hashable, CaseIterable {
-        case calendar, trends
-    }
+    @Environment(\.modelContext) private var modelContext
+    // Unread: they redraw „Offen" when an entry or an answer lands.
+    @Query private var entries: [Entry]
+    @Query private var morningAfters: [MorningAfter]
 
-    @State private var section: Section = .calendar
-    /// Which way the next section change slides. Set before the change so the animation follows
-    /// the swipe instead of always entering from the same side.
-    @State private var isAdvancing = true
+    @State private var openedMorning: DueMorning?
+
+    private var store: KlarStore { KlarStore(context: modelContext) }
 
     var body: some View {
         NavigationStack {
             KlarScreen(title: "Verlauf") {
                 VStack(alignment: .leading, spacing: 0) {
-                    KlarSegmentedControl(
-                        options: [
-                            (Section.calendar, "Kalender"),
-                            (Section.trends, "Trends")
-                        ],
-                        selection: Binding(get: { section }, set: { select($0) })
-                    )
-                    .padding(.bottom, Klar.Space.x5)
-
-                    sectionContent
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .id(section)
-                        .transition(.asymmetric(
-                            insertion: .move(edge: isAdvancing ? .trailing : .leading).combined(with: .opacity),
-                            removal: .move(edge: isAdvancing ? .leading : .trailing).combined(with: .opacity)
-                        ))
+                    let openDays = store.openMorningAfterDays()
+                    if !openDays.isEmpty {
+                        OpenMorningsCard(dayKeys: openDays) { openedMorning = DueMorning(dayKey: $0) }
+                            .padding(.bottom, 16)
+                    }
+                    CalendarSectionView()
                 }
             }
-            // Swiping anywhere the content does not claim — which on a short month is most of the
-            // screen — moves between the three sections. The segments stay because a bare gesture
-            // is undiscoverable and unreachable with VoiceOver; this is the shortcut, not the only
-            // way.
-            //
-            // `simultaneousGesture`, not `gesture`: the direction test only runs in `onEnded`, so
-            // an exclusive gesture claims every drag — including vertical ones — for the whole
-            // time the finger is down, and the scroll view never sees them. The page simply did
-            // not scroll. It also sits inside the `NavigationStack` so it cannot cover the bar.
-            .simultaneousGesture(
-                DragGesture(minimumDistance: 30)
-                    .onEnded { value in
-                        guard abs(value.translation.width) > abs(value.translation.height) else { return }
-                        shiftSection(value.translation.width < 0 ? 1 : -1)
-                    }
-            )
         }
-    }
-
-    @ViewBuilder
-    private var sectionContent: some View {
-        switch section {
-        case .calendar: CalendarSectionView()
-        case .trends: TrendsSectionView()
+        .sheet(item: $openedMorning) { due in
+            MorningAfterCardView(dayKey: due.dayKey)
+                .presentationBackground(.clear)
         }
-    }
-
-    private func select(_ next: Section) {
-        guard next != section,
-              let from = Section.allCases.firstIndex(of: section),
-              let to = Section.allCases.firstIndex(of: next)
-        else { return }
-        isAdvancing = to > from
-        withAnimation(.easeInOut(duration: 0.25)) { section = next }
-    }
-
-    /// Refuses to wrap around: swiping past the last section does nothing, so the ends of the
-    /// range stay felt rather than looping the user back to the start.
-    private func shiftSection(_ delta: Int) {
-        let all = Section.allCases
-        guard let index = all.firstIndex(of: section) else { return }
-        let target = index + delta
-        guard all.indices.contains(target) else { return }
-        select(all[target])
     }
 }
 
@@ -158,6 +104,9 @@ struct CalendarSectionView: View {
     /// invalidates the grid when an entry is added, so the day dots stay current. Deleting it
     /// silently stops the calendar updating.
     @Query private var entries: [Entry]
+    @Query private var substances: [Substance]
+    // Unread: redraws the open-day rings when a day is answered.
+    @Query private var morningAfters: [MorningAfter]
 
     /// The 1st of the visible month at 00:00, never a wall-clock moment: every derived number here
     /// (the dots, the two tiles, the cell dates) reads its calendar month off this anchor, and they
@@ -169,7 +118,9 @@ struct CalendarSectionView: View {
     private var store: KlarStore { KlarStore(context: modelContext) }
     private var calendar: Calendar { KlarDate.calendar }
 
-    private var loggedDays: Set<Date> { store.loggedDays(inMonthOf: visibleMonth) }
+    private var activeSubstances: [Substance] {
+        substances.filter { !$0.isArchived }.sorted { $0.sortOrder < $1.sortOrder }
+    }
 
     private var daysInMonth: Int {
         calendar.range(of: .day, in: .month, for: visibleMonth)?.count ?? 30
@@ -279,10 +230,13 @@ struct CalendarSectionView: View {
     }
 
     private var dayGrid: some View {
-        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 2), count: 7), spacing: 2) {
+        // Read once per render, not once per cell: every cell used to rescan all entries.
+        let logged = store.loggedSubstances(inMonthOf: visibleMonth)
+        let open = Set(store.openMorningAfterDays().compactMap(KlarDate.date(fromDayKey:)))
+        return LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 2), count: 7), spacing: 2) {
             ForEach(cells) { cell in
                 if let day = cell.day {
-                    dayCell(day)
+                    dayCell(day, logged: logged, open: open)
                 } else {
                     Color.clear.frame(height: 38)
                 }
@@ -290,11 +244,12 @@ struct CalendarSectionView: View {
         }
     }
 
-    private func dayCell(_ day: Int) -> some View {
+    private func dayCell(_ day: Int, logged: [Date: [Substance]], open: Set<Date>) -> some View {
         let date = dayDate(day)
-        let hasEntries = date.map { loggedDays.contains($0) } ?? false
+        let substances = date.flatMap { logged[$0] }
         let isToday = date.map { $0 == KlarDate.logicalDay(for: Date()) } ?? false
         let isFuture = date.map { $0 > KlarDate.logicalDay(for: Date()) } ?? false
+        let isOpen = date.map { open.contains($0) } ?? false
 
         return Button {
             if let date, !isFuture { selectedDay = date }
@@ -303,15 +258,26 @@ struct CalendarSectionView: View {
                 if isToday {
                     Circle().fill(Klar.text)
                 }
+                if isOpen {
+                    // Today is never open, so the ring cannot collide with the today pill.
+                    Circle().strokeBorder(Klar.borderStrong, lineWidth: 1)
+                }
                 Text("\(day)")
                     .font(Klar.TypeScale.bodySmall)
                     .foregroundStyle(dayColor(isToday: isToday, isFuture: isFuture))
 
-                if hasEntries {
-                    Circle()
-                        .fill(isToday ? Klar.bg : Klar.Palette.cyan600)
-                        .frame(width: 5, height: 5)
-                        .offset(y: 11)
+                if let substances {
+                    // One dot per substance, at most three — the cell is 38 pt tall. On the today
+                    // pill the colours would vanish into `Klar.text`, so they take the page colour.
+                    HStack(spacing: 2) {
+                        if substances.isEmpty {
+                            dot(isToday ? Klar.bg : Klar.Palette.cyan600)
+                        }
+                        ForEach(Array(substances.prefix(3))) { substance in
+                            dot(isToday ? Klar.bg : Klar.substanceColor(substance.colorIndex))
+                        }
+                    }
+                    .offset(y: 11)
                 }
             }
             .frame(height: 38)
@@ -319,7 +285,11 @@ struct CalendarSectionView: View {
         }
         .buttonStyle(.plain)
         .disabled(isFuture)
-        .accessibilityLabel(accessibilityLabel(day: day, hasEntries: hasEntries))
+        .accessibilityLabel(accessibilityLabel(day: day, substances: substances) + (isOpen ? ", Rückblick offen" : ""))
+    }
+
+    private func dot(_ color: Color) -> some View {
+        Circle().fill(color).frame(width: 5, height: 5)
     }
 
     private func dayColor(isToday: Bool, isFuture: Bool) -> Color {
@@ -329,23 +299,28 @@ struct CalendarSectionView: View {
         return isFuture ? Klar.borderStrong : Klar.text
     }
 
-    private func accessibilityLabel(day: Int, hasEntries: Bool) -> String {
-        "\(day). \(KlarDate.monthName(visibleMonth))" + (hasEntries ? ", erfasst" : ", eintragsfrei")
+    private func accessibilityLabel(day: Int, substances: [Substance]?) -> String {
+        let base = "\(day). \(KlarDate.monthName(visibleMonth))"
+        guard let substances else { return base + ", eintragsfrei" }
+        let names = substances.map(\.name)
+        return base + (names.isEmpty ? ", erfasst" : ", " + names.joined(separator: ", "))
     }
 
     private var legend: some View {
-        HStack(spacing: 18) {
+        KlarFlowLayout(spacing: 14) {
             HStack(spacing: 6) {
                 RoundedRectangle(cornerRadius: 3)
                     .fill(Klar.borderStrong)
                     .frame(width: 10, height: 10)
                 Text("Eintragsfrei")
             }
-            HStack(spacing: 6) {
-                Circle()
-                    .fill(Klar.Palette.cyan600)
-                    .frame(width: 10, height: 10)
-                Text("Erfasst")
+            ForEach(activeSubstances) { substance in
+                HStack(spacing: 6) {
+                    Circle()
+                        .fill(Klar.substanceColor(substance.colorIndex))
+                        .frame(width: 10, height: 10)
+                    Text(substance.name)
+                }
             }
         }
         .font(Klar.TypeScale.bodySmall)
@@ -387,15 +362,23 @@ struct DayDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     @Query private var allEntries: [Entry]
+    @Query private var morningAfters: [MorningAfter]
 
     @State private var entryBeingEdited: Entry?
     @State private var isAddingEntry = false
+    @State private var openedMorning: DueMorning?
 
     private var store: KlarStore { KlarStore(context: modelContext) }
 
     private var entries: [Entry] {
         store.entries(onLogicalDay: day)
     }
+
+    /// Not `LogicalDay.dayKey(for: day)`: `day` is already normalized to 00:00, and the cutoff
+    /// would move it to the day before.
+    private var dayKey: String { KlarDate.dayKey(forLogicalDay: day) }
+    private var morningRecord: MorningAfter? { store.morningAfter(forDayKey: dayKey) }
+    private var canAnswerMorning: Bool { store.canAnswerMorningAfter(dayKey: dayKey) }
 
     var body: some View {
         NavigationStack {
@@ -414,6 +397,13 @@ struct DayDetailView: View {
                         isAddingEntry = true
                     }
                     .padding(.top, 12)
+
+                    if morningRecord != nil || canAnswerMorning {
+                        MorningAfterDayBlock(record: morningRecord, canAnswer: canAnswerMorning) {
+                            openedMorning = DueMorning(dayKey: dayKey)
+                        }
+                        .padding(.top, 20)
+                    }
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, Klar.Space.x2)
@@ -434,6 +424,10 @@ struct DayDetailView: View {
         .sheet(isPresented: $isAddingEntry) {
             // Back-filling a past day: keep the day, default the time to now-of-that-day.
             EntrySheetView(timestamp: backfillTimestamp)
+        }
+        .sheet(item: $openedMorning) { due in
+            MorningAfterCardView(dayKey: due.dayKey)
+                .presentationBackground(.clear)
         }
     }
 

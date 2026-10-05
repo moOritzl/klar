@@ -7,7 +7,7 @@ final class ExportImportTests: XCTestCase {
     func testJSONRoundTripRestoresIdenticalDatabase() throws {
         let sourceContext = TestModelContainer.makeInMemoryContext()
 
-        let substance = Substance(name: "Kaffee", unit: .drink, colorIndex: 2, costPerUnit: Decimal(string: "2.50"), sortOrder: 0)
+        let substance = Substance(name: "Kaffee", unit: .drink, colorIndex: 2, sortOrder: 0)
         sourceContext.insert(substance)
 
         let tag = ContextTag(name: "Zuhause", isBuiltIn: true)
@@ -50,7 +50,6 @@ final class ExportImportTests: XCTestCase {
         XCTAssertEqual(importedSubstance.id, substance.id)
         XCTAssertEqual(importedSubstance.name, "Kaffee")
         XCTAssertEqual(importedSubstance.unit, .drink)
-        XCTAssertEqual(importedSubstance.costPerUnit, Decimal(string: "2.50"))
         XCTAssertFalse(importedSubstance.asksMorningAfter)
 
         let importedMornings = try destinationContext.fetch(FetchDescriptor<MorningAfter>())

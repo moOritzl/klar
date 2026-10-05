@@ -2,7 +2,7 @@ import SwiftUI
 import SwiftData
 
 enum KlarTab: Hashable {
-    case today, history, limits, help
+    case today, history, patterns, help
 }
 
 /// The app shell. Gates, in priority order:
@@ -97,11 +97,10 @@ struct MainTabView: View {
     /// Lives here rather than in `TodayView` because the button that sets it does too — the
     /// bottom accessory is a property of the `TabView`, not of any one tab.
     @State private var isEntrySheetPresented = false
+    @State private var patternsSubstanceID: UUID?
     /// „Der Morgen danach" is the one moment the app speaks unprompted. Presented here, on top
     /// of the tabs, so whichever tab is showing cannot swallow it.
     @State private var dueMorning: DueMorning?
-    /// Kept apart from `dueMorning`, which is already `nil` by the time `onDismiss` runs.
-    @State private var presentedMorningKey: String?
 
     private var store: KlarStore { KlarStore(context: modelContext) }
 
@@ -115,7 +114,10 @@ struct MainTabView: View {
             // The tab label matches the screen's `navigationTitle`, as it does in every
             // first-party app. The case stays `.today` — the file, the screen IDs (B1–B3) and
             // the docs all still call this the Heute screen; only what the user reads changed.
-            TodayView()
+            TodayView(onShowPatterns: { substance in
+                patternsSubstanceID = substance.id
+                selectedTab = .patterns
+            })
                 .tabItem { Label("Übersicht", systemImage: "house") }
                 .tag(KlarTab.today)
 
@@ -123,9 +125,9 @@ struct MainTabView: View {
                 .tabItem { Label("Verlauf", systemImage: "chart.bar") }
                 .tag(KlarTab.history)
 
-            LimitsView()
-                .tabItem { Label("Grenzen", systemImage: "gauge.with.dots.needle.33percent") }
-                .tag(KlarTab.limits)
+            PatternsView(selectedSubstanceID: $patternsSubstanceID)
+                .tabItem { Label("Muster", systemImage: "chart.xyaxis.line") }
+                .tag(KlarTab.patterns)
 
             HelpView()
                 .tabItem { Label("Hilfe", systemImage: "lifepreserver") }
@@ -139,18 +141,19 @@ struct MainTabView: View {
         }
         // No `tabBarMinimizeBehavior`. It was tried and it strands the user: once the bar has
         // minimized, scrolling back to the top does not bring it back on these screens, and three
-        // of the four tabs are simply gone. Trading permanent access to Verlauf, Grenzen and Hilfe
+        // of the four tabs are simply gone. Trading permanent access to Verlauf, Muster and Hilfe
         // for a bit of scroll polish is not a trade worth making on a four-tab app.
         .sheet(isPresented: $isEntrySheetPresented) {
             EntrySheetView()
         }
-        .sheet(item: $dueMorning, onDismiss: {
-            // Swiping the card away is a skip. After „Fertig" the record exists and this is a no-op.
-            if let key = presentedMorningKey { store.skipMorningAfter(dayKey: key) }
-            presentedMorningKey = nil
-        }) { due in
+        // Dismissing writes nothing: swiping the card away is „Später", and the day waits in
+        // „Offen". Only the card's own „Überspringen" records a skip.
+        .sheet(item: $dueMorning) { due in
             MorningAfterCardView(dayKey: due.dayKey)
                 .presentationBackground(.clear)
+                // The once-a-day pop-up is spent when the card is actually on screen, not when
+                // it was queued — a sheet SwiftUI does not present must not use the day up.
+                .onAppear { settings.lastPresentedMorningDayKey = due.dayKey }
         }
         .task { presentDueMorning() }
         .onChange(of: foregroundTick) { _, _ in
@@ -175,16 +178,29 @@ struct MainTabView: View {
         // backgrounds sits above the lock too — that needs a window-level lock, not this guard.)
         let dueKey = store.dueMorningAfterDay()
         guard Self.shouldPresentMorning(
-            isLocked: isLocked, isEntrySheetPresented: isEntrySheetPresented, dueMorning: dueMorning, dueKey: dueKey
+            isLocked: isLocked,
+            isEntrySheetPresented: isEntrySheetPresented,
+            dueMorning: dueMorning,
+            dueKey: dueKey,
+            lastPresentedKey: settings.lastPresentedMorningDayKey
         ) else { return }
-        presentedMorningKey = dueKey
         dueMorning = dueKey.map(DueMorning.init)
     }
 
     /// Pulled out of `presentDueMorning()` so the guard is testable without `AppLockManager`'s
-    /// Face ID plumbing or a real `TabView`.
-    static func shouldPresentMorning(isLocked: Bool, isEntrySheetPresented: Bool, dueMorning: DueMorning?, dueKey: String?) -> Bool {
-        !isLocked && dueMorning == nil && !isEntrySheetPresented && dueKey != nil
+    /// Face ID plumbing or a real `TabView`. A day the card already popped up for, or an
+    /// older one that becomes due again (the newer day's entries were deleted), is not presented
+    /// again — P9: every question is asked by itself once. Day keys sort as strings.
+    static func shouldPresentMorning(
+        isLocked: Bool,
+        isEntrySheetPresented: Bool,
+        dueMorning: DueMorning?,
+        dueKey: String?,
+        lastPresentedKey: String?
+    ) -> Bool {
+        guard !isLocked, dueMorning == nil, !isEntrySheetPresented, let dueKey else { return false }
+        guard let lastPresentedKey else { return true }
+        return dueKey > lastPresentedKey
     }
 }
 
