@@ -7,6 +7,8 @@ import KlarCore
 /// The hierarchy of the screen is the hierarchy of the message: limits on top, what was actually
 /// logged underneath.
 struct TodayView: View {
+    var onShowPatterns: (Substance) -> Void = { _ in }
+
     @Environment(\.modelContext) private var modelContext
     @Environment(\.scenePhase) private var scenePhase
     @Query private var entries: [Entry]
@@ -14,6 +16,7 @@ struct TodayView: View {
 
     @State private var isSettingsPresented = false
     @State private var entryBeingEdited: Entry?
+    @State private var limitSubstance: Substance?
     @State private var openedMorning: DueMorning?
 
     private var store: KlarStore { KlarStore(context: modelContext) }
@@ -56,6 +59,7 @@ struct TodayView: View {
         .sheet(item: $entryBeingEdited) { entry in
             EntryDetailSheet(entry: entry)
         }
+        .sheet(item: $limitSubstance) { LimitSheet(substance: $0) }
         .sheet(item: $openedMorning) { due in
             MorningAfterCardView(dayKey: due.dayKey)
                 .presentationBackground(.clear)
@@ -82,15 +86,21 @@ struct TodayView: View {
                     // One substance keeps the original large card; several share one combined
                     // card — every limit visible at a glance, tightest first.
                     if quotaSubstances.count == 1, let single = quotaSubstances.first {
-                        QuotaCard(
-                            substance: single.substance,
-                            quota: single.quota,
-                            daysSinceLast: store.stats(for: single.substance).daysSinceLastOccasion,
-                            month: today
-                        )
+                        Button {
+                            limitSubstance = single.substance
+                        } label: {
+                            QuotaCard(
+                                substance: single.substance,
+                                quota: single.quota,
+                                daysSinceLast: store.stats(for: single.substance).daysSinceLastOccasion,
+                                month: today
+                            )
+                        }
+                        .klarRowButtonStyle()
+                        .accessibilityIdentifier("today.quota.\(single.substance.name)")
                         .padding(.bottom, 12)
                     } else if quotaSubstances.count > 1 {
-                        MultiQuotaCard(quotas: quotaSubstances, month: today)
+                        MultiQuotaCard(quotas: quotaSubstances, month: today, onSelect: { limitSubstance = $0 })
                             .padding(.bottom, 12)
                     }
 
@@ -100,7 +110,7 @@ struct TodayView: View {
                     }
 
                     if !morningRows.isEmpty {
-                        MorningPatternsCard(rows: morningRows)
+                        MorningPatternsCard(rows: morningRows, onSelect: onShowPatterns)
                             .padding(.bottom, 18)
                     }
 
@@ -271,6 +281,7 @@ struct QuotaCard: View {
 struct MultiQuotaCard: View {
     let quotas: [SubstanceQuota]
     var month: Date = Date()
+    var onSelect: (Substance) -> Void = { _ in }
 
     var body: some View {
         KlarCard(padding: 0) {
@@ -279,9 +290,15 @@ struct MultiQuotaCard: View {
                     if index > 0 {
                         KlarRowDivider(inset: 18)
                     }
-                    MultiQuotaRow(substance: pair.substance, quota: pair.quota)
-                        .padding(.horizontal, 18)
-                        .padding(.vertical, 14)
+                    Button {
+                        onSelect(pair.substance)
+                    } label: {
+                        MultiQuotaRow(substance: pair.substance, quota: pair.quota)
+                            .padding(.horizontal, 18)
+                            .padding(.vertical, 14)
+                    }
+                    .klarRowButtonStyle(cornerRadius: 0)
+                    .accessibilityIdentifier("today.quota.\(pair.substance.name)")
                 }
             }
         } header: {

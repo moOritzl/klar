@@ -114,7 +114,10 @@ struct MainTabView: View {
             // The tab label matches the screen's `navigationTitle`, as it does in every
             // first-party app. The case stays `.today` — the file, the screen IDs (B1–B3) and
             // the docs all still call this the Heute screen; only what the user reads changed.
-            TodayView()
+            TodayView(onShowPatterns: { substance in
+                patternsSubstanceID = substance.id
+                selectedTab = .patterns
+            })
                 .tabItem { Label("Übersicht", systemImage: "house") }
                 .tag(KlarTab.today)
 

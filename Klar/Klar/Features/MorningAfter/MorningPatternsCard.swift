@@ -12,6 +12,7 @@ struct MorningPatternRow: Identifiable {
 /// empty — until some substance has three answered mornings.
 struct MorningPatternsCard: View {
     let rows: [MorningPatternRow]
+    var onSelect: (Substance) -> Void = { _ in }
 
     var body: some View {
         KlarCard {
@@ -19,23 +20,34 @@ struct MorningPatternsCard: View {
                 .padding(.bottom, 10)
 
             ForEach(Array(rows.enumerated()), id: \.element.id) { index, row in
-                VStack(alignment: .leading, spacing: 3) {
-                    Text("\(row.substance.name) · \(MorningPatternText.summary(row.pattern))")
-                        .font(Klar.TypeScale.body)
-                        .foregroundStyle(Klar.text)
-                    if let nextTime = row.pattern.nextTime {
-                        Text("Nächstes Mal: \(nextTime)")
-                            .font(Klar.TypeScale.bodySmall)
-                            .foregroundStyle(Klar.textTertiary)
+                Button {
+                    onSelect(row.substance)
+                } label: {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text("\(row.substance.name) · \(MorningPatternText.summary(row.pattern))")
+                                .font(Klar.TypeScale.body)
+                                .foregroundStyle(Klar.text)
+                            if let nextTime = row.pattern.nextTime {
+                                Text("Nächstes Mal: \(nextTime)")
+                                    .font(Klar.TypeScale.bodySmall)
+                                    .foregroundStyle(Klar.textTertiary)
+                            }
+                        }
+                        Spacer()
+                        KlarDisclosureChevron()
                     }
+                    .contentShape(Rectangle())
                 }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("today.morningPattern.\(row.substance.name)")
                 if index < rows.count - 1 {
                     KlarRowDivider()
                         .padding(.vertical, 10)
                 }
             }
         }
-        .accessibilityElement(children: .combine)
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier("today.morningPatterns")
     }
 }
