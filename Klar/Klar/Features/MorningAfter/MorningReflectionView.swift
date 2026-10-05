@@ -15,6 +15,9 @@ struct MorningReflectionView: View {
     @State private var trigger = ""
     @State private var wouldHaveHelped = ""
     @State private var nextTime = ""
+    /// The record is read once, so reopening a reflected day shows the sentences already written
+    /// and saving does not blank the ones left untouched.
+    @State private var hasLoaded = false
 
     private var store: KlarStore { KlarStore(context: modelContext) }
 
@@ -60,6 +63,21 @@ struct MorningReflectionView: View {
             .padding(.bottom, 30)
         }
         .scrollDismissesKeyboard(.interactively)
+        .onAppear(perform: loadExistingFields)
+    }
+
+    /// The three field values to start from: what is stored on the day's record, empty otherwise.
+    static func initialFields(for record: MorningAfter?) -> (trigger: String, wouldHaveHelped: String, nextTime: String) {
+        (record?.trigger ?? "", record?.wouldHaveHelped ?? "", record?.nextTime ?? "")
+    }
+
+    private func loadExistingFields() {
+        guard !hasLoaded else { return }
+        hasLoaded = true
+        let fields = Self.initialFields(for: store.morningAfter(forDayKey: dayKey))
+        trigger = fields.trigger
+        wouldHaveHelped = fields.wouldHaveHelped
+        nextTime = fields.nextTime
     }
 
     private func questionCard(number: Int, label: LocalizedStringKey, placeholder: String, text: Binding<String>) -> some View {
