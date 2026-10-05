@@ -128,7 +128,8 @@ Vier Einschränkungen sind für dieses Projekt konstitutiv und werden nicht wegd
 - Die Anzeige zählt hoch und zählt über die Grenze hinaus weiter: „3 von max. 4", „5 von max. 4" (`KlarCore.QuotaReading`). Ein Überschreiten wird angezeigt, nicht bewertet.
 - Der Stand jeder Grenze steht in der Übersicht und öffnet per Tippen die Grenze; gesetzt wird sie pro Substanz in Einstellungen › Substanzen.
 - Rahmung: eine Grenze, die man sich selbst setzt, um die Kontrolle zu behalten, kein Reduktionsziel
-- Eintragsfreie Serien, Ausgaben pro Monat (nutzerdefinierte Kostenbasis; ersetzt „Geld gespart", das ein Reduktionsziel voraussetzt)
+- Eintragsfreie Serien
+- Keine Kosten, keine Ausgaben, kein „Geld gespart": Geld ist nicht Teil von Klar
 
 ### Modul E — Craving-SOS (mit Behavior Substitution & Problem Solving)
 - Urge-Surfing-Timer, Atemübung, eigene „Warum"-Notizen, Ein-Tap-Anruf an selbstgewählten Kontakt

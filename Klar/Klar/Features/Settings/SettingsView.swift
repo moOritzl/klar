@@ -88,7 +88,7 @@ struct SettingsView: View {
                             SettingsNavigationRow(
                                 icon: "list.bullet",
                                 title: "Substanzen",
-                                subtitle: "Grenzen, Morgen danach, Kosten"
+                                subtitle: "Grenzen, Morgen danach"
                             ) { isManagingSubstances = true }
                             .accessibilityIdentifier("settings.substances")
 

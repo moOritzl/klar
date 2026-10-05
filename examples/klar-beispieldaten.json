@@ -5605,7 +5605,6 @@
     {
       "asksMorningAfter": true,
       "colorIndex": 0,
-      "costPerUnitRaw": "5.50",
       "id": "F445EB10-E7EE-48BB-BB93-024E836FC193",
       "isArchived": false,
       "name": "Alkohol",
@@ -5615,7 +5614,6 @@
     {
       "asksMorningAfter": false,
       "colorIndex": 1,
-      "costPerUnitRaw": "0.45",
       "id": "BEC38FCC-EF06-4DD4-9175-4859218F5CE3",
       "isArchived": false,
       "name": "Nikotin",
@@ -5625,7 +5623,6 @@
     {
       "asksMorningAfter": false,
       "colorIndex": 2,
-      "costPerUnitRaw": "2.80",
       "id": "C2410DC3-7368-4C7F-8B7A-79EB2AA39D9D",
       "isArchived": false,
       "name": "Kaffee",

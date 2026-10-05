@@ -5,22 +5,15 @@ public struct SubstanceDTO: Codable, Identifiable, Sendable, Equatable {
     public var name: String
     public var unit: SubstanceUnit
     public var colorIndex: Int
-    public var costPerUnitRaw: String?
     public var sortOrder: Int
     public var isArchived: Bool
     public var asksMorningAfter: Bool
-
-    public var costPerUnit: Decimal? {
-        get { costPerUnitRaw.flatMap { Decimal(string: $0) } }
-        set { costPerUnitRaw = newValue.map { "\($0)" } }
-    }
 
     public init(
         id: UUID = UUID(),
         name: String,
         unit: SubstanceUnit,
         colorIndex: Int,
-        costPerUnit: Decimal? = nil,
         sortOrder: Int,
         isArchived: Bool = false,
         asksMorningAfter: Bool = true
@@ -29,7 +22,6 @@ public struct SubstanceDTO: Codable, Identifiable, Sendable, Equatable {
         self.name = name
         self.unit = unit
         self.colorIndex = colorIndex
-        self.costPerUnitRaw = costPerUnit.map { "\($0)" }
         self.sortOrder = sortOrder
         self.isArchived = isArchived
         self.asksMorningAfter = asksMorningAfter

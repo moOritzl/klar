@@ -218,7 +218,7 @@ app sends none.
   the limit (`LimitEditor`: stepper, Reduktion / Abstinenz / Beobachten, „Ziel pausieren"),
   „Morgen danach fragen" (`Substance.asksMorningAfter`, written through
   `KlarStore.setAsksMorningAfter`; on by default except for Nikotin,
-  `SubstanceCatalog.asksMorningAfterByDefault`), „Kosten je <Einheit>", and „Archivieren".
+  `SubstanceCatalog.asksMorningAfterByDefault`), and „Archivieren".
 - **Craving-SOS** groups „Ersatzhandlungen"
   ([SubstitutionActionsView.swift](../Klar/Klar/Features/Settings/SubstitutionActionsView.swift),
   reorder + delete, same data source as the SOS — order matters, the SOS leads with the first),
@@ -269,9 +269,9 @@ foreground, never as a notification.
 
 ### 3.4 Not built, because the draft doesn't draw them
 
-From the concept (§ 4, Modul D): **eintragsfreie Serien, Meilensteine, Geld-gespart-Schätzung.** The
-cost basis is captured (Einstellungen › Substanzen) and `Substance.costPerUnit` is populated, but nothing
-consumes it. The draft's closing panel argues *against* a stats surface ("Zahlen ohne Handlungsfrage
+From the concept (§ 4, Modul D): **eintragsfreie Serien, Meilensteine.** Costs are not part of Klar
+at all — no cost basis, no spending, no „Geld gespart" — so there is no field for them. The draft's
+closing panel argues *against* a stats surface ("Zahlen ohne Handlungsfrage
 sind Selbstzweck"), so this is a product decision, not an oversight.
 
 ### 3.5 App Group is not provisioned

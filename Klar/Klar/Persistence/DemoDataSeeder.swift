@@ -10,10 +10,10 @@ enum DemoDataSeeder {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = TimeZone(identifier: "Europe/Berlin")!
 
-        let coffee = Substance(name: "Kaffee", unit: .drink, colorIndex: 0, costPerUnit: Decimal(string: "3.00"), sortOrder: 0, asksMorningAfter: false)
-        let alcohol = Substance(name: "Alkohol", unit: .drink, colorIndex: 1, costPerUnit: Decimal(string: "5.00"), sortOrder: 1)
+        let coffee = Substance(name: "Kaffee", unit: .drink, colorIndex: 0, sortOrder: 0, asksMorningAfter: false)
+        let alcohol = Substance(name: "Alkohol", unit: .drink, colorIndex: 1, sortOrder: 1)
         let nicotine = Substance(name: "Nikotin", unit: .piece, colorIndex: 2, sortOrder: 2, asksMorningAfter: false)
-        let cannabis = Substance(name: "Cannabis", unit: .g, colorIndex: 3, costPerUnit: Decimal(string: "10.00"), sortOrder: 3)
+        let cannabis = Substance(name: "Cannabis", unit: .g, colorIndex: 3, sortOrder: 3)
         for substance in [coffee, alcohol, nicotine, cannabis] {
             context.insert(substance)
         }

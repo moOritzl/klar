@@ -86,7 +86,6 @@ class Substance:
     unit: str
     color_index: int
     sort_order: int
-    cost: str | None = None
     archived: bool = False
     asks_morning_after: bool = True
     id: str = field(default_factory=new_id)
@@ -98,7 +97,6 @@ class Substance:
                 "name": self.name,
                 "unit": self.unit,
                 "colorIndex": self.color_index,
-                "costPerUnitRaw": self.cost,
                 "sortOrder": self.sort_order,
                 "isArchived": self.archived,
                 "asksMorningAfter": self.asks_morning_after,
@@ -205,9 +203,9 @@ class Morning:
 # up with — the same three the app's own DemoDataSeeder uses. Both drink and smoke
 # carry a reduction goal, so the Today screen shows the combined quota card.
 SUBSTANCES = {
-    "alkohol": Substance("Alkohol", "drink", 0, 0, cost="5.50"),
-    "nikotin": Substance("Nikotin", "piece", 1, 1, cost="0.45", asks_morning_after=False),
-    "kaffee": Substance("Kaffee", "drink", 2, 2, cost="2.80", asks_morning_after=False),
+    "alkohol": Substance("Alkohol", "drink", 0, 0),
+    "nikotin": Substance("Nikotin", "piece", 1, 1, asks_morning_after=False),
+    "kaffee": Substance("Kaffee", "drink", 2, 2, asks_morning_after=False),
 }
 
 # The four built-in names must match ContextTagSeeder.builtInNames exactly, or the

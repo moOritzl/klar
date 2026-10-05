@@ -105,7 +105,7 @@ enum ExportImportService {
     private static func insert(_ export: KlarExport, into context: ModelContext) throws {
         var substanceByID: [UUID: Substance] = [:]
         for dto in export.substances {
-            let substance = Substance(id: dto.id, name: dto.name, unit: dto.unit, colorIndex: dto.colorIndex, costPerUnit: dto.costPerUnit, sortOrder: dto.sortOrder, isArchived: dto.isArchived, asksMorningAfter: dto.asksMorningAfter)
+            let substance = Substance(id: dto.id, name: dto.name, unit: dto.unit, colorIndex: dto.colorIndex, sortOrder: dto.sortOrder, isArchived: dto.isArchived, asksMorningAfter: dto.asksMorningAfter)
             context.insert(substance)
             substanceByID[dto.id] = substance
         }
