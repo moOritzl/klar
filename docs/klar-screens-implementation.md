@@ -186,7 +186,7 @@ happens, how much, the user's own words.
 
 | Card | State | Wiring |
 |---|---|---|
-| **Häufigkeit** | ✅ | „Pro Woche" and „Ø Abstand". Pro Woche is occasion days ÷ max(1, (whole days first→last + 1) ÷ 7), so it never exceeds 7 (`StatsCalculator`). |
+| **Häufigkeit** | ✅ | „Pro Woche" and „Ø Abstand". Pro Woche is the occasion days inside a window ending at today's logical day and at most 56 days long (starting no earlier than the first occasion), ÷ max(1, window days ÷ 7) — so it never exceeds 7 and it falls when the user stops (`StatsCalculator`). |
 | **Der Morgen danach** | ✅ | Only for substances that ask. One stacked bar per question over **all** answered days (`pattern(…, limit: .max)`), counts underneath with zeros left out. One hue in three steps, no green, no red. A tertiary line names days shared with other asking substances (`sharedDays`). Under three answered days only „Muster erscheinen nach drei Rückblicken." |
 | **Kontext** | ✅ | Share of entries carrying the tag, divided by entries with at least one tag („Basis: N Einträge mit Kontext"), so the bars do not sum to 100 %. Per tag with a pattern of its own (≥ 3 answered days) a second line, e.g. „5 Tage: 4× verkatert, 1× bereut" (`MorningPatternText.tally`). |
 | **Ø Dosis über Zeit** | ✅ | Swift Charts line of Ø dose per week, as before (`DoseTrendCard`). |
