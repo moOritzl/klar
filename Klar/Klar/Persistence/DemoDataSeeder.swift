@@ -13,7 +13,8 @@ enum DemoDataSeeder {
         let coffee = Substance(name: "Kaffee", unit: .drink, colorIndex: 0, costPerUnit: Decimal(string: "3.00"), sortOrder: 0, asksMorningAfter: false)
         let alcohol = Substance(name: "Alkohol", unit: .drink, colorIndex: 1, costPerUnit: Decimal(string: "5.00"), sortOrder: 1)
         let nicotine = Substance(name: "Nikotin", unit: .piece, colorIndex: 2, sortOrder: 2, asksMorningAfter: false)
-        for substance in [coffee, alcohol, nicotine] {
+        let cannabis = Substance(name: "Cannabis", unit: .g, colorIndex: 3, costPerUnit: Decimal(string: "10.00"), sortOrder: 3)
+        for substance in [coffee, alcohol, nicotine, cannabis] {
             context.insert(substance)
         }
 
@@ -58,32 +59,61 @@ enum DemoDataSeeder {
                     insertEntry(alcohol, day: nextDay, hour: 1, minute: 15, tag: club)
                 }
                 entryCount += 2
+                if dayOffset % 18 == 0 {
+                    // Some club nights are mixed — the Muster tab names those days.
+                    insertEntry(cannabis, day: day, hour: 23, minute: 45, tag: club)
+                    entryCount += 1
+                }
             }
             if dayOffset % 4 == 0 {
                 insertEntry(nicotine, day: day, hour: 20, tag: allein)
                 entryCount += 1
             }
+            if dayOffset % 7 == 0 {
+                insertEntry(cannabis, day: day, hour: 21, tag: zuhause)
+                entryCount += 1
+            }
         }
 
-        // Answer most past alcohol evenings, so Übersicht and the entry sheet have a pattern.
-        // The newest one is left unanswered on purpose, to exercise the "never asked about an
-        // older day once it's no longer the newest" path — it is ~8 days old here, past the 48 h
-        // expiry, so no card shows on launch. Launch with --klar-uitest-seed-yesterday to see one.
-        let alcoholDays = Set(
+        // One mixed evening three logical days ago stays open. That is past the 48 h in which
+        // the card pops up by itself, and inside the 72 h in which it can be answered — so the
+        // demo shows „Offen" and the calendar ring without a card covering the screen at launch
+        // (between 00:00 and 05:00 it still pops up once, which is fine).
+        let logicalToday = LogicalDay.date(
+            from: LogicalDay.components(for: now, timezoneID: "Europe/Berlin"),
+            timezoneID: "Europe/Berlin"
+        )
+        let openDay = calendar.date(byAdding: .day, value: -3, to: logicalToday)!
+        insertEntry(alcohol, day: openDay, hour: 21, tag: club)
+        insertEntry(cannabis, day: openDay, hour: 22, tag: club)
+        let openKey = LogicalDay.dayKey(
+            for: calendar.date(bySettingHour: 21, minute: 0, second: 0, of: openDay)!,
+            timezoneID: "Europe/Berlin"
+        )
+
+        // Every older day with alcohol or cannabis is answered, so Übersicht, the entry sheet and
+        // Muster all have a pattern. The newest regretted days carry a written reflection — six back, because some
+        // of the newest answered days are cannabis-only and the alcohol view needs its own.
+        let askingIDs: Set<UUID> = [alcohol.id, cannabis.id]
+        let answered = Set(
             try context.fetch(FetchDescriptor<Entry>())
-                .filter { $0.substance?.id == alcohol.id }
+                .filter { $0.substance.map { askingIDs.contains($0.id) } ?? false }
                 .map { LogicalDay.dayKey(for: $0.timestamp, timezoneID: $0.timezoneID) }
         )
-        let todayKey = LogicalDay.dayKey(for: now, timezoneID: "Europe/Berlin")
-        let answered = alcoholDays.filter { $0 < todayKey }.sorted().dropLast()
+        .filter { $0 < openKey }
+        .sorted()
         for (index, key) in answered.enumerated() {
             let hungover = index % 3 != 1
+            let regretted = index % 3 == 0
+            let reflects = regretted && index >= answered.count - 6
             context.insert(MorningAfter(
                 dayKey: key,
                 body: hungover ? .hungover : .fine,
-                regret: index % 3 == 0 ? .yes : .no,
+                regret: regretted ? .yes : .no,
                 again: hungover ? .differently : .yes,
-                nextTime: index == answered.count - 1 ? "Zwischendurch Wasser" : nil
+                trigger: reflects ? "Wollte nicht als Erste gehen" : nil,
+                wouldHaveHelped: reflects ? "Vorher richtig essen" : nil,
+                nextTime: reflects ? "Zwischendurch Wasser" : nil
             ))
         }
 
