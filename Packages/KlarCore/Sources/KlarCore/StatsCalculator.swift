@@ -8,6 +8,8 @@ public struct WeeklyAverage: Sendable, Equatable {
 
 public struct StatsSummary: Sendable, Equatable {
     public let weeklyAverages: [WeeklyAverage]
+    /// Occasion days divided by the inclusive first-to-last span in weeks, the span floored at one
+    /// week — so it never exceeds 7, and a short history reads as its own days, not an inflated rate.
     public let occasionFrequencyPerWeek: Double
     public let averageGapDays: Double?
     public let contextTagDistribution: [UUID: Int]
@@ -63,11 +65,12 @@ public enum StatsCalculator {
         let averageGapDays = gaps.isEmpty ? nil : gaps.reduce(0, +) / Double(gaps.count)
 
         let frequency: Double
-        if let first = occasionDates.first, let last = occasionDates.last, last > first {
-            let totalWeeks = last.timeIntervalSince(first) / (7 * 86400)
-            frequency = totalWeeks > 0 ? Double(occasionDates.count) / totalWeeks : Double(occasionDates.count)
+        if let first = occasionDates.first, let last = occasionDates.last {
+            let spanDays = (calendar.dateComponents([.day], from: first, to: last).day ?? 0) + 1
+            let spanWeeks = max(1, Double(spanDays) / 7)
+            frequency = Double(occasionDates.count) / spanWeeks
         } else {
-            frequency = Double(occasionDates.count)
+            frequency = 0
         }
 
         var tagCounts: [UUID: Int] = [:]
