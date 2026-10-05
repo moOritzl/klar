@@ -32,6 +32,15 @@ enum MorningPatternText {
             }
     }
 
+    /// "Körper: verkatert" — one line per answered question, for the day detail.
+    static func answerLines(body: MorningBody?, regret: MorningRegret?, again: MorningAgain?) -> [String] {
+        var lines: [String] = []
+        if let body { lines.append("Körper: \(body.label)") }
+        if let regret { lines.append("Reue: \(regret.label)") }
+        if let again { lines.append("Nochmal so: \(again.label)") }
+        return lines
+    }
+
     private static func fragments(_ pattern: MorningPattern) -> String {
         var parts: [String] = []
         if let count = pattern.body[.hungover], count > 0 { parts.append("\(count)× verkatert") }

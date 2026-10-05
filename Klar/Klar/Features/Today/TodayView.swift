@@ -14,6 +14,7 @@ struct TodayView: View {
 
     @State private var isSettingsPresented = false
     @State private var entryBeingEdited: Entry?
+    @State private var openedMorning: DueMorning?
 
     private var store: KlarStore { KlarStore(context: modelContext) }
 
@@ -38,6 +39,7 @@ struct TodayView: View {
     private var quotaSubstances: [SubstanceQuota] {
         store.quotaSubstances()
     }
+    private var openMorningDays: [String] { store.openMorningAfterDays() }
     private var morningRows: [MorningPatternRow] {
         store.allSubstances().compactMap { substance in
             store.morningPattern(for: substance).map { MorningPatternRow(substance: substance, pattern: $0) }
@@ -53,6 +55,10 @@ struct TodayView: View {
         }
         .sheet(item: $entryBeingEdited) { entry in
             EntryDetailSheet(entry: entry)
+        }
+        .sheet(item: $openedMorning) { due in
+            MorningAfterCardView(dayKey: due.dayKey)
+                .presentationBackground(.clear)
         }
         .onChange(of: scenePhase) { _, newPhase in
             guard newPhase == .active else { return }
@@ -85,6 +91,11 @@ struct TodayView: View {
                         .padding(.bottom, 12)
                     } else if quotaSubstances.count > 1 {
                         MultiQuotaCard(quotas: quotaSubstances, month: today)
+                            .padding(.bottom, 12)
+                    }
+
+                    if !openMorningDays.isEmpty {
+                        OpenMorningsCard(dayKeys: openMorningDays) { openedMorning = DueMorning(dayKey: $0) }
                             .padding(.bottom, 12)
                     }
 

@@ -145,5 +145,16 @@ final class ScreenshotTests: XCTestCase {
         capture(app, "D-Morgen-danach")
         app.buttons["ja"].firstMatch.tap()
         capture(app, "D-Morgen-danach-bereut")
+
+        // B · Offen, E1 with the ring, E2 with „Rückblick nachtragen"
+        app.buttons["Später"].tap()
+        XCTAssertTrue(app.staticTexts["Übersicht"].waitForExistence(timeout: 5))
+        capture(app, "B-Offen")
+        app.tabBars.buttons["Verlauf"].tap()
+        XCTAssertTrue(app.buttons["Vorheriger Monat"].waitForExistence(timeout: 5))
+        capture(app, "E1-Kalender-offen")
+        app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Rückblick offen")).firstMatch.tap()
+        XCTAssertTrue(app.buttons["dayDetail.morning"].waitForExistence(timeout: 5))
+        capture(app, "E2-Tagesdetail-offen")
     }
 }

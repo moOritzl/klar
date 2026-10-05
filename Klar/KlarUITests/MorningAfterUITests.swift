@@ -40,6 +40,10 @@ final class MorningAfterUITests: XCTestCase {
         relaunched.launch()
         XCTAssertTrue(relaunched.staticTexts["Übersicht"].waitForExistence(timeout: 10))
         XCTAssertFalse(relaunched.staticTexts["morningAfter.header"].waitForExistence(timeout: 3))
+        XCTAssertFalse(
+            relaunched.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "morning.open.")).firstMatch.exists,
+            "a skipped day is not listed as open"
+        )
     }
 
     /// „Später" leaves the day open, and the card does not pop up again by itself.
@@ -58,5 +62,14 @@ final class MorningAfterUITests: XCTestCase {
         relaunched.launch()
         XCTAssertTrue(relaunched.staticTexts["Übersicht"].waitForExistence(timeout: 10))
         XCTAssertFalse(relaunched.staticTexts["morningAfter.header"].waitForExistence(timeout: 3))
+
+        // The day waits in „Offen" on Übersicht, and answering it there takes it off the list.
+        let openRow = relaunched.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "morning.open.")).firstMatch
+        XCTAssertTrue(openRow.waitForExistence(timeout: 5))
+        openRow.tap()
+        XCTAssertTrue(relaunched.staticTexts["morningAfter.header"].waitForExistence(timeout: 5))
+        relaunched.buttons["verkatert"].tap()
+        relaunched.buttons["Fertig"].tap()
+        XCTAssertFalse(openRow.waitForExistence(timeout: 3))
     }
 }

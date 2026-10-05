@@ -45,4 +45,11 @@ final class MorningPatternTextTests: XCTestCase {
             ["Auslöser: Stress", "Nächstes Mal: Wasser"]
         )
     }
+
+    func testAnswerLinesNameEachAnsweredQuestion() {
+        XCTAssertEqual(
+            MorningPatternText.answerLines(body: .hungover, regret: nil, again: .differently),
+            ["Körper: verkatert", "Nochmal so: anders"]
+        )
+    }
 }
