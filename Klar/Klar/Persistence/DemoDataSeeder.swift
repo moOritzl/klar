@@ -77,8 +77,7 @@ enum DemoDataSeeder {
 
         // One mixed evening three logical days ago stays open. That is past the 48 h in which
         // the card pops up by itself, and inside the 72 h in which it can be answered — so the
-        // demo shows „Offen" and the calendar ring without a card covering the screen at launch
-        // (between 00:00 and 05:00 it still pops up once, which is fine).
+        // demo shows „Offen" and the calendar ring without a card covering the screen at launch.
         let logicalToday = LogicalDay.date(
             from: LogicalDay.components(for: now, timezoneID: "Europe/Berlin"),
             timezoneID: "Europe/Berlin"

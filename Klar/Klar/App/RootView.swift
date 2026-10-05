@@ -151,6 +151,9 @@ struct MainTabView: View {
         .sheet(item: $dueMorning) { due in
             MorningAfterCardView(dayKey: due.dayKey)
                 .presentationBackground(.clear)
+                // The once-a-day pop-up is spent when the card is actually on screen, not when
+                // it was queued — a sheet SwiftUI does not present must not use the day up.
+                .onAppear { settings.lastPresentedMorningDayKey = due.dayKey }
         }
         .task { presentDueMorning() }
         .onChange(of: foregroundTick) { _, _ in
@@ -181,13 +184,13 @@ struct MainTabView: View {
             dueKey: dueKey,
             lastPresentedKey: settings.lastPresentedMorningDayKey
         ) else { return }
-        settings.lastPresentedMorningDayKey = dueKey
         dueMorning = dueKey.map(DueMorning.init)
     }
 
     /// Pulled out of `presentDueMorning()` so the guard is testable without `AppLockManager`'s
-    /// Face ID plumbing or a real `TabView`. A day the card already popped up for is not
-    /// presented again — P9: every question is asked by itself once.
+    /// Face ID plumbing or a real `TabView`. A day the card already popped up for, or an
+    /// older one that becomes due again (the newer day's entries were deleted), is not presented
+    /// again — P9: every question is asked by itself once. Day keys sort as strings.
     static func shouldPresentMorning(
         isLocked: Bool,
         isEntrySheetPresented: Bool,
@@ -195,7 +198,9 @@ struct MainTabView: View {
         dueKey: String?,
         lastPresentedKey: String?
     ) -> Bool {
-        !isLocked && dueMorning == nil && !isEntrySheetPresented && dueKey != nil && dueKey != lastPresentedKey
+        guard !isLocked, dueMorning == nil, !isEntrySheetPresented, let dueKey else { return false }
+        guard let lastPresentedKey else { return true }
+        return dueKey > lastPresentedKey
     }
 }
 

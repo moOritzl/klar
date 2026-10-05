@@ -153,7 +153,12 @@ final class ScreenshotTests: XCTestCase {
         app.tabBars.buttons["Verlauf"].tap()
         XCTAssertTrue(app.buttons["Vorheriger Monat"].waitForExistence(timeout: 5))
         capture(app, "E1-Kalender-offen")
-        app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Rückblick offen")).firstMatch.tap()
+        // On the 1st of a month „yesterday" lies in the previous month: look there once.
+        let openDay = app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Rückblick offen")).firstMatch
+        if !openDay.waitForExistence(timeout: 2) {
+            app.buttons["Vorheriger Monat"].tap()
+        }
+        openDay.tap()
         XCTAssertTrue(app.buttons["dayDetail.morning"].waitForExistence(timeout: 5))
         capture(app, "E2-Tagesdetail-offen")
     }

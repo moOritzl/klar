@@ -56,4 +56,12 @@ final class MainTabViewMorningGuardTests: XCTestCase {
             isLocked: false, isEntrySheetPresented: false, dueMorning: nil, dueKey: "2026-09-20", lastPresentedKey: "2026-09-19"
         ))
     }
+
+    /// If the newer day's entries are deleted, an older day that already popped up becomes due
+    /// again — it must not pop up a second time.
+    func testDoesNotPresentAnOlderDayAgain() {
+        XCTAssertFalse(MainTabView.shouldPresentMorning(
+            isLocked: false, isEntrySheetPresented: false, dueMorning: nil, dueKey: "2026-09-19", lastPresentedKey: "2026-09-20"
+        ))
+    }
 }

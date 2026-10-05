@@ -5,7 +5,7 @@ Implements `Klar App Draft.dc.html` from the Claude Design project *Klar iOS App
 Rückblick-Archiv (E4) and the Pläne screens (G1–G3) were removed in v3 — Der Morgen danach and
 Muster below now use those letters instead. Every other drafted screen is built.
 
-**Status:** builds clean; 58 KlarCore tests + 85 app unit tests + 8 UI tests (9 runs —
+**Status:** builds clean; 60 KlarCore tests + 88 app unit tests + 8 UI tests (9 runs —
 `testLaunch` covers light and dark) pass; every screen below has been driven end-to-end in the
 simulator (`KlarUITests/ScreenshotTests`).
 
