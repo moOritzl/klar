@@ -52,4 +52,11 @@ final class MorningPatternTextTests: XCTestCase {
             ["Körper: verkatert", "Nochmal so: anders"]
         )
     }
+
+    func testHasContentCountsNoteAndReflectionNotJustAnswers() {
+        XCTAssertTrue(MorningPatternText.hasContent(body: nil, regret: nil, again: nil, note: "Schlecht geschlafen", trigger: nil, wouldHaveHelped: nil, nextTime: nil))
+        XCTAssertTrue(MorningPatternText.hasContent(body: nil, regret: nil, again: nil, note: nil, trigger: nil, wouldHaveHelped: nil, nextTime: "Wasser"))
+        XCTAssertTrue(MorningPatternText.hasContent(body: .fine, regret: nil, again: nil, note: nil, trigger: nil, wouldHaveHelped: nil, nextTime: nil))
+        XCTAssertFalse(MorningPatternText.hasContent(body: nil, regret: nil, again: nil, note: "  \n ", trigger: "", wouldHaveHelped: " ", nextTime: nil))
+    }
 }

@@ -8,8 +8,14 @@ struct MorningAfterDayBlock: View {
     let canAnswer: Bool
     let onOpen: () -> Void
 
-    private var isAnswered: Bool {
-        record.map { $0.body != nil || $0.regret != nil || $0.again != nil } ?? false
+    /// Answers, note or reflection — not answers alone, so a day saved with only a note is shown.
+    private var hasContent: Bool {
+        record.map {
+            MorningPatternText.hasContent(
+                body: $0.body, regret: $0.regret, again: $0.again,
+                note: $0.note, trigger: $0.trigger, wouldHaveHelped: $0.wouldHaveHelped, nextTime: $0.nextTime
+            )
+        } ?? false
     }
 
     var body: some View {
@@ -17,7 +23,7 @@ struct MorningAfterDayBlock: View {
             KlarSectionLabel(text: "Der Morgen danach")
                 .padding(.bottom, 10)
 
-            if let record, isAnswered {
+            if let record, hasContent {
                 VStack(alignment: .leading, spacing: 4) {
                     ForEach(MorningPatternText.answerLines(body: record.body, regret: record.regret, again: record.again), id: \.self) { line in
                         Text(line)

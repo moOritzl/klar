@@ -41,6 +41,17 @@ enum MorningPatternText {
         return lines
     }
 
+    /// Whether a day's record holds anything to show: an answer, a note, or reflection text.
+    /// A record without any of it is a skipped day. (Patterns still count answers only.)
+    static func hasContent(
+        body: MorningBody?, regret: MorningRegret?, again: MorningAgain?,
+        note: String?, trigger: String?, wouldHaveHelped: String?, nextTime: String?
+    ) -> Bool {
+        if body != nil || regret != nil || again != nil { return true }
+        if let note, !note.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { return true }
+        return !reflectionLines(trigger: trigger, wouldHaveHelped: wouldHaveHelped, nextTime: nextTime).isEmpty
+    }
+
     private static func fragments(_ pattern: MorningPattern) -> String {
         var parts: [String] = []
         if let count = pattern.body[.hungover], count > 0 { parts.append("\(count)× verkatert") }
