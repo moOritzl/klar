@@ -106,7 +106,7 @@ Vier Einschränkungen sind für dieses Projekt konstitutiv und werden nicht wegd
 
 ### Modul B — Feedback
 - Trends pro Substanz: Frequenz, Ø-Dosis über Zeit, Lücken
-- Rückblick-Muster pro Substanz und Kontext-Tag (Modul C) in der Übersicht und im Eintrag-Sheet, als Zählung ohne Score
+- Tab „Muster" je Substanz: Häufigkeit, Verteilung der drei Rückblick-Antworten über alle beantworteten Tage, Folgen je Kontext neben dem Kontextanteil, Mischkonsum-Tage benannt, eigene Reflexionssätze. Übersicht und Eintrag-Sheet zeigen weiter die Kurzform der letzten fünf.
 - Referenzpunkt ist ausschließlich die eigene Baseline (P7)
 
 ### Modul C — Rückblick (neu, ersetzt Action Planning)
@@ -117,8 +117,8 @@ Vier Einschränkungen sind für dieses Projekt konstitutiv und werden nicht wegd
   2. „Bereust du etwas von gestern?" — nein / ein bisschen / ja
   3. „Würdest du es wieder so machen?" — ja / anders / nein
 - Optionale Freitext-Notiz.
-- **Verfall:** Fällig ist nur der jüngste Konsumtag vor heute. Er verfällt 48 Stunden nach seinem Ende (05:00 am Folgetag). Ein neuer Konsumtag verdrängt einen älteren, unbeantworteten; ein Eintrag am selben Morgen tut das nicht.
-- **Pro Substanz schaltbar** („Morgen danach fragen" im Tab Grenzen), bei Nikotin standardmäßig aus.
+- **Verfall:** Die Karte erscheint pro Konsumtag einmal von selbst — für den jüngsten Konsumtag, bis 48 Stunden nach seinem Ende. „Später" oder Wegwischen lässt den Tag offen. Offene Tage stehen bis 72 Stunden nach ihrem Ende unter „Offen" (Übersicht, Verlauf) und sind im Tagesdetail nachtragbar; „Überspringen" nimmt einen Tag nur aus dieser Liste.
+- **Pro Substanz schaltbar** („Morgen danach fragen" in Einstellungen › Substanzen), bei Nikotin standardmäßig aus.
 - **Zurückspielen:** Ab drei beantworteten Rückblicken für eine Substanz zeigt die Übersicht eine Zeile wie „Letzte 5×: 3× verkatert, 1× bereut". Im Eintrag-Sheet erscheint dieselbe Zählung für die gewählte Kombination aus Substanz und Kontext-Tag, sobald dafür drei Rückblicke vorliegen. Die Anzeige besteht aus Zahlen, ohne Score, Farbwertung oder Kommentar (P7). Ein Muster erscheint nur für Substanzen, bei denen „Morgen danach fragen" an ist; schaltet man eine Substanz aus, verschwindet auch ihr Muster (die Einträge bleiben und das Muster kommt beim Wiedereinschalten zurück).
 - **Ausgeschlossen:** Bewertung des Rauschs, „bester Abend", Serien positiver Antworten, Vor-/Nachteil-Listen (P8).
 - **Entfernt aus v2:** Wenn-Dann-Pläne, Plan-Vorlagen, Plan-Check-in, Plan-Erfolgsquote.
@@ -126,6 +126,7 @@ Vier Einschränkungen sind für dieses Projekt konstitutiv und werden nicht wegd
 ### Modul D — Grenzen (war: Ziele & Reduktion)
 - Pro Substanz eine selbst gesetzte Monatsgrenze („max. N×"); 0 ist als Sonderfall möglich
 - Die Anzeige zählt hoch und zählt über die Grenze hinaus weiter: „3 von max. 4", „5 von max. 4" (`KlarCore.QuotaReading`). Ein Überschreiten wird angezeigt, nicht bewertet.
+- Der Stand jeder Grenze steht in der Übersicht und öffnet per Tippen die Grenze; gesetzt wird sie pro Substanz in Einstellungen › Substanzen.
 - Rahmung: eine Grenze, die man sich selbst setzt, um die Kontrolle zu behalten, kein Reduktionsziel
 - Eintragsfreie Serien, Ausgaben pro Monat (nutzerdefinierte Kostenbasis; ersetzt „Geld gespart", das ein Reduktionsziel voraussetzt)
 
