@@ -257,6 +257,69 @@ struct KlarStore {
         )
     }
 
+    /// All answered days of the substance, not only the newest five — the Muster tab.
+    func morningDistribution(for substance: Substance) -> MorningPattern? {
+        guard substance.asksMorningAfter else { return nil }
+        return MorningAfterService.pattern(
+            substanceID: substance.id,
+            contextTagID: nil,
+            entries: allEntries().map { $0.toDTO() },
+            records: allMorningAfters().map { $0.toDTO() },
+            limit: .max
+        )
+    }
+
+    /// Per context tag, the pattern over all answered days with that tag — only tags with at
+    /// least three.
+    func morningPatternsByContext(for substance: Substance) -> [UUID: MorningPattern] {
+        guard substance.asksMorningAfter else { return [:] }
+        let entries = allEntries().map { $0.toDTO() }
+        let records = allMorningAfters().map { $0.toDTO() }
+        var result: [UUID: MorningPattern] = [:]
+        for tag in allContextTags() {
+            if let pattern = MorningAfterService.pattern(
+                substanceID: substance.id, contextTagID: tag.id, entries: entries, records: records, limit: .max
+            ) {
+                result[tag.id] = pattern
+            }
+        }
+        return result
+    }
+
+    /// The other asking substances logged on this substance's answered days, most shared first.
+    func sharedMorningDays(for substance: Substance) -> [(substance: Substance, days: Int)] {
+        guard substance.asksMorningAfter else { return [] }
+        let all = allSubstances(includeArchived: true)
+        let counts = MorningAfterService.sharedDays(
+            substanceID: substance.id,
+            askingSubstanceIDs: askingSubstanceIDs,
+            entries: allEntries().map { $0.toDTO() },
+            records: allMorningAfters().map { $0.toDTO() }
+        )
+        return counts
+            .compactMap { id, days in all.first { $0.id == id }.map { (substance: $0, days: days) } }
+            .sorted { $0.days != $1.days ? $0.days > $1.days : $0.substance.sortOrder < $1.substance.sortOrder }
+    }
+
+    /// Records of this substance's days that carry at least one written reflection, newest first.
+    func reflections(for substance: Substance, limit: Int = 5) -> [MorningAfter] {
+        guard substance.asksMorningAfter else { return [] }
+        let days = Set(
+            allEntries()
+                .filter { $0.substance?.id == substance.id }
+                .map { LogicalDay.dayKey(for: $0.timestamp, timezoneID: $0.timezoneID) }
+        )
+        return Array(
+            allMorningAfters()
+                .filter { days.contains($0.dayKey) }
+                .filter {
+                    !MorningPatternText.reflectionLines(trigger: $0.trigger, wouldHaveHelped: $0.wouldHaveHelped, nextTime: $0.nextTime).isEmpty
+                }
+                .sorted { $0.dayKey > $1.dayKey }
+                .prefix(limit)
+        )
+    }
+
     func setAsksMorningAfter(_ asks: Bool, for substance: Substance) {
         substance.asksMorningAfter = asks
         save()

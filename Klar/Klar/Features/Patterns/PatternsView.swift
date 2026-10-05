@@ -47,10 +47,25 @@ struct PatternsView: View {
     @ViewBuilder
     private func cards(for substance: Substance) -> some View {
         let summary = store.stats(for: substance)
+        let reflections = store.reflections(for: substance)
         VStack(spacing: 12) {
             FrequencyCard(summary: summary)
-            ContextDistributionCard(substance: substance, summary: summary, tags: store.allContextTags())
+            if substance.asksMorningAfter {
+                MorningDistributionCard(
+                    distribution: store.morningDistribution(for: substance),
+                    shared: store.sharedMorningDays(for: substance).map { (name: $0.substance.name, days: $0.days) }
+                )
+            }
+            ContextDistributionCard(
+                substance: substance,
+                summary: summary,
+                tags: store.allContextTags(),
+                morningPatterns: store.morningPatternsByContext(for: substance)
+            )
             DoseTrendCard(substance: substance, summary: summary)
+            if !reflections.isEmpty {
+                ReflectionsCard(records: reflections)
+            }
         }
     }
 

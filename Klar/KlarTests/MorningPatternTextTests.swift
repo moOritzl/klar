@@ -28,4 +28,21 @@ final class MorningPatternTextTests: XCTestCase {
     func testTheContextualLineNamesTheTag() {
         XCTAssertEqual(MorningPatternText.contextual(pattern(days: 4, body: [.hungover: 3, .fine: 1]), tagName: "Club"), "Mit Club · letzte 4: 3× verkatert")
     }
+
+    func testTheTallyNamesTheDaysCounted() {
+        XCTAssertEqual(MorningPatternText.tally(pattern(days: 5, body: [.hungover: 4, .fine: 1], regret: [.yes: 1])), "5 Tage: 4× verkatert, 1× bereut")
+        XCTAssertEqual(MorningPatternText.tally(pattern(days: 3, body: [.fine: 3], regret: [.no: 3])), "3 Tage: kein Kater, nichts bereut")
+    }
+
+    func testSharedDaysNameTheOtherSubstances() {
+        XCTAssertEqual(MorningPatternText.sharedDaysText([("Cannabis", 3), ("Alkohol", 1)]), "Davon 3 Tage zusammen mit Cannabis, 1 mit Alkohol")
+        XCTAssertEqual(MorningPatternText.sharedDaysText([("Cannabis", 1)]), "Davon 1 Tag zusammen mit Cannabis")
+    }
+
+    func testReflectionLinesLeaveOutWhatWasNotWritten() {
+        XCTAssertEqual(
+            MorningPatternText.reflectionLines(trigger: "Stress", wouldHaveHelped: nil, nextTime: "Wasser"),
+            ["Auslöser: Stress", "Nächstes Mal: Wasser"]
+        )
+    }
 }

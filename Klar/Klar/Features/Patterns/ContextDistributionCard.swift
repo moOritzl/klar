@@ -5,6 +5,8 @@ struct ContextDistributionCard: View {
     let substance: Substance
     let summary: StatsSummary
     let tags: [ContextTag]
+    /// Per tag, what the days after looked like — only tags with three answered days.
+    var morningPatterns: [UUID: MorningPattern] = [:]
 
     /// Share of the entries *with context* that carry each tag. Entries without context are left
     /// out of the base: context is optional, and counting them would make every tag look rare.
@@ -51,6 +53,11 @@ struct ContextDistributionCard: View {
                             fraction: item.share,
                             color: barColors[index % barColors.count]
                         )
+                        if let pattern = morningPatterns[item.tag.id] {
+                            Text(MorningPatternText.tally(pattern))
+                                .font(Klar.TypeScale.caption)
+                                .foregroundStyle(Klar.textTertiary)
+                        }
                     }
                     .padding(.bottom, index == distribution.count - 1 ? 0 : 12)
                 }
