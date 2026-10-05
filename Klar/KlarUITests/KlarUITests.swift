@@ -95,12 +95,18 @@ final class KlarUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Übersicht"].waitForExistence(timeout: 5))
 
         app.tabBars.buttons["Verlauf"].tap()
-        XCTAssertTrue(app.buttons["Kalender"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["Vorheriger Monat"].waitForExistence(timeout: 5))
 
-        app.tabBars.buttons["Grenzen"].tap()
-        XCTAssertTrue(app.buttons["limits.substitutionsLink"].waitForExistence(timeout: 5))
+        app.tabBars.buttons["Muster"].tap()
+        XCTAssertTrue(app.buttons["patterns.substance.Alkohol"].waitForExistence(timeout: 5))
 
         app.tabBars.buttons["Hilfe"].tap()
         XCTAssertTrue(app.buttons["help.sos"].waitForExistence(timeout: 5))
+
+        // Ersatzhandlungen live in Einstellungen now.
+        app.tabBars.buttons["Übersicht"].tap()
+        app.buttons["Einstellungen"].tap()
+        app.buttons["settings.substitutions"].tap()
+        XCTAssertTrue(app.navigationBars["Ersatzhandlungen"].waitForExistence(timeout: 5))
     }
 }

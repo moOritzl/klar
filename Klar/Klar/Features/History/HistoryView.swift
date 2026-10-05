@@ -2,91 +2,17 @@ import SwiftUI
 import SwiftData
 import KlarCore
 
-/// E1–E3 · Tab „Verlauf".
+/// E1–E2 · Tab „Verlauf": the calendar, and what each day held.
 ///
-/// Making patterns visible is the mechanism — not keeping a chronicle. Every number here answers
-/// a question the user could act on, and the only reference point is their own baseline (never a
-/// norm; see concept § 3, P4/P7).
-///
-/// Deviation from the draft: the draft's segmented control has two segments (Kalender /
-/// Rückblick). The weekly review is gone (concept v3), and „Trends" (E3) takes the second
-/// segment.
+/// Trends moved into the tab „Muster" with the morning-after evaluation. What is left here is
+/// the record itself, so the segmented control and the section swipe went with them.
 struct HistoryView: View {
-    enum Section: Hashable, CaseIterable {
-        case calendar, trends
-    }
-
-    @State private var section: Section = .calendar
-    /// Which way the next section change slides. Set before the change so the animation follows
-    /// the swipe instead of always entering from the same side.
-    @State private var isAdvancing = true
-
     var body: some View {
         NavigationStack {
             KlarScreen(title: "Verlauf") {
-                VStack(alignment: .leading, spacing: 0) {
-                    KlarSegmentedControl(
-                        options: [
-                            (Section.calendar, "Kalender"),
-                            (Section.trends, "Trends")
-                        ],
-                        selection: Binding(get: { section }, set: { select($0) })
-                    )
-                    .padding(.bottom, Klar.Space.x5)
-
-                    sectionContent
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .id(section)
-                        .transition(.asymmetric(
-                            insertion: .move(edge: isAdvancing ? .trailing : .leading).combined(with: .opacity),
-                            removal: .move(edge: isAdvancing ? .leading : .trailing).combined(with: .opacity)
-                        ))
-                }
+                CalendarSectionView()
             }
-            // Swiping anywhere the content does not claim — which on a short month is most of the
-            // screen — moves between the three sections. The segments stay because a bare gesture
-            // is undiscoverable and unreachable with VoiceOver; this is the shortcut, not the only
-            // way.
-            //
-            // `simultaneousGesture`, not `gesture`: the direction test only runs in `onEnded`, so
-            // an exclusive gesture claims every drag — including vertical ones — for the whole
-            // time the finger is down, and the scroll view never sees them. The page simply did
-            // not scroll. It also sits inside the `NavigationStack` so it cannot cover the bar.
-            .simultaneousGesture(
-                DragGesture(minimumDistance: 30)
-                    .onEnded { value in
-                        guard abs(value.translation.width) > abs(value.translation.height) else { return }
-                        shiftSection(value.translation.width < 0 ? 1 : -1)
-                    }
-            )
         }
-    }
-
-    @ViewBuilder
-    private var sectionContent: some View {
-        switch section {
-        case .calendar: CalendarSectionView()
-        case .trends: TrendsSectionView()
-        }
-    }
-
-    private func select(_ next: Section) {
-        guard next != section,
-              let from = Section.allCases.firstIndex(of: section),
-              let to = Section.allCases.firstIndex(of: next)
-        else { return }
-        isAdvancing = to > from
-        withAnimation(.easeInOut(duration: 0.25)) { section = next }
-    }
-
-    /// Refuses to wrap around: swiping past the last section does nothing, so the ends of the
-    /// range stay felt rather than looping the user back to the start.
-    private func shiftSection(_ delta: Int) {
-        let all = Section.allCases
-        guard let index = all.firstIndex(of: section) else { return }
-        let target = index + delta
-        guard all.indices.contains(target) else { return }
-        select(all[target])
     }
 }
 

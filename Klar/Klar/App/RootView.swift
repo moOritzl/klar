@@ -2,7 +2,7 @@ import SwiftUI
 import SwiftData
 
 enum KlarTab: Hashable {
-    case today, history, limits, help
+    case today, history, patterns, help
 }
 
 /// The app shell. Gates, in priority order:
@@ -97,6 +97,7 @@ struct MainTabView: View {
     /// Lives here rather than in `TodayView` because the button that sets it does too — the
     /// bottom accessory is a property of the `TabView`, not of any one tab.
     @State private var isEntrySheetPresented = false
+    @State private var patternsSubstanceID: UUID?
     /// „Der Morgen danach" is the one moment the app speaks unprompted. Presented here, on top
     /// of the tabs, so whichever tab is showing cannot swallow it.
     @State private var dueMorning: DueMorning?
@@ -121,9 +122,9 @@ struct MainTabView: View {
                 .tabItem { Label("Verlauf", systemImage: "chart.bar") }
                 .tag(KlarTab.history)
 
-            LimitsView()
-                .tabItem { Label("Grenzen", systemImage: "gauge.with.dots.needle.33percent") }
-                .tag(KlarTab.limits)
+            PatternsView(selectedSubstanceID: $patternsSubstanceID)
+                .tabItem { Label("Muster", systemImage: "chart.xyaxis.line") }
+                .tag(KlarTab.patterns)
 
             HelpView()
                 .tabItem { Label("Hilfe", systemImage: "lifepreserver") }
@@ -137,7 +138,7 @@ struct MainTabView: View {
         }
         // No `tabBarMinimizeBehavior`. It was tried and it strands the user: once the bar has
         // minimized, scrolling back to the top does not bring it back on these screens, and three
-        // of the four tabs are simply gone. Trading permanent access to Verlauf, Grenzen and Hilfe
+        // of the four tabs are simply gone. Trading permanent access to Verlauf, Muster and Hilfe
         // for a bit of scroll polish is not a trade worth making on a four-tab app.
         .sheet(isPresented: $isEntrySheetPresented) {
             EntrySheetView()
