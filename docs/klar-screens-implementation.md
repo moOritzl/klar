@@ -74,9 +74,10 @@ not on the page: they wait behind the bell in the navigation bar („Mitteilunge
 [NotificationCenterView.swift](../Klar/Klar/Features/MorningAfter/NotificationCenterView.swift)),
 which carries the system's red badge with the number of open days. The morning-after patterns
 card is gone from here; patterns live in Muster and on the entry sheet. „Eintrag erfassen" is the
-round button at the trailing end of the tab bar (a `Tab` with `role: .search` whose selection is
-turned into opening the entry sheet, see `MainTabView.tabSelection`). Tabs: Übersicht, Muster,
-Hilfe.
+round button at the trailing end of the tab bar (a `Tab` with `role: .prominent` on iOS 27 and
+`role: .search` on iOS 26, see `MainTabView.addEntryRole`). `TabActionInterceptor` turns the tap
+into opening the entry sheet before UIKit switches tabs; `MainTabView.tabSelection` is the
+fallback. Tabs: Übersicht, Muster, Hilfe.
 
 | Screen | State | Wiring |
 |---|---|---|

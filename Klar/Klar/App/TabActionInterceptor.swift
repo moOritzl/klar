@@ -10,8 +10,9 @@ import UIKit
 /// SwiftUI's own delegate, says no for that one tab and runs the action instead, and forwards every
 /// other call to SwiftUI unchanged.
 ///
-/// SwiftUI's phone tab view drives `UITabBarController` through `viewControllers`, not `UITab`s, so
-/// the tab is recognised by its bar item's title.
+/// The tab is recognised by its title. On iOS 26 SwiftUI's phone tab view drives
+/// `UITabBarController` through `viewControllers`, so UIKit asks `shouldSelect viewController`;
+/// on iOS 27 it uses `UITab`s and asks `shouldSelectTab` instead. Both are answered.
 struct TabActionInterceptor: UIViewControllerRepresentable {
     /// The title of the `Tab` to intercept, exactly as passed to `Tab(_:systemImage:value:)`.
     let tabTitle: String
@@ -56,6 +57,14 @@ struct TabActionInterceptor: UIViewControllerRepresentable {
             guard tabBarController.delegate !== self else { return }
             original = tabBarController.delegate
             tabBarController.delegate = self
+        }
+
+        func tabBarController(_ tabBarController: UITabBarController, shouldSelectTab tab: UITab) -> Bool {
+            if tab.title == tabTitle {
+                action()
+                return false
+            }
+            return original?.tabBarController?(tabBarController, shouldSelectTab: tab) ?? true
         }
 
         func tabBarController(_ tabBarController: UITabBarController, shouldSelect viewController: UIViewController) -> Bool {

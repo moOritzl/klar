@@ -364,7 +364,9 @@ struct CalendarSectionView: View {
         // The today pill is filled with `Klar.text`, which flips with the scheme, so its
         // contents have to be the page colour rather than a literal white.
         if isToday { return Klar.bg }
-        return isFuture ? Klar.borderStrong : Klar.text
+        // Quieter than the past, but still readable. These used to be in the border colour,
+        // which in dark mode all but vanished and left most of the month looking broken.
+        return isFuture ? Klar.textTertiary : Klar.text
     }
 
     private func accessibilityLabel(day: Int, substances: [Substance]?) -> String {

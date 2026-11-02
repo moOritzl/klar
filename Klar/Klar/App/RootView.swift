@@ -128,6 +128,18 @@ struct MainTabView: View {
     /// by it.
     static let addEntryTitle = String(localized: "Eintrag erfassen")
 
+    /// The role that puts the „+" in its own round button beside the tab bar.
+    ///
+    /// iOS 26 draws that button only for the search role. iOS 27 gives it to `.prominent`
+    /// instead and lays a search tab that has no `.searchable` inside the bar with its full
+    /// title — which is how the „+" ended up as a wide „Eintrag erfassen" tab on iOS 27.
+    static var addEntryRole: TabRole {
+        if #available(iOS 27.0, *) {
+            return .prominent
+        }
+        return .search
+    }
+
     /// The tab bar's selection, with the „+" turned into an action: tapping it opens the entry
     /// sheet and leaves the user on the tab they were on. `TabActionInterceptor` normally catches
     /// the tap before it gets here; this is the fallback if UIKit ever selects the tab anyway.
@@ -166,9 +178,9 @@ struct MainTabView: View {
 
             // Logging is the app's one recurring action, so it gets the separate round button at
             // the trailing end of the tab bar: under the thumb, on every tab, and without a second
-            // bar stacked on the first. iOS only draws that button for the search role; the role
-            // decides the placement, the label and `tabSelection` decide what it does.
-            Tab(Self.addEntryTitle, systemImage: "plus", value: KlarTab.addEntry, role: .search) {
+            // bar stacked on the first. The role decides the placement, the label and
+            // `tabSelection` decide what it does.
+            Tab(Self.addEntryTitle, systemImage: "plus", value: KlarTab.addEntry, role: Self.addEntryRole) {
                 Color.clear
             }
         }
