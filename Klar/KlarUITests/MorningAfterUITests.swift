@@ -63,13 +63,20 @@ final class MorningAfterUITests: XCTestCase {
         XCTAssertTrue(relaunched.staticTexts["Übersicht"].waitForExistence(timeout: 10))
         XCTAssertFalse(relaunched.staticTexts["morningAfter.header"].waitForExistence(timeout: 3))
 
-        // The day waits in „Offen" on Übersicht, and answering it there takes it off the list.
+        // The day waits behind the bell („Mitteilungen"), and answering it there takes it off
+        // the open list.
+        relaunched.buttons["today.notifications"].tap()
         let openRow = relaunched.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "morning.open.")).firstMatch
         XCTAssertTrue(openRow.waitForExistence(timeout: 5))
         openRow.tap()
         XCTAssertTrue(relaunched.staticTexts["morningAfter.header"].waitForExistence(timeout: 5))
         relaunched.buttons["verkatert"].tap()
-        relaunched.buttons["Fertig"].tap()
+        relaunched.buttons["morningAfter.done"].tap()
         XCTAssertFalse(openRow.waitForExistence(timeout: 3))
+        XCTAssertTrue(
+            relaunched.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "morning.answered.")).firstMatch
+                .waitForExistence(timeout: 5),
+            "an answered day moves to „Beantwortet“"
+        )
     }
 }

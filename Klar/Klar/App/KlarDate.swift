@@ -50,11 +50,6 @@ enum KlarDate {
         LogicalDay.isBeforeCutoff(date, timezoneID: timezoneID)
     }
 
-    /// True when `date`'s logical day is the 1st of its month — drives the "Neuer Monat" card (B3).
-    static func isFirstOfMonth(_ date: Date = Date()) -> Bool {
-        calendar.component(.day, from: logicalDay(for: date)) == 1
-    }
-
     static func monthComponents(for date: Date = Date()) -> (year: Int, month: Int) {
         let day = logicalDay(for: date)
         return (calendar.component(.year, from: day), calendar.component(.month, from: day))

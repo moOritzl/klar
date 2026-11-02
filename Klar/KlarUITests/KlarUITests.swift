@@ -54,9 +54,9 @@ final class KlarUITests: XCTestCase {
 
         // B2 · Heute, empty day.
         XCTAssertTrue(app.staticTexts["Übersicht"].waitForExistence(timeout: 5))
-        XCTAssertTrue(
-            app.staticTexts["Ein ruhiger Tag."].exists,
-            "A day with no entries must read as a calm baseline, not as a gap to fill."
+        XCTAssertFalse(
+            app.staticTexts["today.loggedSection"].exists,
+            "A day with no entries shows nothing under the calendar: a calm baseline, not a gap to fill."
         )
 
         // C1 · Two taps to "gespeichert".
@@ -68,9 +68,8 @@ final class KlarUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Gespeichert."].waitForExistence(timeout: 5))
         app.buttons["Fertig"].tap()
 
-        // The entry is on Heute, and the calm-day copy is gone.
+        // The entry is listed under the calendar, with today selected.
         XCTAssertTrue(app.staticTexts["today.loggedSection"].waitForExistence(timeout: 5))
-        XCTAssertFalse(app.staticTexts["Ein ruhiger Tag."].exists)
     }
 
     /// The four tabs are reachable and each renders its own screen.
@@ -94,8 +93,9 @@ final class KlarUITests: XCTestCase {
 
         XCTAssertTrue(app.staticTexts["Übersicht"].waitForExistence(timeout: 5))
 
-        app.tabBars.buttons["Verlauf"].tap()
+        // The calendar (formerly the tab „Verlauf") sits at the bottom of Übersicht.
         XCTAssertTrue(app.buttons["Vorheriger Monat"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.tabBars.buttons["Verlauf"].exists)
 
         app.tabBars.buttons["Muster"].tap()
         XCTAssertTrue(app.buttons["patterns.substance.Alkohol"].waitForExistence(timeout: 5))

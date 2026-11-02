@@ -92,7 +92,7 @@ Vier Einschränkungen sind für dieses Projekt konstitutiv und werden nicht wegd
 | P6 | Inhalte kommen von etablierten Organisationen und werden attribuiert („Credible Source") | Garnett et al. (2018) |
 | P7 | Feedback bleibt neutral und am eigenen Baseline-Verlauf orientiert — kein Lob für Konsum, keine Moralisierung | Positionierungsentscheidung v1; konsistent mit P4 |
 | P8 | Der Rückblick fragt nach Folgen und einem Gesamturteil, nie nach der Qualität des Rauschs und nie nach Vorteilen des Konsums | App Store Review Guideline 1.4.3 (§ 7); Miller & Rose (2015) |
-| P9 | Keine Pflicht-Interaktion: Jede Nachfrage ist mit einem Tap überspringbar, wird nicht wiederholt und löst keine Push-Mitteilung aus | Produkterfahrung aus v2 (Plan-Check-in als Belastung); kein Studienbefund |
+| P9 | Keine Pflicht-Interaktion: Jede Nachfrage ist mit einem Tap überspringbar und wird nicht wiederholt. Höchstens eine abschaltbare Push-Mitteilung pro Konsumtag, ohne Substanz auf dem Sperrbildschirm, nie für einen Tag, nach dem die App schon gefragt hat; offene Fragen zeigt ein Badge an der Glocke, nicht am App-Icon | Produkterfahrung aus v2 (Plan-Check-in als Belastung); kein Studienbefund. Geändert am 2. November 2026: ohne Erinnerung blieben Rückblicke unbeantwortet, wenn die App am Morgen nicht geöffnet wurde |
 
 ---
 
@@ -110,14 +110,14 @@ Vier Einschränkungen sind für dieses Projekt konstitutiv und werden nicht wegd
 - Referenzpunkt ist ausschließlich die eigene Baseline (P7)
 
 ### Modul C — Rückblick (neu, ersetzt Action Planning)
-- **Auslöser:** Wenn ein logischer Tag mit mindestens einem Eintrag endet (Grenze 05:00, `LogicalDay`), zeigt die App beim nächsten Öffnen eine Karte. Es gibt keine Push-Mitteilung (P9).
+- **Auslöser:** Wenn ein logischer Tag mit mindestens einem Eintrag endet (Grenze 05:00, `LogicalDay`), zeigt die App beim nächsten Öffnen eine Karte. Zusätzlich kommt am Morgen danach (Standard 10:00, einstellbar und abschaltbar) eine lokale Push-Mitteilung „Wie war der Morgen?", sofern die App bis dahin noch nicht gefragt hat (P9). Die Erlaubnis dafür fragt iOS nach der ersten Karte ab, nicht im Onboarding.
 - **Eine Karte pro Konsumtag**, nicht pro Eintrag. Die Antworten gelten für alle Substanzen und Kontext-Tags dieses Tages.
 - **Drei Fragen**, jede mit einem Tap auf einer neutralen Drei-Stufen-Skala beantwortbar, jede einzeln und die ganze Karte überspringbar:
   1. „Wie geht's dir heute körperlich?" — gut / etwas angeschlagen / richtig verkatert
   2. „Bereust du etwas von gestern?" — nein / ein bisschen / ja
   3. „Würdest du es wieder so machen?" — ja / anders / nein
 - Optionale Freitext-Notiz.
-- **Verfall:** Die Karte erscheint pro Konsumtag einmal von selbst — für den jüngsten Konsumtag, bis 48 Stunden nach seinem Ende. „Später" oder Wegwischen lässt den Tag offen. Offene Tage stehen bis 72 Stunden nach ihrem Ende unter „Offen" (Übersicht, Verlauf) und sind im Tagesdetail nachtragbar; „Überspringen" nimmt einen Tag nur aus dieser Liste.
+- **Verfall:** Die Karte erscheint pro Konsumtag einmal von selbst — für den jüngsten Konsumtag, bis 48 Stunden nach seinem Ende. „Später" oder Wegwischen lässt den Tag offen. Offene Tage stehen bis 72 Stunden nach ihrem Ende in den „Mitteilungen" hinter der Glocke auf der Übersicht, die dann ein rotes Badge mit der Zahl offener Tage trägt, und sind im Tagesdetail nachtragbar; „Überspringen" nimmt einen Tag nur aus dieser Liste. Beantwortete und übersprungene Tage bleiben im selben Fenster unter „Beantwortet" änderbar.
 - **Pro Substanz schaltbar** („Morgen danach fragen" in Einstellungen › Substanzen), bei Nikotin standardmäßig aus.
 - **Zurückspielen:** Ab drei beantworteten Rückblicken für eine Substanz zeigt die Übersicht eine Zeile wie „Letzte 5×: 3× verkatert, 1× bereut". Im Eintrag-Sheet erscheint dieselbe Zählung für die gewählte Kombination aus Substanz und Kontext-Tag, sobald dafür drei Rückblicke vorliegen. Die Anzeige besteht aus Zahlen, ohne Score, Farbwertung oder Kommentar (P7). Ein Muster erscheint nur für Substanzen, bei denen „Morgen danach fragen" an ist; schaltet man eine Substanz aus, verschwindet auch ihr Muster (die Einträge bleiben und das Muster kommt beim Wiedereinschalten zurück).
 - **Ausgeschlossen:** Bewertung des Rauschs, „bester Abend", Serien positiver Antworten, Vor-/Nachteil-Listen (P8).

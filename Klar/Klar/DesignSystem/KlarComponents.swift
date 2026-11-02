@@ -83,22 +83,6 @@ struct KlarRowDivider: View {
     }
 }
 
-/// The dark "the app speaks" card — the new month banner (B3).
-struct KlarInverseCard<Content: View>: View {
-    var padding: CGFloat = 20
-    @ViewBuilder var content: Content
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            content
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(padding)
-        .background(Klar.bgInverseDeep)
-        .clipShape(RoundedRectangle(cornerRadius: Klar.Radius.lg, style: .continuous))
-    }
-}
-
 // MARK: - Buttons
 
 /// Full-width emerald pill. The single primary action per screen.
@@ -453,38 +437,9 @@ struct KlarHeaderAction: View {
 // real one, so it has no callers left. Deleted rather than kept around — a second way to draw a
 // header is exactly how the app ended up with two header languages in one flow.
 
-/// The persistent "log an entry" bar above the tab bar.
-///
-/// Replaces a floating circular `+` in the bottom-right corner. That was a Material Design
-/// pattern — iOS has no such control anywhere, and it paid for its prominence by covering the
-/// last row of whatever was underneath it. The accessory sits *beside* the content instead of on
-/// top of it: iOS reserves the space, so nothing is ever hidden behind it.
-///
-/// Because it belongs to the `TabView` rather than to one screen, logging is now reachable from
-/// all four tabs instead of only from Übersicht — which suits an app whose whole premise is that
-/// the entry is the cheap part.
-struct KlarLogEntryAccessory: View {
-    @Environment(\.tabViewBottomAccessoryPlacement) private var placement
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: 8) {
-                Image(systemName: "plus.circle.fill")
-                    .font(.system(size: 19, weight: .semibold))
-                Text("Eintrag erfassen")
-                    .font(.system(size: 16, weight: .semibold))
-            }
-            .foregroundStyle(Klar.accentStrong)
-            .frame(maxWidth: .infinity)
-            // Expanded is the state the bar takes over once the tab bar has shrunk away, so it
-            // has the whole strip to itself and can afford the taller target.
-            .padding(.vertical, placement == .expanded ? 14 : 8)
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-    }
-}
+// `KlarLogEntryAccessory` lived here: a full-width „Eintrag erfassen" bar in the tab view's
+// bottom accessory. It stacked a second glass bar on top of the tab bar; the action is now the
+// round button at the tab bar's trailing end (`MainTabView`).
 
 /// The trailing chevron that says "this opens something".
 ///
