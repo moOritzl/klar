@@ -31,6 +31,7 @@ struct KlarApp: App {
         #endif
 
         _settings = State(initialValue: AppSettings())
+        MorningReminder.shared.install()
 
         let container = ModelContainerFactory.makeContainer()
         self.container = container

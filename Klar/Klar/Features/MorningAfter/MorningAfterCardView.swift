@@ -108,8 +108,9 @@ struct MorningAfterCardView: View {
                         save()
                         dismiss()
                     }
-                    // „Später" writes nothing: the day stays in „Offen". „Überspringen" takes it
-                    // off that list; the day detail can still answer it.
+                    .accessibilityIdentifier("morningAfter.done")
+                    // „Später" writes nothing: the day stays open in „Mitteilungen". „Überspringen"
+                    // takes it off that list; the day detail can still answer it.
                     HStack(spacing: 10) {
                         KlarQuietButton(title: "Später") {
                             dismiss()

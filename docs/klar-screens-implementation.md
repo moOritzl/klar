@@ -65,36 +65,38 @@ Nothing is written to the store until the final step. Abandoning halfway leaves 
 
 ### B · Übersicht — [TodayView.swift](../Klar/Klar/Features/Today/TodayView.swift)
 
-**The screen is no longer called „Heute".** It leads with a *monthly* quota, then the „Offen"
-card (`OpenMorningsCard`, only while a day is open, see E1), then the „Der Morgen danach"
-patterns card (`MorningPatternsCard`, absent until some substance has three answered mornings),
-and only the last block is about today — so a title promising one day
-forced the quota card to correct it („Diesen Monat") just to be read right. The title is
-scope-neutral, each block names its own timeframe (`AUGUST` on the card, `Di., 11. Aug.` on the
-„Heute erfasst" header), and nothing has to talk its way out of its container. The file, the type
-and the screen IDs below still say Today/Heute; only what the user reads changed.
+**Übersicht carries what used to be two tabs (2 November 2026).** Top to bottom: the month
+(`November` header) with the quota card(s) — only when some substance has a reduction limit;
+without one the screen starts at the calendar — then the month calendar from the former tab
+„Verlauf" (E1/E2), built like the iOS Calendar month view: today is selected, and its entries are
+listed inside the calendar card under the grid; on an entry-free day nothing is listed at all. Open mornings are
+not on the page: they wait behind the bell in the navigation bar („Mitteilungen",
+[NotificationCenterView.swift](../Klar/Klar/Features/MorningAfter/NotificationCenterView.swift)),
+which carries the system's red badge with the number of open days. The morning-after patterns
+card is gone from here; patterns live in Muster and on the entry sheet. „Eintrag erfassen" is the
+round button at the trailing end of the tab bar (a `Tab` with `role: .search` whose selection is
+turned into opening the entry sheet, see `MainTabView.tabSelection`). Tabs: Übersicht, Muster,
+Hilfe.
 
 | Screen | State | Wiring |
 |---|---|---|
 | **B1** Heute (gefüllt) | ✅ | `KlarStore.quotaSubstances()` lists **every** active reduction limit, tightest remaining first. One substance → the large quota card (with the substance named); several → one combined `MultiQuotaCard` with a row + bar per substance. The bar **drains** rather than fills — filled segments are what *remains* — and past the limit it simply stays empty. The count is a `QuotaCount`: the month's real count at 28pt with `contentTransition(.numericText())` so it rolls when an entry lands, then small „von max. N" (`KlarCore.QuotaReading`). It keeps counting past the limit, so it never changes meaning and the month's real number is always on screen. VoiceOver and the C3 notice use the same reading. |
-| **B2** Heute (leerer Tag) | ✅ | "Ein ruhiger Tag." No "Noch nichts geloggt!" — an entry-free day is the calm baseline, not a gap. Asserted in `testOnboardingThenLogFirstEntry`. |
-| **B3** Monatserster | ✅ | The dark "Neuer Monat" card renders when `KlarDate.isFirstOfMonth()` — "Kontingent: N." for one limit, "Kontingente: Alkohol 4 · Nikotin 10." for several. |
+| **B2** Heute (leerer Tag) | ✅ | Nothing under the calendar grid — no "Ein ruhiger Tag.", no "Noch nichts geloggt!". An entry-free day is the calm baseline, not a gap to point at. Asserted in `testOnboardingThenLogFirstEntry`. |
+| **B3** Monatserster | removed | The "Neuer Monat" card repeated the limits printed directly under it. On the 1st the bars simply stand full again. |
 
-**Quota cards and pattern rows are tappable.** `QuotaCard` and every row of `MultiQuotaCard`
-open a `LimitSheet` ([LimitSheet.swift](../Klar/Klar/Features/Limits/LimitSheet.swift)) with the
-shared `LimitEditor` for that substance; every row of the patterns card switches to the tab
-Muster with that substance selected (the selection lives in `MainTabView`). No badge, no count:
-the „Offen" card exists only while something is open (P9).
+**Quota cards are tappable.** `QuotaCard` and every row of `MultiQuotaCard` open a `LimitSheet`
+([LimitSheet.swift](../Klar/Klar/Features/Limits/LimitSheet.swift)) with the shared `LimitEditor`
+for that substance. The only count in the app is the bell's badge for open mornings (P9 as
+amended).
 
 Over the limit, the headline flips from "Noch 2 von 4" to "5 von 4 diesen Monat" — factual, no red,
 no appeal.
 
 **The date names the logical day, not the wall clock.** Between midnight and 05:00 those disagree,
 and the date labels the entries listed under it, so it has to follow them: at 02:15 it reads
-"Mo., 3. Aug. · bis 5 Uhr". It sits on the "Heute erfasst" header rather than on the screen,
-because that is the only block it labels. On an entry-free day there is no such header, and the
-date drops out with it — *except* inside the cutoff window, where it appears under "Ein ruhiger
-Tag." because there it changes what the next tap will do. Same rule throughout: the hint shows
+"Mo., 3. Aug. · bis 5 Uhr". It is the title of today's list under the calendar grid (otherwise just „Heute"),
+because that is the only block it labels. On an entry-free day there is no list and so no title;
+the today pill in the grid follows the logical day too. Same rule throughout: the hint shows
 only where the shown day contradicts the phone. `today` is `@State` refreshed when the scene
 becomes active — "bis 5 Uhr" stops being true at 05:00, and a computed `Date()` would only be
 right by accident. The same window makes the entry confirmation name the day ("Alkohol · jetzt,
@@ -156,8 +158,8 @@ Mood is stored as `Int` (1 / 0 / −1) so the scale can widen later without a mi
 
 | Screen | State | Wiring |
 |---|---|---|
-| **D1** Die Karte | ✅ | Presented by `MainTabView` (in [RootView.swift](../Klar/Klar/App/RootView.swift)) on launch and again on every return to foreground, from `KlarStore.dueMorningAfterDay()` → `MorningAfterService.dueDayKey`. Due is only ever the **newest** logical day before today that has an entry of an asking substance and no record yet — an older, still-unanswered day is never surfaced once a newer one exists. It expires 48 h after the day ends (05:00 the next calendar day). Three optional three-way questions (Körper, Reue, Nochmal so) plus an optional note, one tap per answer, tapping the selected option again clears it. „Fertig" saves. „Später" and swiping the card away write nothing — the card does not pop up again by itself (`AppSettings.lastPresentedMorningDayKey`), and the day waits in „Offen" for 72 h after it ends. „Überspringen" records a skip, which takes the day off „Offen"; the day detail can still answer it. Answered later than the next morning, the questions speak of „dem Tag danach", and an existing record is prefilled. |
-| **D2** Kurz nachdenken | ✅ | [MorningReflectionView.swift](../Klar/Klar/Features/MorningAfter/MorningReflectionView.swift), reached only when „Bereust du etwas von gestern?" is answered „ja". Three optional questions (Auslöser, was hätte geholfen, was nächstes Mal anders); saving calls `KlarStore.recordReflection`. The third answer is stored as that day's `nextTime` and comes back as „Nächstes Mal: …" only on the Übersicht card ([MorningPatternsCard.swift](../Klar/Klar/Features/MorningAfter/MorningPatternsCard.swift)), not in the entry sheet's shorter line. It ends in a note, not a plan — nothing asks later whether it worked. |
+| **D1** Die Karte | ✅ | Presented by `MainTabView` (in [RootView.swift](../Klar/Klar/App/RootView.swift)) on launch and again on every return to foreground, from `KlarStore.dueMorningAfterDay()` → `MorningAfterService.dueDayKey`. Due is only ever the **newest** logical day before today that has an entry of an asking substance and no record yet — an older, still-unanswered day is never surfaced once a newer one exists. It expires 48 h after the day ends (05:00 the next calendar day). Three optional three-way questions (Körper, Reue, Nochmal so) plus an optional note, one tap per answer, tapping the selected option again clears it. „Fertig" saves. „Später" and swiping the card away write nothing — the card does not pop up again by itself (`AppSettings.lastPresentedMorningDayKey`), and the day waits in „Mitteilungen" for 72 h after it ends. „Überspringen" records a skip, which takes the day off the open list; the day detail can still answer it. A local push „Wie war der Morgen?" (`MorningReminder`, default 10:00, Einstellungen → Mitteilungen) goes out the morning after if the card has not asked yet; iOS permission is requested when the first card closes. Answered later than the next morning, the questions speak of „dem Tag danach", and an existing record is prefilled. |
+| **D2** Kurz nachdenken | ✅ | [MorningReflectionView.swift](../Klar/Klar/Features/MorningAfter/MorningReflectionView.swift), reached only when „Bereust du etwas von gestern?" is answered „ja". Three optional questions (Auslöser, was hätte geholfen, was nächstes Mal anders); saving calls `KlarStore.recordReflection`. The third answer is stored as that day's `nextTime` and came back as „Nächstes Mal: …" on the Übersicht patterns card, which was removed on 2 November 2026 — **open:** it is currently shown nowhere outside the day detail and the Muster reflections. It ends in a note, not a plan — nothing asks later whether it worked. |
 
 Both places that read a pattern back — the Übersicht card and the entry sheet's own line
 (`EntrySheetView.morningPatternLine`) — go through
@@ -169,12 +171,15 @@ none does. Only substances with „Morgen danach fragen" switched on ever get a 
 (`KlarStore.morningPattern`) — switching it off hides the pattern too, though the underlying
 records stay and the pattern reappears if the substance is switched back on.
 
-### E · Verlauf — [HistoryView.swift](../Klar/Klar/Features/History/HistoryView.swift)
+### E · Kalender (bottom of Übersicht) — [CalendarSectionView.swift](../Klar/Klar/Features/History/CalendarSectionView.swift)
+
+There is no tab „Verlauf" any more. Its „Einträge" / „Eintragsfrei" tiles were dropped: how often
+over time is what Muster's `FrequencyCard` shows.
 
 | Screen | State | Wiring |
 |---|---|---|
-| **E1** Monatskalender | ✅ | One dot per substance logged that day, in `Klar.substanceColor`, ordered by `sortOrder`, at most three, with a legend of the active substances (`KlarStore.loggedSubstances(inMonthOf:)`). Open days — answerable, no record — carry a 1 pt ring around the day number and VoiceOver adds „Rückblick offen". Above the calendar sits the „Offen" card ([OpenMorningsCard.swift](../Klar/Klar/Features/MorningAfter/OpenMorningsCard.swift)): one row per open day, newest first, with the asking substances as chips; a tap opens the morning-after card for that day. Month navigation (future months disabled); "Einträge" / "Eintragsfrei" tiles. |
-| **E2** Tagesdetail | ✅ | Tap any past day. Entries editable + deletable; "Eintrag nachtragen" back-fills at noon of that day. Below the entries, when the day has an entry of an asking substance, the „Der Morgen danach" block ([MorningAfterDayBlock.swift](../Klar/Klar/Features/MorningAfter/MorningAfterDayBlock.swift)): the answers, the note and the reflection, plain text. „Bearbeiten" (prefilled card) while the day is answerable, 72 h after it ends; afterwards read-only. A record with no answer, no note and no reflection reads „Übersprungen." (`MorningPatternText.hasContent`) with „Rückblick nachtragen"; no record shows just „Rückblick nachtragen". Neither is offered once the window has closed. |
+| **E1** Monatskalender | ✅ | One dot per substance logged that day, in `Klar.substanceColor`, ordered by `sortOrder`, at most three, with a legend of the active substances (`KlarStore.loggedSubstances(inMonthOf:)`). Open days — answerable, no record — carry a 1 pt ring around the day number and VoiceOver adds „Rückblick offen". Open days are listed in „Mitteilungen" behind the bell: one row per open day, newest first, weekday and asking substances; a tap opens the morning-after card for that day. Answered and skipped days stay there under „Beantwortet" while they can still be changed. Month navigation (future months disabled). |
+| **E2** Gewählter Tag | ✅ | Tapping a past day selects it (accent ring) instead of opening a sheet; tapping today goes back. Under the grid, in the same card: the day's title, one row per entry (tap edits, long press edits or deletes), and for past days „Eintrag nachtragen", which back-fills at noon of that day. Below the card, for a past day with an entry of an asking substance, the „Der Morgen danach" block ([MorningAfterDayBlock.swift](../Klar/Klar/Features/MorningAfter/MorningAfterDayBlock.swift)) — answers, note and reflection, editable while answerable (72 h), read-only afterwards. Today lists newest first, past days oldest first. |
 
 Trends moved out: the calendar is the whole screen, no segmented control and no section swipe.
 

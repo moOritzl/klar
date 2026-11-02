@@ -2,14 +2,17 @@ import SwiftUI
 import SwiftData
 
 enum KlarTab: Hashable {
-    case today, history, patterns, help
+    case today, patterns, help
+    /// Not a screen. The round button beside the tab bar that opens „Eintrag erfassen"; selecting
+    /// it never sticks (see `tabSelection`).
+    case addEntry
 }
 
 /// The app shell. Gates, in priority order:
 ///
 /// 1. **App lock** (J1) — Face ID / device passcode.
 /// 2. **Onboarding** (A1–A4) — one-time.
-/// 3. The four tabs.
+/// 3. The three tabs and the „+" beside them.
 struct RootView: View {
     @Environment(AppSettings.self) private var settings
     @Environment(\.modelContext) private var modelContext
@@ -24,6 +27,12 @@ struct RootView: View {
     @State private var foregroundTick = 0
 
     private var store: KlarStore { KlarStore(context: modelContext) }
+
+    private func rescheduleReminder() {
+        guard settings.hasCompletedOnboarding else { return }
+        let store = store
+        Task { await MorningReminder.shared.reschedule(store: store, settings: settings) }
+    }
 
     var body: some View {
         ZStack {
@@ -49,6 +58,8 @@ struct RootView: View {
                 if settings.isAppLockEnabled {
                     lockManager.scheduleLock(after: TimeInterval(settings.autoLockDelay.rawValue))
                 }
+                // Leaving is when the day's entries are final enough to plan tomorrow's reminder.
+                rescheduleReminder()
             } else if newPhase == .active {
                 if settings.isAppLockEnabled {
                     lockManager.cancelPendingLockIfStillWithinGrace()
@@ -60,6 +71,9 @@ struct RootView: View {
                 // single ordered place, makes the dependency explicit instead of relying on
                 // handler-dispatch order.
                 foregroundTick += 1
+                // Coming back may have answered the day by itself (the card pops up), or the
+                // reminder may have been delivered already; either way, plan afresh.
+                rescheduleReminder()
             }
         }
         .task {
@@ -94,13 +108,14 @@ struct MainTabView: View {
     @Environment(AppSettings.self) private var settings
     @Environment(\.modelContext) private var modelContext
 
-    /// Lives here rather than in `TodayView` because the button that sets it does too — the
-    /// bottom accessory is a property of the `TabView`, not of any one tab.
+    /// Lives here because the button that sets it is part of the tab bar, and because
+    /// `presentDueMorning()` must not put the morning card over an open entry sheet.
     @State private var isEntrySheetPresented = false
     @State private var patternsSubstanceID: UUID?
     /// „Der Morgen danach" is the one moment the app speaks unprompted. Presented here, on top
     /// of the tabs, so whichever tab is showing cannot swallow it.
     @State private var dueMorning: DueMorning?
+    private let reminder = MorningReminder.shared
 
     private var store: KlarStore { KlarStore(context: modelContext) }
 
@@ -109,51 +124,72 @@ struct MainTabView: View {
     /// so the card must not go up while this is true or it is readable without unlocking.
     private var isLocked: Bool { settings.isAppLockEnabled && lockManager.requiresUnlock }
 
+    /// The tab bar's selection, with the „+" turned into an action: tapping it opens the entry
+    /// sheet and leaves the user on the tab they were on.
+    private var tabSelection: Binding<KlarTab> {
+        Binding(
+            get: { selectedTab },
+            set: { newTab in
+                if newTab == .addEntry {
+                    isEntrySheetPresented = true
+                } else {
+                    selectedTab = newTab
+                }
+            }
+        )
+    }
+
     var body: some View {
-        TabView(selection: $selectedTab) {
+        TabView(selection: tabSelection) {
             // The tab label matches the screen's `navigationTitle`, as it does in every
             // first-party app. The case stays `.today` — the file, the screen IDs (B1–B3) and
             // the docs all still call this the Heute screen; only what the user reads changed.
-            TodayView(onShowPatterns: { substance in
-                patternsSubstanceID = substance.id
-                selectedTab = .patterns
-            })
-                .tabItem { Label("Übersicht", systemImage: "house") }
-                .tag(KlarTab.today)
+            Tab("Übersicht", systemImage: "house", value: KlarTab.today) {
+                TodayView()
+            }
 
-            HistoryView()
-                .tabItem { Label("Verlauf", systemImage: "chart.bar") }
-                .tag(KlarTab.history)
+            Tab("Muster", systemImage: "chart.xyaxis.line", value: KlarTab.patterns) {
+                PatternsView(selectedSubstanceID: $patternsSubstanceID)
+            }
 
-            PatternsView(selectedSubstanceID: $patternsSubstanceID)
-                .tabItem { Label("Muster", systemImage: "chart.xyaxis.line") }
-                .tag(KlarTab.patterns)
+            Tab("Hilfe", systemImage: "lifepreserver", value: KlarTab.help) {
+                HelpView()
+            }
 
-            HelpView()
-                .tabItem { Label("Hilfe", systemImage: "lifepreserver") }
-                .tag(KlarTab.help)
-        }
-        // Logging is the app's one recurring action, and it is reachable from every tab rather
-        // than only from Übersicht — which is what the accessory slot is for, and a small gain
-        // over the corner button it replaces.
-        .tabViewBottomAccessory {
-            KlarLogEntryAccessory { isEntrySheetPresented = true }
+            // Logging is the app's one recurring action, so it gets the separate round button at
+            // the trailing end of the tab bar: under the thumb, on every tab, and without a second
+            // bar stacked on the first. iOS only draws that button for the search role; the role
+            // decides the placement, the label and `tabSelection` decide what it does.
+            Tab("Eintrag erfassen", systemImage: "plus", value: KlarTab.addEntry, role: .search) {
+                Color.clear
+            }
         }
         // No `tabBarMinimizeBehavior`. It was tried and it strands the user: once the bar has
-        // minimized, scrolling back to the top does not bring it back on these screens, and three
-        // of the four tabs are simply gone. Trading permanent access to Verlauf, Muster and Hilfe
-        // for a bit of scroll polish is not a trade worth making on a four-tab app.
+        // minimized, scrolling back to the top does not bring it back on these screens, and the
+        // other tabs are simply gone. Trading permanent access to Muster and Hilfe for a bit of
+        // scroll polish is not a trade worth making on a three-tab app.
         .sheet(isPresented: $isEntrySheetPresented) {
             EntrySheetView()
         }
         // Dismissing writes nothing: swiping the card away is „Später", and the day waits in
-        // „Offen". Only the card's own „Überspringen" records a skip.
-        .sheet(item: $dueMorning) { due in
+        // „Mitteilungen". Only the card's own „Überspringen" records a skip.
+        //
+        // Closing the first card is also when iOS is asked for permission to send the reminder:
+        // the user has just seen what it would be for. Asked once; iOS remembers the answer.
+        .sheet(item: $dueMorning, onDismiss: {
+            guard settings.isMorningReminderEnabled else { return }
+            Task { await reminder.requestAuthorizationIfUndetermined() }
+        }) { due in
             MorningAfterCardView(dayKey: due.dayKey)
                 .presentationBackground(.clear)
                 // The once-a-day pop-up is spent when the card is actually on screen, not when
                 // it was queued — a sheet SwiftUI does not present must not use the day up.
-                .onAppear { settings.lastPresentedMorningDayKey = due.dayKey }
+                // Never moved backwards: a tapped reminder can open an older day.
+                .onAppear {
+                    if (settings.lastPresentedMorningDayKey ?? "") < due.dayKey {
+                        settings.lastPresentedMorningDayKey = due.dayKey
+                    }
+                }
         }
         .task { presentDueMorning() }
         .onChange(of: foregroundTick) { _, _ in
@@ -161,6 +197,9 @@ struct MainTabView: View {
             // night before, so checking only at launch would miss it. Driven by `RootView`'s
             // counter rather than `scenePhase` directly — see the doc comment on
             // `foregroundTick` above.
+            presentDueMorning()
+        }
+        .onChange(of: reminder.tappedDayKey) { _, _ in
             presentDueMorning()
         }
         .onChange(of: isLocked) { _, isLocked in
@@ -176,6 +215,7 @@ struct MainTabView: View {
         // `RootView`'s `.overlay`, so presenting here while locked would make the card readable
         // without unlocking. (Pre-existing, out of scope: a sheet already open when the app
         // backgrounds sits above the lock too — that needs a window-level lock, not this guard.)
+        if presentTappedReminder() { return }
         let dueKey = store.dueMorningAfterDay()
         guard Self.shouldPresentMorning(
             isLocked: isLocked,
@@ -185,6 +225,19 @@ struct MainTabView: View {
             lastPresentedKey: settings.lastPresentedMorningDayKey
         ) else { return }
         dueMorning = dueKey.map(DueMorning.init)
+    }
+
+    /// A tapped „Wie war der Morgen?" opens that day's card even if the card already popped up
+    /// for it — the user asked for it. Waits while locked; dropped once the day is answered or
+    /// can no longer be.
+    private func presentTappedReminder() -> Bool {
+        guard let key = reminder.tappedDayKey,
+              !isLocked, dueMorning == nil, !isEntrySheetPresented
+        else { return false }
+        reminder.tappedDayKey = nil
+        guard store.openMorningAfterDays().contains(key) else { return false }
+        dueMorning = DueMorning(dayKey: key)
+        return true
     }
 
     /// Pulled out of `presentDueMorning()` so the guard is testable without `AppLockManager`'s

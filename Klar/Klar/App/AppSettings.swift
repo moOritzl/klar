@@ -39,6 +39,8 @@ final class AppSettings {
         self.supportContactName = defaults.string(forKey: Keys.supportContactName)
         self.supportContactPhone = defaults.string(forKey: Keys.supportContactPhone)
         self.lastPresentedMorningDayKey = defaults.string(forKey: Keys.lastPresentedMorningDayKey)
+        self.isMorningReminderEnabled = defaults.object(forKey: Keys.isMorningReminderEnabled) as? Bool ?? true
+        self.morningReminderMinuteOfDay = defaults.object(forKey: Keys.morningReminderMinuteOfDay) as? Int ?? 10 * 60
         // No stored value means System, so existing installs adopt the default without a migration.
         self.appearance = AppAppearance(
             rawValue: defaults.string(forKey: Keys.appearance) ?? ""
@@ -77,10 +79,22 @@ final class AppSettings {
     }
 
     /// The last day „Der Morgen danach" presented itself for. The card pops up once per day;
-    /// after that the day is reachable from „Offen" and the day detail only. Device state: after
+    /// after that the day is reachable from „Mitteilungen" and the day detail only. Device state: after
     /// an import on a new phone the card may pop up once more, which is harmless.
     var lastPresentedMorningDayKey: String? {
         didSet { defaults.set(lastPresentedMorningDayKey, forKey: Keys.lastPresentedMorningDayKey) }
+    }
+
+    /// The „Wie war der Morgen?" push (`MorningReminder`). On by default, but nothing is sent until
+    /// iOS permission is granted, and that is only asked after the first morning card.
+    var isMorningReminderEnabled: Bool {
+        didSet { defaults.set(isMorningReminderEnabled, forKey: Keys.isMorningReminderEnabled) }
+    }
+
+    /// When the reminder goes out, as minutes after midnight. 10:00 by default: late enough to
+    /// have slept, early enough that the day before is still close.
+    var morningReminderMinuteOfDay: Int {
+        didSet { defaults.set(morningReminderMinuteOfDay, forKey: Keys.morningReminderMinuteOfDay) }
     }
 
     func resetForOnboarding() {
@@ -96,5 +110,7 @@ final class AppSettings {
         static let appearance = "klar.appearance"
         static let counselingCity = "klar.counselingCity"
         static let lastPresentedMorningDayKey = "klar.lastPresentedMorningDayKey"
+        static let isMorningReminderEnabled = "klar.isMorningReminderEnabled"
+        static let morningReminderMinuteOfDay = "klar.morningReminderMinuteOfDay"
     }
 }

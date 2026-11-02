@@ -68,8 +68,8 @@ final class ScreenshotTests: XCTestCase {
         XCTAssertTrue(app.staticTexts["today.loggedSection"].waitForExistence(timeout: 5))
         capture(app, "B1-Heute-gefuellt")
 
-        // E1 · Verlauf · Kalender
-        app.tabBars.buttons["Verlauf"].tap()
+        // E1 · Kalender, at the bottom of Übersicht
+        app.swipeUp()
         XCTAssertTrue(app.buttons["Vorheriger Monat"].waitForExistence(timeout: 5))
         capture(app, "E1-Kalender")
 
@@ -149,8 +149,12 @@ final class ScreenshotTests: XCTestCase {
         // B · Offen, E1 with the ring, E2 with „Rückblick nachtragen"
         app.buttons["Später"].tap()
         XCTAssertTrue(app.staticTexts["Übersicht"].waitForExistence(timeout: 5))
-        capture(app, "B-Offen")
-        app.tabBars.buttons["Verlauf"].tap()
+        capture(app, "B-Glocke")
+        app.buttons["today.notifications"].tap()
+        XCTAssertTrue(app.navigationBars["Mitteilungen"].waitForExistence(timeout: 5))
+        capture(app, "B-Mitteilungen")
+        app.buttons["Fertig"].tap()
+        app.swipeUp()
         XCTAssertTrue(app.buttons["Vorheriger Monat"].waitForExistence(timeout: 5))
         capture(app, "E1-Kalender-offen")
         // On the 1st of a month „yesterday" lies in the previous month: look there once.

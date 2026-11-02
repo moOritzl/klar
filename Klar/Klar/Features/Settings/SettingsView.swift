@@ -1,10 +1,11 @@
 import SwiftUI
 import SwiftData
 import UniformTypeIdentifiers
+import UserNotifications
 
 /// I1 · Einstellungen.
 ///
-/// Reached from the gear on „Heute", never a tab. A deliberately boring place: everything you
+/// Reached from the gear on „Übersicht", never a tab. A deliberately boring place: everything you
 /// decide once and then forget, kept away from the four tabs. Privacy comes first on the screen
 /// because it comes first in the product.
 struct SettingsView: View {
@@ -18,6 +19,8 @@ struct SettingsView: View {
     @State private var isEditingSubstitutions = false
     @State private var isShowingDataScreen = false
     @State private var lockUnavailable = false
+    /// Read from iOS on appear; `nil` until then. Only `.denied` changes what the screen shows.
+    @State private var notificationStatus: UNAuthorizationStatus?
 
     private var store: KlarStore { KlarStore(context: modelContext) }
 
@@ -63,6 +66,55 @@ struct SettingsView: View {
                                 label: \.label,
                                 selection: $settings.appearance
                             )
+                        }
+                        .padding(.bottom, 16)
+
+                        KlarGroupHeader(text: "Mitteilungen")
+                            .padding(.bottom, 8)
+
+                        SettingsGroup {
+                            SettingsToggleRow(
+                                icon: "bell",
+                                title: "Wie war der Morgen?",
+                                subtitle: "Eine Erinnerung am Morgen nach einem Tag mit Einträgen. Ohne Substanz auf dem Sperrbildschirm.",
+                                isOn: Binding(
+                                    get: { settings.isMorningReminderEnabled },
+                                    set: { setMorningReminder($0) }
+                                )
+                            )
+                            .accessibilityIdentifier("settings.morningReminder")
+
+                            if settings.isMorningReminderEnabled {
+                                KlarRowDivider()
+
+                                SettingsTimeRow(
+                                    icon: "clock",
+                                    title: "Uhrzeit",
+                                    minuteOfDay: Binding(
+                                        get: { settings.morningReminderMinuteOfDay },
+                                        set: {
+                                            settings.morningReminderMinuteOfDay = $0
+                                            rescheduleReminder()
+                                        }
+                                    )
+                                )
+
+                                // Switched on here but off in iOS: say so, instead of a switch
+                                // that silently does nothing.
+                                if notificationStatus == .denied {
+                                    KlarRowDivider()
+
+                                    SettingsNavigationRow(
+                                        icon: "exclamationmark.circle",
+                                        title: "In iOS ausgeschaltet",
+                                        subtitle: "In den Einstellungen erlauben"
+                                    ) {
+                                        if let url = URL(string: UIApplication.openNotificationSettingsURLString) {
+                                            UIApplication.shared.open(url)
+                                        }
+                                    }
+                                }
+                            }
                         }
                         .padding(.bottom, 16)
 
@@ -171,6 +223,7 @@ struct SettingsView: View {
                     }
             }
         }
+        .task { notificationStatus = await MorningReminder.shared.authorizationStatus() }
         .alert("Face ID nicht verfügbar", isPresented: $lockUnavailable) {
             Button("Verstanden", role: .cancel) {}
         } message: {
@@ -180,6 +233,20 @@ struct SettingsView: View {
 
     private var whySubtitle: String {
         store.latestWhyNote()?.text ?? "Erscheint im Craving-SOS"
+    }
+
+    /// Turning the reminder on is a clear moment to ask iOS for permission, if it never was.
+    private func setMorningReminder(_ isOn: Bool) {
+        settings.isMorningReminderEnabled = isOn
+        Task {
+            if isOn { await MorningReminder.shared.requestAuthorizationIfUndetermined() }
+            notificationStatus = await MorningReminder.shared.authorizationStatus()
+            await MorningReminder.shared.reschedule(store: store, settings: settings)
+        }
+    }
+
+    private func rescheduleReminder() {
+        Task { await MorningReminder.shared.reschedule(store: store, settings: settings) }
     }
 
     /// Never leave the switch on when the device can't actually honour it.
@@ -275,6 +342,46 @@ struct SettingsPickerRow<Value: Hashable & Identifiable>: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 13)
+    }
+}
+
+/// A time of day, stored as minutes after midnight. The compact system picker, so the time opens
+/// the same wheel it does in Clock and Calendar.
+struct SettingsTimeRow: View {
+    let icon: String
+    let title: LocalizedStringKey
+    @Binding var minuteOfDay: Int
+
+    private var time: Binding<Date> {
+        Binding(
+            get: {
+                Calendar.current.date(
+                    bySettingHour: minuteOfDay / 60, minute: minuteOfDay % 60, second: 0, of: Date()
+                ) ?? Date()
+            },
+            set: {
+                let parts = Calendar.current.dateComponents([.hour, .minute], from: $0)
+                minuteOfDay = (parts.hour ?? 10) * 60 + (parts.minute ?? 0)
+            }
+        )
+    }
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: icon)
+                .font(.system(size: 15))
+                .foregroundStyle(Klar.textSecondary)
+                .frame(width: 18)
+            Text(title)
+                .font(Klar.TypeScale.body)
+                .foregroundStyle(Klar.text)
+            Spacer()
+            DatePicker(title, selection: time, displayedComponents: .hourAndMinute)
+                .labelsHidden()
+                .environment(\.locale, Locale(identifier: "de_DE"))
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 9)
     }
 }
 

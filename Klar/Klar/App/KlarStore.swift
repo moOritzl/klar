@@ -201,6 +201,17 @@ struct KlarStore {
         )
     }
 
+    /// Days that can still be answered or edited, newest first — skipped and answered ones
+    /// included. The Mitteilungen list reads its „Beantwortet" rows from these.
+    func answerableMorningAfterDays(now: Date = Date()) -> [String] {
+        MorningAfterService.answerableDayKeys(
+            entries: allEntries().map { $0.toDTO() },
+            askingSubstanceIDs: askingSubstanceIDs,
+            now: now,
+            nowTimezoneID: KlarDate.timezoneID
+        ).sorted(by: >)
+    }
+
     /// Whether the day detail may answer or edit `dayKey` — skipped days included.
     func canAnswerMorningAfter(dayKey: String, now: Date = Date()) -> Bool {
         MorningAfterService.answerableDayKeys(
