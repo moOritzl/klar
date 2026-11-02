@@ -124,8 +124,13 @@ struct MainTabView: View {
     /// so the card must not go up while this is true or it is readable without unlocking.
     private var isLocked: Bool { settings.isAppLockEnabled && lockManager.requiresUnlock }
 
+    /// One string for the „+" tab's label and for `TabActionInterceptor`, which recognises the tab
+    /// by it.
+    static let addEntryTitle = String(localized: "Eintrag erfassen")
+
     /// The tab bar's selection, with the „+" turned into an action: tapping it opens the entry
-    /// sheet and leaves the user on the tab they were on.
+    /// sheet and leaves the user on the tab they were on. `TabActionInterceptor` normally catches
+    /// the tap before it gets here; this is the fallback if UIKit ever selects the tab anyway.
     private var tabSelection: Binding<KlarTab> {
         Binding(
             get: { selectedTab },
@@ -146,6 +151,9 @@ struct MainTabView: View {
             // the docs all still call this the Heute screen; only what the user reads changed.
             Tab("Übersicht", systemImage: "house", value: KlarTab.today) {
                 TodayView()
+                    // Stops UIKit from switching to the empty „+" tab before the binding below
+                    // can refuse it — that switch is what made the screen flash.
+                    .background(TabActionInterceptor(tabTitle: Self.addEntryTitle) { isEntrySheetPresented = true })
             }
 
             Tab("Muster", systemImage: "chart.xyaxis.line", value: KlarTab.patterns) {
@@ -160,7 +168,7 @@ struct MainTabView: View {
             // the trailing end of the tab bar: under the thumb, on every tab, and without a second
             // bar stacked on the first. iOS only draws that button for the search role; the role
             // decides the placement, the label and `tabSelection` decide what it does.
-            Tab("Eintrag erfassen", systemImage: "plus", value: KlarTab.addEntry, role: .search) {
+            Tab(Self.addEntryTitle, systemImage: "plus", value: KlarTab.addEntry, role: .search) {
                 Color.clear
             }
         }
